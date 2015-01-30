@@ -13,12 +13,10 @@ import java.util.*;
 
 public class AstarAgent extends Agent {
 
-    class MapLocation
-    {
+    class MapLocation {
         public int x, y;
 
-        public MapLocation(int x, int y, MapLocation cameFrom, float cost)
-        {
+        public MapLocation(int x, int y, MapLocation cameFrom, float cost) {
             this.x = x;
             this.y = y;
         }
@@ -31,89 +29,119 @@ public class AstarAgent extends Agent {
     private long totalPlanTime = 0; // nsecs
     private long totalExecutionTime = 0; //nsecs
 
-    public AstarAgent(int playernum)
-    {
+    public AstarAgent(int playernum) {
         super(playernum);
 
         System.out.println("Constructed AstarAgent");
     }
 
-    @Override
-    public Map<Integer, Action> initialStep(State.StateView newstate, History.HistoryView statehistory) {
-        // get the footman location
+    private void setFootmanID(State.StateView newstate) throws Exception {
         List<Integer> unitIDs = newstate.getUnitIds(playernum);
-
-        if(unitIDs.size() == 0)
-        {
-            System.err.println("No units found!");
-            return null;
+        // Make sure we have some units
+        if(unitIDs.size() == 0) {
+            throw new Exception("No units found!");
         }
 
         footmanID = unitIDs.get(0);
-
-        // double check that this is a footman
-        if(!newstate.getUnit(footmanID).getTemplateView().getName().equals("Footman"))
-        {
-            System.err.println("Footman unit not found");
-            return null;
+        // Make sure it's actually a footman
+        if(!newstate.getUnit(footmanID).getTemplateView().getName().equals("Footman")) {
+            throw new Exception("Footman unit not found");
         }
+    }
 
-        // find the enemy playernum
+    private int findEnemyPlayerNum(State.StateView newstate) throws Exception {
         Integer[] playerNums = newstate.getPlayerNumbers();
         int enemyPlayerNum = -1;
-        for(Integer playerNum : playerNums)
-        {
-            if(playerNum != playernum) {
+        for (Integer playerNum : playerNums) {
+            if (playerNum != playernum) {
                 enemyPlayerNum = playerNum;
                 break;
             }
         }
-
-        if(enemyPlayerNum == -1)
-        {
-            System.err.println("Failed to get enemy playernumber");
-            return null;
+        if (enemyPlayerNum == -1) {
+            throw new Exception("Failed to get enemy playernumber");
         }
+        return enemyPlayerNum;
+    }
 
-        // find the townhall ID
+    private List<Integer> getEnemyUnitIDs(State.StateView newstate, int enemyPlayerNum) throws Exception {
         List<Integer> enemyUnitIDs = newstate.getUnitIds(enemyPlayerNum);
-
-        if(enemyUnitIDs.size() == 0)
-        {
-            System.err.println("Failed to find enemy units");
-            return null;
+        if (enemyUnitIDs.size() == 0) {
+            throw new Exception("Failed to find enemy units");
         }
+        return enemyUnitIDs;
+    }
+
+    private void setTownhallID(State.StateView newstate, int enemyPlayerNum) throws Exception {
+        List<Integer> enemyUnitIDs = getEnemyUnitIDs(newstate, enemyPlayerNum);
 
         townhallID = -1;
         enemyFootmanID = -1;
-        for(Integer unitID : enemyUnitIDs)
-        {
-            Unit.UnitView tempUnit = newstate.getUnit(unitID);
-            String unitType = tempUnit.getTemplateView().getName().toLowerCase();
-            if(unitType.equals("townhall"))
-            {
-                townhallID = unitID;
-            }
-            else if(unitType.equals("footman"))
-            {
+
+        for (Integer unitID : enemyUnitIDs) {
+            String unitType = newstate.getUnit(unitID).getTemplateView().getName().toLowerCase();
+            if (unitType.equals("townhall")) {
+                townhallID = unitID;    
+            } else if (unitType.equals("footman")) {
                 enemyFootmanID = unitID;
-            }
-            else
-            {
+            } else {
                 System.err.println("Unknown unit type");
             }
         }
 
-        if(townhallID == -1) {
-            System.err.println("Error: Couldn't find townhall");
+        if (townhallID == -1) {
+            throw new Exception("Error: Couldn't find townhall");
+        }
+    }
+
+    @Override
+    public Map<Integer, Action> initialStep(State.StateView newstate, History.HistoryView statehistory) {
+        try {
+            setFootmanID(newstate); // find the footman location
+            setTownhallID(newstate, findEnemyPlayerNum(newstate));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
             return null;
         }
-
+        
         long startTime = System.nanoTime();
         path = findPath(newstate);
         totalPlanTime += System.nanoTime() - startTime;
 
         return middleStep(newstate, statehistory);
+    }
+
+    /**
+     * Replan the path and return the time taken to replan the path
+     */
+    private long replanPath(State.StateView newstate) {
+        long planStartTime, planTime;
+        planStartTime = System.nanoTime();
+
+        // actually replan the path. the rest is just time auditing stuff
+        path = findPath(newstate);
+        
+        planTime = System.nanoTime() - planStartTime;
+        totalPlanTime += planTime;
+        return planTime;
+    }
+
+    /**
+     * Returns whether the given unit is at nextLoc.
+     * nextLoc is the instance variable stored in the AstarAgent class
+     * @param unit
+     */
+    private boolean isUnitAtNextLoc(Unit.UnitView unit) {
+        return unit.getXPosition() == nextLoc.x && unit.getYPosition() == nextLoc.y;
+    }
+
+    /**
+     * Determines whether two units are neighbors on the map (if they are within one tile in any direction)
+     * @param unitA @param unitB The two units to be compared
+     */
+    private boolean areNeighbors(Unit.UnitView unitA, Unit.UnitView unitB) {
+        return Math.abs(unitA.getXPosition() - unitB.getXPosition()) <= 1 &&
+            Math.abs(unitA.getYPosition() - unitB.getYPosition()) <= 1;
     }
 
     @Override
@@ -123,52 +151,34 @@ public class AstarAgent extends Agent {
 
         Map<Integer, Action> actions = new HashMap<Integer, Action>();
 
-        if(shouldReplanPath(newstate, statehistory, path)) {
-            long planStartTime = System.nanoTime();
-            path = findPath(newstate);
-            planTime = System.nanoTime() - planStartTime;
-            totalPlanTime += planTime;
+        if (shouldReplanPath(newstate, statehistory, path)) {
+            planTime = replanPath(newstate);
         }
 
         Unit.UnitView footmanUnit = newstate.getUnit(footmanID);
 
-        int footmanX = footmanUnit.getXPosition();
-        int footmanY = footmanUnit.getYPosition();
-
-        if(!path.empty() && (nextLoc == null || (footmanX == nextLoc.x && footmanY == nextLoc.y))) {
-
+        if (!path.empty() && (nextLoc == null || isUnitAtNextLoc(footmanUnit))) {
             // stat moving to the next step in the path
             nextLoc = path.pop();
-
             System.out.println("Moving to (" + nextLoc.x + ", " + nextLoc.y + ")");
         }
 
-        if(nextLoc != null && (footmanX != nextLoc.x || footmanY != nextLoc.y))
-        {
-            int xDiff = nextLoc.x - footmanX;
-            int yDiff = nextLoc.y - footmanY;
-
-            // figure out the direction the footman needs to move in
-            Direction nextDirection = getNextDirection(xDiff, yDiff);
-
-            actions.put(footmanID, Action.createPrimitiveMove(footmanID, nextDirection));
+        if (nextLoc != null && !isUnitAtNextLoc(footmanUnit)) {
+            // figure out the next direction and then put the action into the map
+            actions.put(footmanID, Action.createPrimitiveMove(footmanID, getNextDirection(footmanUnit)));
         } else {
             Unit.UnitView townhallUnit = newstate.getUnit(townhallID);
 
             // if townhall was destroyed on the last turn
-            if(townhallUnit == null) {
+            if (townhallUnit == null) {
                 terminalStep(newstate, statehistory);
                 return actions;
             }
-
-            if(Math.abs(footmanX - townhallUnit.getXPosition()) > 1 ||
-                    Math.abs(footmanY - townhallUnit.getYPosition()) > 1)
-            {
+            if (!areNeighbors(footmanUnit, townhallUnit)) {
                 System.err.println("Invalid plan. Cannot attack townhall");
                 totalExecutionTime += System.nanoTime() - startTime - planTime;
                 return actions;
-            }
-            else {
+            } else {
                 System.out.println("Attacking TownHall");
                 // if no more movements in the planned path then attack
                 actions.put(footmanID, Action.createPrimitiveAttack(footmanID, townhallID));
@@ -297,6 +307,15 @@ public class AstarAgent extends Agent {
     {
         // return an empty path
         return new Stack<MapLocation>();
+    }
+
+    /**
+     * Overload of the original getNextDirection method.
+     * Determines the direction @param unit should move
+     * relative to nextLoc
+     */
+    private Direction getNextDirection(Unit.UnitView unit) {
+        return getNextDirection(nextLoc.x - unit.getXPosition(), nextLoc.y - unit.getYPosition());
     }
 
     /**
