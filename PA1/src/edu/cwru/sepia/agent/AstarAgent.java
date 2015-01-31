@@ -1,7 +1,6 @@
 package edu.cwru.sepia.agent;
 
 import edu.cwru.sepia.action.Action;
-import edu.cwru.sepia.environment.model.AStarNode;
 import edu.cwru.sepia.environment.model.history.History;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.State;
@@ -32,7 +31,16 @@ public class AstarAgent extends Agent {
 
     public AstarAgent(int playernum) {
         super(playernum);
-
+	// Declare Open List (Frontier) as a set
+        // Declare Closed List as a Priority Queue
+	// start with root node (initial location of agent)
+	// while the open set is not empty
+		// pop a node off the open list
+		// if it's the goal, you're done
+		// else "Search Algorithm Junk"
+			// compute heuristic 
+			// explore nodes
+	//Return No Available Path if no solution found
         System.out.println("Constructed AstarAgent");
     }
 
@@ -304,17 +312,10 @@ public class AstarAgent extends Agent {
      * @param resourceLocations Set of positions occupied by resources
      * @return Stack of positions with top of stack being first move in plan
      */
-    private Stack<MapLocation> AstarSearch(MapLocation start, MapLocation goal, int xExtent, int yExtent, MapLocation enemyFootmanLoc, Set<MapLocation> resourceLocations) {
+    private Stack<MapLocation> AstarSearch(MapLocation start, MapLocation goal, int xExtent, int yExtent, MapLocation enemyFootmanLoc, Set<MapLocation> resourceLocations)
+    {
         // return an empty path
         return new Stack<MapLocation>();
-    }
-
-    /**
-     * Compute distance between two locations according to the Chebyshev distance:
-     * D((x1, y1), (x2, y2)) = max(|x2-x1|, |y2-y1|)
-     */
-    private int chebyshevDistance(MapLocation loc1, MapLocation loc2) {
-        return Math.max(Math.abs(loc2.x - loc1.x), Math.abs(loc2.y - loc1.y));
     }
 
     /**
