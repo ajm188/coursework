@@ -2,15 +2,15 @@ JAVAC=javac
 SEPIA_JAR=../jars/Sepia.jar
 SEPIA_MAIN=edu.cwru.sepia.Main2
 SEPIA_CP=-cp $(SEPIA_JAR)
-JAVA_CMD=java $(SEPIA_CP) $(SEPIA_MAIN)
 SRC=src
+JAVA_CMD=java $(SEPIA_CP):$(SRC) $(SEPIA_MAIN)
 FULL_AGENT_PATH=$(SRC)/edu/cwru/sepia/agent/AstarAgent
 OUTPUT=$(FULL_AGENT_PATH).java
 
 
 all: run
 
-run:
+run: agent
 	$(JAVA_CMD) data/maze_8x8_config.xml
 
 config %.xml: agent
