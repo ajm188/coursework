@@ -5,6 +5,7 @@ import edu.cwru.sepia.environment.model.history.History;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
+import edu.cwru.sepia.environment.model.AStarNode;
 import edu.cwru.sepia.util.Direction;
 
 import java.io.InputStream;
@@ -31,8 +32,8 @@ public class AstarAgent extends Agent {
 
     public AstarAgent(int playernum) {
         super(playernum);
-	// Declare Open List (Frontier) as a set
-        // Declare Closed List as a Priority Queue
+	// Declare Closed List as a set
+        // Declare Open List (Frontier) as a Priority Queue
 	// start with root node (initial location of agent)
 	// while the open set is not empty
 		// pop a node off the open list
@@ -314,9 +315,30 @@ public class AstarAgent extends Agent {
      */
     private Stack<MapLocation> AstarSearch(MapLocation start, MapLocation goal, int xExtent, int yExtent, MapLocation enemyFootmanLoc, Set<MapLocation> resourceLocations)
     {
-        // return an empty path
-        return new Stack<MapLocation>();
+	// Declare Closed List as a set
+        Set<AStarNode> closedList = new HashSet<AStarNode>();
+	// Declare Open List (Frontier) as a Priority Queue
+	PriorityQueue<AStarNode> openList = new PriorityQueue<AStarNode>();
+	// start with root node (initial location of agent)
+	AStarNode root = new AStarNode(start.x, start.y, chebyshev(start, goal));
+	AStarNode aStarGoal = new AStarNode(goal.x, goal.y, 0);
+	// while the open set is not empty
+	while (openList.isEmpty()){
+		// pop a node off the open list
+		AStarNode node = openList.poll();
+		// if it's the goal, you're done
+		if (root.equals(aStarGoal){
+			return null;
+		}
+		// else "Search Algorithm Junk"
+			// compute heuristic
+	} 
+	return new Stack<MapLocation>();
     }
+
+    private int chebyshev(MapLocation loc1, MapLocation loc2){
+	return Math.max(Math.abs(loc2.x-loc1.x), Math.abs(loc2.y-loc1.y));
+    }    
 
     /**
      * Overload of the original getNextDirection method.
