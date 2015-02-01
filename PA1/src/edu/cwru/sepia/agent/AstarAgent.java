@@ -322,16 +322,28 @@ public class AstarAgent extends Agent {
 	// start with root node (initial location of agent)
 	AStarNode root = new AStarNode(start.x, start.y, chebyshev(start, goal));
 	AStarNode aStarGoal = new AStarNode(goal.x, goal.y, 0);
+
+	// add root to the open list to start search
+	openList.add(root);	
+	g = 0
+	f = g +  
 	// while the open set is not empty
-	while (openList.isEmpty()){
+	while (!openList.isEmpty()){
 		// pop a node off the open list
 		AStarNode node = openList.poll();
 		// if it's the goal, you're done
-		if (root.equals(aStarGoal){
+		if (root.equals(aStarGoal)){
 			return null;
 		}
 		// else "Search Algorithm Junk"
-			// compute heuristic
+		else {
+			Set<AStarNode> neighbors = current_node.getNeighbors()
+			// For all children of the current node
+			for (AStarNode n : neighbors){
+				// if the candidate isn't already in the list, add it
+				
+			}
+		}
 	} 
 	return new Stack<MapLocation>();
     }
