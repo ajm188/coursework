@@ -1,3 +1,4 @@
 *.swp
-AstarAgent*.class
+*.class
+!EnemyBlockerAgent.class
 .DS_STORE
