@@ -6,7 +6,7 @@ import edu.cwru.sepia.environment.model.history.History;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
-import edu.cwru.sepia.environment.model.AStarNode;
+import edu.cwru.sepia.environment.model.ExposedAStarNode;
 import edu.cwru.sepia.util.Direction;
 
 import java.io.InputStream;
@@ -47,16 +47,6 @@ public class AstarAgent extends Agent {
 
     public AstarAgent(int playernum) {
         super(playernum);
-	// Declare Closed List as a set
-        // Declare Open List (Frontier) as a Priority Queue
-	// start with root node (initial location of agent)
-	// while the open set is not empty
-		// pop a node off the open list
-		// if it's the goal, you're done
-		// else "Search Algorithm Junk"
-			// compute heuristic 
-			// explore nodes
-	//Return No Available Path if no solution found
         System.out.println("Constructed AstarAgent");
     }
 
@@ -331,30 +321,30 @@ public class AstarAgent extends Agent {
     private Stack<MapLocation> AstarSearch(MapLocation start, MapLocation goal, int xExtent, int yExtent, MapLocation enemyFootmanLoc, Set<MapLocation> resourceLocations)
     {
 	// Declare Closed List as a set
-        Set<AStarNode> closedList = new HashSet<AStarNode>();
+        Set<ExposedAStarNode> closedList = new HashSet<ExposedAStarNode>();
 	// Declare Open List (Frontier) as a Priority Queue
-	PriorityQueue<AStarNode> openList = new PriorityQueue<AStarNode>();
+	PriorityQueue<ExposedAStarNode> openList = new PriorityQueue<ExposedAStarNode>();
 	// start with root node (initial location of agent)
-	AStarNode root = new AStarNode(start.x, start.y, chebyshev(start, goal));
-	AStarNode aStarGoal = new AStarNode(goal.x, goal.y, 0);
+	ExposedAStarNode root = new ExposedAStarNode(start.x, start.y, chebyshev(start, goal));
+	ExposedAStarNode aStarGoal = new ExposedAStarNode(goal.x, goal.y, 0);
 
 	// add root to the open list to start search
 	openList.add(root);	
 	g = 0
-	f = g +  
+	f = g   
 	// while the open set is not empty
 	while (!openList.isEmpty()){
 		// pop a node off the open list
-		AStarNode node = openList.poll();
+		ExposedAStarNode node = openList.poll();
 		// if it's the goal, you're done
 		if (root.equals(aStarGoal)){
 			return null;
 		}
 		// else "Search Algorithm Junk"
 		else {
-			Set<AStarNode> neighbors = current_node.getNeighbors()
+			Set<ExposedAStarNode> neighbors = current_node.getNeighbors()
 			// For all children of the current node
-			for (AStarNode n : neighbors){
+			for (ExposedAStarNode n : neighbors){
 				// if the candidate isn't already in the list, add it
 				
 			}
