@@ -1,6 +1,7 @@
 package edu.cwru.sepia.agent;
 
 import edu.cwru.sepia.action.Action;
+import edu.cwru.sepia.environment.model.ExposedAStarNode;
 import edu.cwru.sepia.environment.model.history.History;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.State;
@@ -20,6 +21,20 @@ public class AstarAgent extends Agent {
         public MapLocation(int x, int y, MapLocation cameFrom, float cost) {
             this.x = x;
             this.y = y;
+        }
+
+        public boolean isLegal(int xExtent, int yExtent) {
+            return this.x >= 0 && this.x < xExtent && this.y >= 0 && this.y < yExtent;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof MapLocation) {
+                MapLocation other = (MapLocation) o;
+                return this.x == other.x && this.y == other.y;
+            } else {
+                return super.equals(o);
+            }
         }
     }
 
@@ -351,6 +366,45 @@ public class AstarAgent extends Agent {
     private int chebyshev(MapLocation loc1, MapLocation loc2){
 	return Math.max(Math.abs(loc2.x-loc1.x), Math.abs(loc2.y-loc1.y));
     }    
+
+    /**
+     * Return the path the A* found. Follow back pointers from the goal state until the initial state.
+     *
+     * @param goal ExposedAStarNode representing the goal state.
+     */
+    private Stack<MapLocation> reconstructPath(ExposedAStarNode goal) {
+        Stack<MapLocation> path = new Stack<MapLocation>();
+        
+        ExposedAStarNode current = goal;
+        while (current.previous() != null) {
+            path.push(new MapLocation(current.x(), current.y(), null, 0)); // we don't care about previous map locations or costs
+
+        }
+        return path;
+    }
+
+    private Set<ExposedAStarNode> getNeighbors(ExposedAStarNode current, int xExtent, int yExtent, MapLocation enemyFootmanLoc, Set<MapLocation> resourceLocations) {
+        Set<ExposedAStarNode> neighbors = new HashSet<ExposedAStarNode>();
+        MapLocation currentLoc = new MapLocation(current.x(), current.y(), null, 0); // need the current node as a map location to compute chebyshev
+        
+        for (int xAdj = -1; xAdj <= 1; xAdj++) {
+            for (int yAdj = -1; yAdj <= 1; yAdj++) {
+                if (xAdj == 0 && yAdj == 0) {
+                    // skip if there is no adjustment
+                    continue;
+                }
+                MapLocation newLoc = new MapLocation(current.x() + xAdj, current.y() + yAdj, null, 0);
+                if (newLoc.isLegal(xExtent, yExtent)) {
+                    if (!(newLoc.equals(enemyFootmanLoc) || resourceLocations.contains(newLoc))) {
+                        int newG = current.g() + 1;
+                        neighbors.add(new ExposedAStarNode(newLoc.x, newLoc.y, newG, newG + chebyshev(currentLoc, newLoc), current, getNextDirection(xAdj, yAdj)));
+                    }
+                }
+            }
+        }
+
+        return neighbors;
+    }
 
     /**
      * Overload of the original getNextDirection method.

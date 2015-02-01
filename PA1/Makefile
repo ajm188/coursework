@@ -5,7 +5,8 @@ SEPIA_CP=-cp $(SEPIA_JAR)
 SRC=src
 JAVA_CMD=java $(SEPIA_CP):$(SRC) $(SEPIA_MAIN)
 FULL_AGENT_PATH=$(SRC)/edu/cwru/sepia/agent/AstarAgent
-OUTPUT=$(FULL_AGENT_PATH).java
+FULL_ASTAR_NODE_PATH=$(SRC)/edu/cwru/sepia/environment/model/ExposedAStarNode
+OUTPUT=$(FULL_AGENT_PATH).java $(FULL_ASTAR_NODE_PATH).java
 
 
 all: run
@@ -17,8 +18,8 @@ config %.xml: agent
 	$(JAVA_CMD) data/$@
 	
 agent: $(OUTPUT)
-	$(JAVAC) $(SEPIA_CP) $<
+	$(JAVAC) $(SEPIA_CP) $^
 
 clean:
-	rm -f $(FULL_AGENT_PATH)*.class
+	rm -f $(FULL_AGENT_PATH)*.class $(FULL_ASTAR_NODE_PATH).class
 
