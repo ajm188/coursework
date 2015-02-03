@@ -368,6 +368,7 @@ public class AstarAgent extends Agent {
         ExposedAStarNode current = goal;
         while (current.previous() != null) {
             path.push(new MapLocation(current.x(), current.y(), null, 0)); // we don't care about previous map locations or costs
+            current = current.previous();
 
         }
         return path;
