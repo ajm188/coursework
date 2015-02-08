@@ -353,23 +353,28 @@ public class AstarAgent extends Agent {
 	return new Stack<MapLocation>();
     }
 
-    private int chebyshev(MapLocation loc1, MapLocation loc2){
-	return Math.max(Math.abs(loc2.x-loc1.x), Math.abs(loc2.y-loc1.y));
+    private int chebyshev(MapLocation loc1, MapLocation loc2) {
+        return Math.max(Math.abs(loc2.x-loc1.x), Math.abs(loc2.y-loc1.y));
     }    
 
     /**
      * Return the path the A* found. Follow back pointers from the goal state until the initial state.
+     * Don't include the actual start and end locations.
      *
      * @param goal ExposedAStarNode representing the goal state.
+     * @param start The actual start location. Don't include this in the stack
+     * @param end The actual end location. Don't include this in the stack
      */
-    private Stack<MapLocation> reconstructPath(ExposedAStarNode goal) {
+    private Stack<MapLocation> reconstructPath(ExposedAStarNode goal, MapLocation start, MapLocation end) {
         Stack<MapLocation> path = new Stack<MapLocation>();
         
         ExposedAStarNode current = goal;
         while (current.previous() != null) {
-            path.push(new MapLocation(current.x(), current.y(), null, 0)); // we don't care about previous map locations or costs
+            MapLocation next = new MapLocation(current.x(), current.y(), null, 0);
+            if (!(next.equals(start) || next.equals(end))) {
+                path.push(next); // we don't care about previous map locations or costs
+            }
             current = current.previous();
-
         }
         return path;
     }
