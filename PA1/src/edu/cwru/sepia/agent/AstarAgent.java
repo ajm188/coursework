@@ -206,10 +206,10 @@ public class AstarAgent extends Agent {
 
     @Override
     public void terminalStep(State.StateView newstate, History.HistoryView statehistory) {
-        System.out.println("Total turns: " + newstate.getTurnNumber());
-        System.out.println("Total planning time: " + totalPlanTime/1e9);
-        System.out.println("Total execution time: " + totalExecutionTime/1e9);
-        System.out.println("Total time: " + (totalExecutionTime + totalPlanTime)/1e9);
+       System.out.println("Total turns: " + newstate.getTurnNumber());
+       System.out.println("Total planning time: " + totalPlanTime/1e9);
+       System.out.println("Total execution time: " + totalExecutionTime/1e9);
+       System.out.println("Total time: " + (totalExecutionTime + totalPlanTime)/1e9);
     }
 
     @Override
@@ -234,9 +234,9 @@ public class AstarAgent extends Agent {
      * @param currentPath
      * @return
      */
-    private boolean shouldReplanPath(State.StateView state, History.HistoryView history, Stack<MapLocation> currentPath)
-    {
-        return false;
+    private boolean shouldReplanPath(State.StateView state, History.HistoryView history, Stack<MapLocation> currentPath) {
+        MapLocation next = currentPath.peek();
+        return state.isUnitAt(next.x, next.y);
     }
 
     /**
@@ -320,37 +320,37 @@ public class AstarAgent extends Agent {
      */
     private Stack<MapLocation> AstarSearch(MapLocation start, MapLocation goal, int xExtent, int yExtent, MapLocation enemyFootmanLoc, Set<MapLocation> resourceLocations)
     {
-	// Declare Closed List as a set
+        // Declare Closed List as a set
         Set<ExposedAStarNode> closedList = new HashSet<ExposedAStarNode>();
-	// Declare Open List (Frontier) as a Priority Queue
-	PriorityQueue<ExposedAStarNode> openList = new PriorityQueue<ExposedAStarNode>();
-	// start with root node (initial location of agent)
-	ExposedAStarNode root = new ExposedAStarNode(start.x, start.y, chebyshev(start, goal));
-	ExposedAStarNode aStarGoal = new ExposedAStarNode(goal.x, goal.y, 0);
+        // Declare Open List (Frontier) as a Priority Queue
+        PriorityQueue<ExposedAStarNode> openList = new PriorityQueue<ExposedAStarNode>();
+        // start with root node (initial location of agent)
+        ExposedAStarNode root = new ExposedAStarNode(start.x, start.y, chebyshev(start, goal));
+        ExposedAStarNode aStarGoal = new ExposedAStarNode(goal.x, goal.y, 0);
 
-	// add root to the open list to start search
-	openList.add(root);	
-	g = 0
-	f = g   
-	// while the open set is not empty
-	while (!openList.isEmpty()){
-		// pop a node off the open list
-		ExposedAStarNode node = openList.poll();
-		// if it's the goal, you're done
-		if (root.equals(aStarGoal)){
-			return null;
-		}
-		// else "Search Algorithm Junk"
-		else {
-			Set<ExposedAStarNode> neighbors = current_node.getNeighbors()
-			// For all children of the current node
-			for (ExposedAStarNode n : neighbors){
-				// if the candidate isn't already in the list, add it
-				
-			}
-		}
-	} 
-	return new Stack<MapLocation>();
+        // add root to the open list to start search
+        openList.add(root);	
+        g = 0
+            f = g   
+            // while the open set is not empty
+            while (!openList.isEmpty()){
+                // pop a node off the open list
+                ExposedAStarNode node = openList.poll();
+                // if it's the goal, you're done
+                if (root.equals(aStarGoal)){
+                    return null;
+                }
+                // else "Search Algorithm Junk"
+                else {
+                    Set<ExposedAStarNode> neighbors = current_node.getNeighbors()
+                        // For all children of the current node
+                        for (ExposedAStarNode n : neighbors){
+                            // if the candidate isn't already in the list, add it
+
+                        }
+                }
+            } 
+        return new Stack<MapLocation>();
     }
 
     private int chebyshev(MapLocation loc1, MapLocation loc2) {
@@ -367,7 +367,7 @@ public class AstarAgent extends Agent {
      */
     private Stack<MapLocation> reconstructPath(ExposedAStarNode goal, MapLocation start, MapLocation end) {
         Stack<MapLocation> path = new Stack<MapLocation>();
-        
+
         ExposedAStarNode current = goal;
         while (current.previous() != null) {
             MapLocation next = new MapLocation(current.x(), current.y(), null, 0);
@@ -382,7 +382,7 @@ public class AstarAgent extends Agent {
     private Set<ExposedAStarNode> getNeighbors(ExposedAStarNode current, int xExtent, int yExtent, MapLocation enemyFootmanLoc, Set<MapLocation> resourceLocations) {
         Set<ExposedAStarNode> neighbors = new HashSet<ExposedAStarNode>();
         MapLocation currentLoc = new MapLocation(current.x(), current.y(), null, 0); // need the current node as a map location to compute chebyshev
-        
+
         for (int xAdj = -1; xAdj <= 1; xAdj++) {
             for (int yAdj = -1; yAdj <= 1; yAdj++) {
                 if (xAdj == 0 && yAdj == 0) {
