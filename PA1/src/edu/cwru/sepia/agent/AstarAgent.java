@@ -121,6 +121,7 @@ public class AstarAgent extends Agent {
         
         long startTime = System.nanoTime();
         path = findPath(newstate);
+        assert !path.empty();
         totalPlanTime += System.nanoTime() - startTime;
 
         return middleStep(newstate, statehistory);
@@ -235,6 +236,9 @@ public class AstarAgent extends Agent {
      * @return
      */
     private boolean shouldReplanPath(State.StateView state, History.HistoryView history, Stack<MapLocation> currentPath) {
+        if (currentPath.isEmpty()) {
+            return true;
+        }
         MapLocation next = currentPath.peek();
         return state.isUnitAt(next.x, next.y);
     }
@@ -335,8 +339,8 @@ public class AstarAgent extends Agent {
 		    // pop a node off the open list
 		    ExposedAStarNode node = openList.poll();
 		    // if it's the goal, you're done
-		    if (root.equals(aStarGoal)){
-			    return null;
+		    if (node.equals(aStarGoal)){
+			    return reconstructPath(node, start, goal);
 		    }
 		    // else "Search Algorithm Junk"
 		    else {
@@ -344,13 +348,13 @@ public class AstarAgent extends Agent {
 			    // For all children of the current node
 			    for (ExposedAStarNode n : neighbors){
 				    // if the candidate isn't already in the list, add it
-				    if (!openList.contains(n)){
-					    openList.add(n);		
-				    }				
+				    if (!(openList.contains(n) || closedList.contains(n))){
+					    openList.add(n);
+				    }
 			    }
 		    }
 	    } 
-	    return new Stack<MapLocation>();
+	    return null;
     }
 
     private int chebyshev(MapLocation loc1, MapLocation loc2) {
@@ -372,6 +376,7 @@ public class AstarAgent extends Agent {
         while (current.previous() != null) {
             MapLocation next = new MapLocation(current.x(), current.y(), null, 0);
             if (!(next.equals(start) || next.equals(end))) {
+                System.out.print("(" + next.x + ", " + next.y + "), ");
                 path.push(next); // we don't care about previous map locations or costs
             }
             current = current.previous();
