@@ -330,8 +330,7 @@ public class AstarAgent extends Agent {
 
 	// add root to the open list to start search
 	openList.add(root);	
-	g = 0
-	f = g   
+	
 	// while the open set is not empty
 	while (!openList.isEmpty()){
 		// pop a node off the open list
@@ -342,11 +341,13 @@ public class AstarAgent extends Agent {
 		}
 		// else "Search Algorithm Junk"
 		else {
-			Set<ExposedAStarNode> neighbors = current_node.getNeighbors()
+			Set<ExposedAStarNode> neighbors = getNeighbors(node, xExtent, yExtent, enemyFootmanLoc, resourceLocations);
 			// For all children of the current node
 			for (ExposedAStarNode n : neighbors){
 				// if the candidate isn't already in the list, add it
-				
+				if (!openList.contains(n)){
+					openList.add(n);		
+				}				
 			}
 		}
 	} 
