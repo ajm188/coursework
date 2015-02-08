@@ -381,7 +381,6 @@ public class AstarAgent extends Agent {
         while (current.previous() != null) {
             MapLocation next = new MapLocation(current.x(), current.y(), null, 0);
             if (!(next.equals(start) || next.equals(end))) {
-                System.out.print("(" + next.x + ", " + next.y + "), ");
                 path.push(next); // we don't care about previous map locations or costs
             }
             current = current.previous();
