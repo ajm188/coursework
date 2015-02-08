@@ -318,39 +318,39 @@ public class AstarAgent extends Agent {
      * @param resourceLocations Set of positions occupied by resources
      * @return Stack of positions with top of stack being first move in plan
      */
-    private Stack<MapLocation> AstarSearch(MapLocation start, MapLocation goal, int xExtent, int yExtent, MapLocation enemyFootmanLoc, Set<MapLocation> resourceLocations)
-    {
+    private Stack<MapLocation> AstarSearch(MapLocation start, MapLocation goal, int xExtent, int yExtent, MapLocation enemyFootmanLoc, Set<MapLocation> resourceLocations) {
         // Declare Closed List as a set
         Set<ExposedAStarNode> closedList = new HashSet<ExposedAStarNode>();
-        // Declare Open List (Frontier) as a Priority Queue
-        PriorityQueue<ExposedAStarNode> openList = new PriorityQueue<ExposedAStarNode>();
-        // start with root node (initial location of agent)
-        ExposedAStarNode root = new ExposedAStarNode(start.x, start.y, chebyshev(start, goal));
-        ExposedAStarNode aStarGoal = new ExposedAStarNode(goal.x, goal.y, 0);
+	    // Declare Open List (Frontier) as a Priority Queue
+	    PriorityQueue<ExposedAStarNode> openList = new PriorityQueue<ExposedAStarNode>();
+	    // start with root node (initial location of agent)
+	    ExposedAStarNode root = new ExposedAStarNode(start.x, start.y, chebyshev(start, goal));
+	    ExposedAStarNode aStarGoal = new ExposedAStarNode(goal.x, goal.y, 0);
 
-        // add root to the open list to start search
-        openList.add(root);	
-        g = 0
-            f = g   
-            // while the open set is not empty
-            while (!openList.isEmpty()){
-                // pop a node off the open list
-                ExposedAStarNode node = openList.poll();
-                // if it's the goal, you're done
-                if (root.equals(aStarGoal)){
-                    return null;
-                }
-                // else "Search Algorithm Junk"
-                else {
-                    Set<ExposedAStarNode> neighbors = current_node.getNeighbors()
-                        // For all children of the current node
-                        for (ExposedAStarNode n : neighbors){
-                            // if the candidate isn't already in the list, add it
-
-                        }
-                }
-            } 
-        return new Stack<MapLocation>();
+	    // add root to the open list to start search
+	    openList.add(root);	
+	
+	    // while the open set is not empty
+	    while (!openList.isEmpty()){
+		    // pop a node off the open list
+		    ExposedAStarNode node = openList.poll();
+		    // if it's the goal, you're done
+		    if (root.equals(aStarGoal)){
+			    return null;
+		    }
+		    // else "Search Algorithm Junk"
+		    else {
+			    Set<ExposedAStarNode> neighbors = getNeighbors(node, xExtent, yExtent, enemyFootmanLoc, resourceLocations);
+			    // For all children of the current node
+			    for (ExposedAStarNode n : neighbors){
+				    // if the candidate isn't already in the list, add it
+				    if (!openList.contains(n)){
+					    openList.add(n);		
+				    }				
+			    }
+		    }
+	    } 
+	    return new Stack<MapLocation>();
     }
 
     private int chebyshev(MapLocation loc1, MapLocation loc2) {
