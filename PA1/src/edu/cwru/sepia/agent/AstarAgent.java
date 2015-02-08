@@ -27,6 +27,11 @@ public class AstarAgent extends Agent {
             return this.x >= 0 && this.x < xExtent && this.y >= 0 && this.y < yExtent;
         }
 
+        public int hashCode() {
+            int tmp = y + (x + 1)/2;
+            return x + (tmp * tmp);
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof MapLocation) {
@@ -237,7 +242,7 @@ public class AstarAgent extends Agent {
      */
     private boolean shouldReplanPath(State.StateView state, History.HistoryView history, Stack<MapLocation> currentPath) {
         if (currentPath.isEmpty()) {
-            return true;
+            return false;
         }
         MapLocation next = currentPath.peek();
         return state.isUnitAt(next.x, next.y);
