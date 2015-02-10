@@ -14,7 +14,7 @@ all: run
 run: agent
 	$(JAVA_CMD) data/maze_8x8_config.xml
 
-config %.xml: agent
+%.xml: agent
 	$(JAVA_CMD) data/$@
 	
 agent: $(OUTPUT)

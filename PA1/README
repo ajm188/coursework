@@ -1,0 +1,18 @@
+EECS 391 Programming Assignment 1
+Stephanie Hippo
+Andrew Mason
+
+Compiling and Running Code
+(see the Makefile for more information)
+
+$ make
+This will compile the AstarAgent code and then run sepia using the maze_8x8_config.xml file
+
+$ make config *.xml
+This will complie the AstarAgent code and then run sepia using the maze config file specified.
+Only provide the name of the file, not the relative path, since the Makefile assumes the config file lives in data/
+Example (same as running $ make): $ make config maze_8x8_config.xml
+
+$ make agent
+This will compile the AstarAgent code and do nothing else
+
