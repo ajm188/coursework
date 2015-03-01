@@ -4,6 +4,7 @@ import edu.cwru.sepia.action.Action;
 import edu.cwru.sepia.action.ActionType;
 import edu.cwru.sepia.action.DirectedAction;
 import edu.cwru.sepia.action.TargetedAction;
+import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
 import edu.cwru.sepia.util.Direction;
@@ -20,6 +21,12 @@ import java.util.*;
  */
 public class GameState {
 
+    private int xExtent;
+    private int yExtent;
+
+    private List<ResourceNode.ResourceView> resourceNodes;
+
+    private Map<Integer, List<Unit.UnitView>> playerUnits;
     /**
      * You will implement this constructor. It will
      * extract all of the needed state information from the built in
@@ -42,6 +49,15 @@ public class GameState {
      * @param state Current state of the episode
      */
     public GameState(State.StateView state) {
+        xExtent = state.getXExtent();
+        yExtent = state.getYExtent();
+
+        resourceNodes = state.getAllResourceNodes();
+
+        playerUnits = new HashMap<Integer, List<Unit.UnitView>>();
+        for (Integer playerNumber : state.getPlayerNumbers()) {
+            playerUnits.put(playerNumber, state.getUnits(playerNumber));
+        }
     }
 
     /**
