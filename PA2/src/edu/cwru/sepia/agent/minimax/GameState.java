@@ -24,6 +24,8 @@ public class GameState {
     private int xExtent;
     private int yExtent;
 
+    private Double utility;
+
     private List<ResourceNode.ResourceView> resourceNodes;
 
     private Map<Integer, List<Unit.UnitView>> playerUnits;
@@ -58,6 +60,8 @@ public class GameState {
         for (Integer playerNumber : state.getPlayerNumbers()) {
             playerUnits.put(playerNumber, state.getUnits(playerNumber));
         }
+
+        utility = null;
     }
 
     /**
@@ -79,7 +83,10 @@ public class GameState {
      * @return The weighted linear combination of the features
      */
     public double getUtility() {
-        return 0.0;
+        if (utility == null) {
+            utility = 0.0; // do semthing here ...
+        }
+        return utility;
     }
 
     /**
