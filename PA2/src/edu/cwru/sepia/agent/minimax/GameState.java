@@ -35,6 +35,8 @@ public class GameState {
     private List<UnitView> archers;
 
     private State.StateView state;
+
+    private List<GameStateChild> children;
     /**
      * You will implement this constructor. It will
      * extract all of the needed state information from the built in
@@ -73,6 +75,8 @@ public class GameState {
         }
 
         this.state = state;
+
+        children = null;
 
         utility = null;
     }
@@ -119,6 +123,11 @@ public class GameState {
      * @return All possible actions and their associated resulting game state
      */
     public List<GameStateChild> getChildren() {
+        if (children != null)
+        {
+            return children; // do some caching for speed
+        }
+
         //depending on whose turn it is, collect all possible actions
         List<UnitView> desiredList = isMax ? footmen : archers;
         Map<Integer,List<Action>> unitActions = new HashMap<Integer, List<Action>>();
@@ -126,7 +135,69 @@ public class GameState {
             unitActions.put(unit.getID(), getAllActions(unit));
         }
 
-        return null;
+        /*
+         * Ok, here we go. We need to get all of the pairwise combinations of the
+         * actions of the units. If there is only one unit, great! This is really
+         * easy then. Just create a list of maps, each of which maps the single
+         * unit id to each of the actions that unit can make in this state.
+         *
+         * If there are two units that can move, then it gets more complicated.
+         * If the second unit has k moves, then each of the first unit's move maps
+         * needs to be copied k times, so that each of the first unit's moves can
+         * be paired exactly once with each of the second unit's moves. We also
+         * do some error checking to ensure that the two units don't do something
+         * that would be simultaneously illegal (like trying to move to the same square).
+         */
+        int firstUnitID = desiredList.get(0).getID();
+        Integer secondUnitID = desiredList.size() > 1 ? desiredList.get(1).getID() : null;
+        // if there is no second unit, we want to copy everything once (which is basically not copying at all)
+        int timesToCopy = secondUnitID != null ? unitActions.get(secondUnitID.intValue()).size() : 1;
+
+        List<Map<Integer, Action>> actionsList = new ArrayList<Map<Integer, Action>>();
+
+        // collect all of the actions for the first unit, copying them if necessary (see the above block comment)
+        for (Action a : unitActions.get(firstUnitID))
+        {
+            for (int i = 0; i < timesToCopy; i++)
+            {
+                Map<Integer, Action> childMap = new HashMap<Integer, Action>();
+                childMap.put(firstUnitID, a);
+                actionsList.add(childMap);
+            }
+        }
+
+        if (secondUnitID != null)
+        {
+            // now add in all of the actions for the second unit, if one exists
+            int secondUnitID = secondUnitID.intValue();
+            for (int listIndex = 0; listIndex < actionsList.length();) 
+            {
+                for (Action a : unitActions.get(secondUnitID))
+                {
+                    Map<Integer, Action> currentMap = actionsList.get(listIndex);
+                    if (isLegal(currentMap.get(firstUnitID), a)
+                    {
+                        currentMap.put(secondUnitID, a);
+                        listIndex++;
+                    }
+                    else
+                    {
+                        actionsList.remove(listIndex);
+                        // actionsList has decreased its size by one, so there is no need to increment the counter
+                    }
+                }
+            }
+        }
+
+        List<GameStateChild> children = new ArrayList<GameStateChild>();
+        for (Map<Integer, Action> actions : actionsList)
+        {
+            // apply the action and add the resulting child state to the list
+        }
+
+        this.children = children;
+
+        return this.children;
     }
 
     private List<Action> getAllActions(UnitView unit){
@@ -137,7 +208,7 @@ public class GameState {
             if (direction.xComponent() == 0 && direction.yComponent() == 0){
                 continue;
             }
-            if (isLegal(direction)){
+            if (isLegal(unit, direction)){
                 allActions.add(Action.createPrimitiveMove(unit.getID(), direction));
             }
         }
@@ -174,15 +245,45 @@ public class GameState {
     }
 
      private boolean isLegal(UnitView unit, Direction direction){
-        int x = unit.getXPosition() + direction.xComponent;
-        int y = unit.getYPosition() + direction.yComponent;
+        int x = unit.getXPosition() + direction.xComponent();
+        int y = unit.getYPosition() + direction.yComponent();
      	boolean inBounds = x < xExtent && x >= 0 && y < yExtent && y >= 0;
         for (ResourceNode.ResourceView resourceView : resourceNodes){
             if (!inBounds){
                 return false;
             }
-            inBounds = inBounds || resourceView.getXPosition() != x && resourceView.getYPosition != y;	
+            inBounds = inBounds || resourceView.getXPosition() != x && resourceView.getYPosition() != y;	
         }
         return inBounds;
+     }
+
+     /**
+      * Are these two actions legal (together)?
+      * The only actions that can conflict are move actions that attempt to move to the same square.
+      */
+     private boolean isLegal(Action action1, Action action2)
+     {
+         Action.ActionType primitiveMove = Action.ActionType.PRIMITIVEMOVE;
+         if (action1.actionType != primitiveMove || action2.actionType != primitiveMove)
+         {
+             return false;
+         }
+
+         DirectedAction moveAction1 = (DirectedAction) action1;
+         DirectedAction moveAction2 = (DirectedAction) action2;
+
+         Unit.UnitView unit1 = state.getUnit(moveAction1.getUnitID());
+         Unit.UnitView unit2 = state.getUnit(moveAction2.getUnitID());
+
+         Direction direction1 = moveAction1.getDirection();
+         Direction direction2 = moveAction2.getDirection();
+
+         int x1 = unit1.getXPosition() + direction1.xComponent();
+         int y1 = unit1.getYPosition() + direction1.yComponent();
+
+         int x2 = unit2.getXPosition() + direction2.xComponent();
+         int y2 = unit2.getYPosition() + direction2.yCompontent();
+
+         return (x1 != x2 || y1 != y2);
      }
 }
