@@ -13,6 +13,7 @@ import edu.cwru.sepia.environment.model.state.Unit.UnitView;
 import edu.cwru.sepia.util.Direction;
 
 import java.util.*;
+import java.io.IOException;
 
 /**
  * This class stores all of the information the agent
@@ -215,7 +216,15 @@ public class GameState {
 
     private GameStateChild applyActions(Map<Integer, Action> actions)
     {
-        State stateClone = this.state.getStateCreator().createState();
+        State stateClone;
+        try
+        {
+            stateClone = this.state.getStateCreator().createState();
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
         for (Integer unitID : actions.keySet())
         {
             Action action = actions.get(unitID);
@@ -271,7 +280,7 @@ public class GameState {
                 }
 
                 Unit.UnitView enemy = state.getUnit(enemyUnitID);
-                if (enemy.getPlayer() == unit.getPlayer()) {
+                if (enemy.getTemplateView().getCharacter() == unit.getTemplateView().getCharacter()) {
                     // this is not actually an enemy, next iteration
                     continue;
                 }
