@@ -14,10 +14,10 @@ public class GameStateChild {
     //* This is the game state resulting from the specified set of actions
     public GameState state;
 
-    public GameStateChild(State.StateView state)
+    public GameStateChild(State.StateView state, boolean isMax)
     {
         action = null;
-        this.state = new GameState(state);
+        this.state = new GameState(state, isMax);
     }
 
     public GameStateChild(Map<Integer, Action> action, GameState state)

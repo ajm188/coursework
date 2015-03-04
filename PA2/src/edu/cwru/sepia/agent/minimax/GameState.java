@@ -115,6 +115,43 @@ public class GameState {
      * @return All possible actions and their associated resulting game state
      */
     public List<GameStateChild> getChildren() {
+	//depending on whose turn it is, collect all possible actions
+	List<UnitView> desiredList = isMax ? footmen : archers;
+	Map<Integer,List<Action>> unitActions = new HashMap<Integer, List<Action>>();
+	for (UnitView unit : desiredList) {
+		unitActions.put(unit.getID(), getAllActions(unit));
+	}	
+
         return null;
     }
+
+    private List<Action> getAllActions(UnitView unit){
+	List<Action> allActions = new ArrayList<Action>();
+	
+	for(Direction direction: Directions.values()){
+		if (direction.xComponent() == 0 && direction.yComponent() == 0){
+			continue;
+		}
+		if (isLegal(direction)){
+			allActions.add(Action.createPrimitiveMove(unit.getID(), direction));
+		}
+	}
+	
+	//for each unit, get units in range	
+
+	return allActions;
+    }
+
+     private boolean isLegal(UnitView unit, Direction direction){
+	int x = unit.getXPosition() + direction.xComponent;
+	int y = unit.getYPosition() + direction.yComponent;
+     	boolean inBounds = x < xExtent && x >= 0 && y < yExtent && y >= 0;
+	for (ResourceNode.ResourceView resourceView : resourceNodes){
+		if (!inBounds){
+			return false;
+		}
+		inBounds = inBounds || resourceView.getXPosition() != x && resourceView.getYPosition != y;	
+	}
+	return inBounds;
+     }
 }
