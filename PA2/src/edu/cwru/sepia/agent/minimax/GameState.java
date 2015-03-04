@@ -117,12 +117,50 @@ public class GameState {
         if (utility != null) {
             return utility;
         }
-	
-	double health = 0.0;
+
+        // Health feature
+        double health = 0.0;
         List<UnitView> desiredList = isMax ? footmen : archers;
-    	for(UnitView thing : desiredList){
-		health += thing.getHP();
-	}
+        for(UnitView thing : desiredList){
+            health += thing.getHP();
+        }
+
+        // Attack feature
+        double attackingPotential = 0.0;
+        for(UnitView unit : desiredList) {
+            int unitsInRange = 0;
+            UnitTemplateView unitTemplateView = unit.getTemplateView();
+            int upperBound = unitTemplateView.getRange();
+            int lowerBound = -upperBound;
+            for (int xAdj = lowerBound; xAdj <= upperBound; xAdj++) {
+                for (int yAdj = lowerBound; yAdj <= upperBound; yAdj++) {
+                    if (xAdj == 0 && yAdj == 0) {
+                        continue;
+                    }
+
+                    int newX = unit.getXPosition() + xAdj;
+                    int newY = unit.getYPosition() + yAdj;
+                    Integer enemyUnitID = state.unitAt(newX, newY);
+                    if (enemyUnitID == null) {
+                        // no unit here, next iteration
+                        continue;
+                    }
+
+                    Unit.UnitView enemy = state.getUnit(enemyUnitID);
+                    if (enemy.getTemplateView().getCharacter() == unit.getTemplateView().getCharacter()) {
+                        // this is not actually an enemy, next iteration
+                        continue;
+                    }
+
+                    // no conditions violated, there's a unit we can attack. plus 1
+                    unitsInRange++;
+                }
+            }
+            attackingPotential += (unitsInRange * unitTemplateView.getBasicAttack());
+        }
+
+        utility = 1 * health + 1 * attackingPotential;
+        return utility;
     }
 
     /**
