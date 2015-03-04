@@ -7,6 +7,8 @@ import edu.cwru.sepia.action.TargetedAction;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
+import edu.cwru.sepia.environment.model.state.UnitTemplate;
+import edu.cwru.sepia.environment.model.state.UnitTemplate.UnitTemplateView;
 import edu.cwru.sepia.environment.model.state.Unit.UnitView;
 import edu.cwru.sepia.util.Direction;
 
@@ -25,7 +27,7 @@ public class GameState {
     private int xExtent;
     private int yExtent;
 
-    private boolean max;
+    private boolean isMax;
 
     private Double utility;
 
@@ -59,6 +61,17 @@ public class GameState {
      * @param state Current state of the episode
      */
     public GameState(State.StateView state) {
+        extractInfoFromState(state);
+    }
+
+    public GameState(State.StateView state, boolean isMax)
+    {
+        this.isMax = isMax;
+        extractInfoFromState(state);
+    }
+
+    private void extractInfoFromState(State.StateView state)
+    {
         xExtent = state.getXExtent();
         yExtent = state.getYExtent();
 
@@ -169,13 +182,12 @@ public class GameState {
         if (secondUnitID != null)
         {
             // now add in all of the actions for the second unit, if one exists
-            int secondUnitID = secondUnitID.intValue();
-            for (int listIndex = 0; listIndex < actionsList.length();) 
+            for (int listIndex = 0; listIndex < actionsList.size();) 
             {
                 for (Action a : unitActions.get(secondUnitID))
                 {
                     Map<Integer, Action> currentMap = actionsList.get(listIndex);
-                    if (isLegal(currentMap.get(firstUnitID), a)
+                    if (isLegal(currentMap.get(firstUnitID), a))
                     {
                         currentMap.put(secondUnitID, a);
                         listIndex++;
@@ -192,7 +204,8 @@ public class GameState {
         List<GameStateChild> children = new ArrayList<GameStateChild>();
         for (Map<Integer, Action> actions : actionsList)
         {
-            // apply the action and add the resulting child state to the list
+            // apply the set of actions and return the GameStateChild that results from these actions
+            children.add(applyActions(actions));
         }
 
         this.children = children;
@@ -200,11 +213,37 @@ public class GameState {
         return this.children;
     }
 
+    private GameStateChild applyActions(Map<Integer, Action> actions)
+    {
+        State stateClone = this.state.getStateCreator().createState();
+        for (Integer unitID : actions.keySet())
+        {
+            Action action = actions.get(unitID);
+            switch (action.getType())
+            {
+                case PRIMITIVEMOVE:
+                    DirectedAction move = (DirectedAction) action;
+                    stateClone.moveUnit(stateClone.getUnit(unitID), move.getDirection());
+                    break;
+                case PRIMITIVEATTACK:
+                    TargetedAction attack = (TargetedAction) action;
+                    Unit attacker = stateClone.getUnit(unitID);
+                    Unit defender = stateClone.getUnit(attack.getTargetId()); // WHY IS THIS ONE SPELLED DIFFERENTLY??? EITHER ALWAYS DO "ID" OR ALWAYS DO "Id" NOT BOTH!!!
+                    defender.setHP(defender.getCurrentHealth() - attacker.getTemplate().getBasicAttack());
+                    break;
+                default:
+                    // this really should never happen but it never hurts to be careful
+                    break;
+            }
+        }
+        return new GameStateChild(actions, new GameState(stateClone.getView(0), !isMax));
+    }
+
     private List<Action> getAllActions(UnitView unit){
         List<Action> allActions = new ArrayList<Action>();
 	
         // get all move actions
-        for(Direction direction: Directions.values()){
+        for(Direction direction: Direction.values()){
             if (direction.xComponent() == 0 && direction.yComponent() == 0){
                 continue;
             }
@@ -214,11 +253,11 @@ public class GameState {
         }
 	
         // get all attacking actions
-        UnitTemplate unitTemplate = unit.getTemplate();
-        int upperBound = unitTemplate.getRange();
+        UnitTemplateView unitTemplateView = unit.getTemplateView();
+        int upperBound = unitTemplateView.getRange();
         int lowerBound = -upperBound;
         for (int xAdj = lowerBound; xAdj <= upperBound; xAdj++) {
-            for (int yAdj = lowerBonud; yAdj <= upperBound; yAdj++) {
+            for (int yAdj = lowerBound; yAdj <= upperBound; yAdj++) {
                 if (xAdj == 0 && yAdj == 0) {
                     continue;
                 }
@@ -263,8 +302,8 @@ public class GameState {
       */
      private boolean isLegal(Action action1, Action action2)
      {
-         Action.ActionType primitiveMove = Action.ActionType.PRIMITIVEMOVE;
-         if (action1.actionType != primitiveMove || action2.actionType != primitiveMove)
+         ActionType primitiveMove = ActionType.PRIMITIVEMOVE;
+         if (action1.getType() != primitiveMove || action2.getType() != primitiveMove)
          {
              return false;
          }
@@ -272,8 +311,8 @@ public class GameState {
          DirectedAction moveAction1 = (DirectedAction) action1;
          DirectedAction moveAction2 = (DirectedAction) action2;
 
-         Unit.UnitView unit1 = state.getUnit(moveAction1.getUnitID());
-         Unit.UnitView unit2 = state.getUnit(moveAction2.getUnitID());
+         Unit.UnitView unit1 = state.getUnit(moveAction1.getUnitId());
+         Unit.UnitView unit2 = state.getUnit(moveAction2.getUnitId());
 
          Direction direction1 = moveAction1.getDirection();
          Direction direction2 = moveAction2.getDirection();
@@ -282,7 +321,7 @@ public class GameState {
          int y1 = unit1.getYPosition() + direction1.yComponent();
 
          int x2 = unit2.getXPosition() + direction2.xComponent();
-         int y2 = unit2.getYPosition() + direction2.yCompontent();
+         int y2 = unit2.getYPosition() + direction2.yComponent();
 
          return (x1 != x2 || y1 != y2);
      }
