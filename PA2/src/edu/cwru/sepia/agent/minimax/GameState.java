@@ -114,10 +114,15 @@ public class GameState {
      * @return The weighted linear combination of the features
      */
     public double getUtility() {
-        if (utility == null) {
-            utility = 0.0; // do semthing here ...
+        if (utility != null) {
+            return utility;
         }
-        return utility;
+	
+	double health = 0.0;
+        List<UnitView> desiredList = isMax ? footmen : archers;
+    	for(UnitView thing : desiredList){
+		health += thing.getHP();
+	}
     }
 
     /**
