@@ -81,9 +81,9 @@ public class GameState {
         footmen = new ArrayList<UnitView>();
         archers = new ArrayList<UnitView>();
         for (UnitView unit : state.getAllUnits()) {
-            if (unit.getTemplateView().getName().equals("footman")) {
+            if (unit.getTemplateView().getName().equals("Footman")) {
                 footmen.add(unit);
-            } else if (unit.getTemplateView().getName().equals("archer")) {
+            } else if (unit.getTemplateView().getName().equals("Archer")) {
                 archers.add(unit);
             }
         }
@@ -118,6 +118,8 @@ public class GameState {
             return utility;
         }
 
+        utility = 0.0;
+
         // Health feature
         double health = 0.0;
         List<UnitView> desiredList = isMax ? footmen : archers;
@@ -127,7 +129,7 @@ public class GameState {
 
         // Attack feature
         double attackingPotential = 0.0;
-        for(UnitView unit : desiredList) {
+        for (UnitView unit : desiredList) {
             int unitsInRange = 0;
             UnitTemplateView unitTemplateView = unit.getTemplateView();
             int upperBound = unitTemplateView.getRange();
@@ -159,8 +161,30 @@ public class GameState {
             attackingPotential += (unitsInRange * unitTemplateView.getBasicAttack());
         }
 
-        utility = 1 * health + 1 * attackingPotential;
+        utility += 1 * health + 1 * attackingPotential;
+        if (!isMax) {
+            // negate for MIN
+            utility = -utility;
+        } else {
+            // distance to archers feature
+            // compute the average mininmum distance between a footman and an archer
+            int minDist = 0;
+            for (UnitView footman : footmen) {
+                double currentMin = Double.POSITIVE_INFINITY;
+                for (UnitView archer : archers) {
+                    currentMin = Math.min(currentMin, chebyshev(footman, archer));
+                }
+                minDist += currentMin;
+            }
+            utility += minDist / footmen.size();
+        }
+
         return utility;
+    }
+
+    private double chebyshev(UnitView unit1, UnitView unit2)
+    {
+        return Math.max(unit2.getXPosition() - unit1.getXPosition(), unit2.getYPosition() - unit1.getYPosition());
     }
 
     /**
