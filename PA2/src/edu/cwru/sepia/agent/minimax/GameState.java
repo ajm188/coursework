@@ -7,6 +7,7 @@ import edu.cwru.sepia.action.TargetedAction;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
+import edu.cwru.sepia.environment.model.state.Unit.UnitView;
 import edu.cwru.sepia.util.Direction;
 
 import java.util.*;
@@ -24,11 +25,14 @@ public class GameState {
     private int xExtent;
     private int yExtent;
 
+    private boolean max;
+
     private Double utility;
 
     private List<ResourceNode.ResourceView> resourceNodes;
 
-    private Map<Integer, List<Unit.UnitView>> playerUnits;
+    private List<UnitView> footmen;
+    private List<UnitView> archers;
     /**
      * You will implement this constructor. It will
      * extract all of the needed state information from the built in
@@ -56,9 +60,14 @@ public class GameState {
 
         resourceNodes = state.getAllResourceNodes();
 
-        playerUnits = new HashMap<Integer, List<Unit.UnitView>>();
-        for (Integer playerNumber : state.getPlayerNumbers()) {
-            playerUnits.put(playerNumber, state.getUnits(playerNumber));
+        footmen = new ArrayList<UnitView>();
+        archers = new ArrayList<UnitView>();
+        for (UnitView unit : state.getAllUnits()) {
+            if (unit.getTemplateView().getName().equals("footman")) {
+                footmen.add(unit);
+            } else if (unit.getTemplateView().getName().equals("archer")) {
+                archers.add(unit);
+            }
         }
 
         utility = null;
