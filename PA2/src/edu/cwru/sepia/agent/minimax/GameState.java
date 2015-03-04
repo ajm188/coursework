@@ -117,67 +117,26 @@ public class GameState {
         if (utility != null) {
             return utility;
         }
-
-        utility = 0.0;
-
-        // Health feature
-        double health = 0.0;
-        List<UnitView> desiredList = isMax ? footmen : archers;
-        for(UnitView thing : desiredList){
-            health += thing.getHP();
-        }
-
-        // Attack feature
-        double attackingPotential = 0.0;
-        for (UnitView unit : desiredList) {
-            int unitsInRange = 0;
-            UnitTemplateView unitTemplateView = unit.getTemplateView();
-            int upperBound = unitTemplateView.getRange();
-            int lowerBound = -upperBound;
-            for (int xAdj = lowerBound; xAdj <= upperBound; xAdj++) {
-                for (int yAdj = lowerBound; yAdj <= upperBound; yAdj++) {
-                    if (xAdj == 0 && yAdj == 0) {
-                        continue;
-                    }
-
-                    int newX = unit.getXPosition() + xAdj;
-                    int newY = unit.getYPosition() + yAdj;
-                    Integer enemyUnitID = state.unitAt(newX, newY);
-                    if (enemyUnitID == null) {
-                        // no unit here, next iteration
-                        continue;
-                    }
-
-                    Unit.UnitView enemy = state.getUnit(enemyUnitID);
-                    if (enemy.getTemplateView().getCharacter() == unit.getTemplateView().getCharacter()) {
-                        // this is not actually an enemy, next iteration
-                        continue;
-                    }
-
-                    // no conditions violated, there's a unit we can attack. plus 1
-                    unitsInRange++;
-                }
+        /*
+         * Features we want:
+         *  - health of the footmen (positive)
+         *  - health of the archers (negative)
+         *  - number of footmen (positive)
+         *  - number of archers (negative)
+         *  - distance from footmen to archers (negative) --> not sure if this should be positive or negative
+         * Adjust the weights as we test
+         */
+        double footmanToArcherDistance = 0.0;
+        for (UnitView footman : footmen) {
+            double currentMin = Double.POSITIVE_INFINITY;
+            for (UnitView archer : archers) {
+                currentMin = Math.min(currentMin, chebyshev(footman, archer));
             }
-            attackingPotential += (unitsInRange * unitTemplateView.getBasicAttack());
+            footmanToArcherDistance += currentMin;
         }
 
-        utility += 1 * health + 1 * attackingPotential;
-        if (!isMax) {
-            // negate for MIN
-            utility = -utility;
-        } else {
-            // distance to archers feature
-            // compute the average mininmum distance between a footman and an archer
-            int minDist = 0;
-            for (UnitView footman : footmen) {
-                double currentMin = Double.POSITIVE_INFINITY;
-                for (UnitView archer : archers) {
-                    currentMin = Math.min(currentMin, chebyshev(footman, archer));
-                }
-                minDist += currentMin;
-            }
-            utility += minDist / footmen.size();
-        }
+        utility = 1 * getTotalHealth(footmen) + (-1) * getTotalHealth(archers)
+            + 1 * footmen.size() + (-1) * archers.size() + 1 * footmanToArcherDistance;
 
         return utility;
     }
@@ -185,6 +144,16 @@ public class GameState {
     private double chebyshev(UnitView unit1, UnitView unit2)
     {
         return Math.max(unit2.getXPosition() - unit1.getXPosition(), unit2.getYPosition() - unit1.getYPosition());
+    }
+
+    private int getTotalHealth(List<UnitView> units)
+    {
+        int health = 0;
+        for (UnitView unit : units)
+        {
+            health += unit.getHP();
+        }
+        return health;
     }
 
     /**
