@@ -33,6 +33,8 @@ public class GameState {
 
     private List<UnitView> footmen;
     private List<UnitView> archers;
+
+    private State.StateView state;
     /**
      * You will implement this constructor. It will
      * extract all of the needed state information from the built in
@@ -69,6 +71,8 @@ public class GameState {
                 archers.add(unit);
             }
         }
+
+        this.state = state;
 
         utility = null;
     }
@@ -120,7 +124,7 @@ public class GameState {
         Map<Integer,List<Action>> unitActions = new HashMap<Integer, List<Action>>();
         for (UnitView unit : desiredList) {
             unitActions.put(unit.getID(), getAllActions(unit));
-        }	
+        }
 
         return null;
     }
@@ -128,6 +132,7 @@ public class GameState {
     private List<Action> getAllActions(UnitView unit){
         List<Action> allActions = new ArrayList<Action>();
 	
+        // get all move actions
         for(Direction direction: Directions.values()){
             if (direction.xComponent() == 0 && direction.yComponent() == 0){
                 continue;
@@ -137,7 +142,33 @@ public class GameState {
             }
         }
 	
-        //for each unit, get units in range	
+        // get all attacking actions
+        UnitTemplate unitTemplate = unit.getTemplate();
+        int upperBound = unitTemplate.getRange();
+        int lowerBound = -upperBound;
+        for (int xAdj = lowerBound; xAdj <= upperBound; xAdj++) {
+            for (int yAdj = lowerBonud; yAdj <= upperBound; yAdj++) {
+                if (xAdj == 0 && yAdj == 0) {
+                    continue;
+                }
+
+                int newX = unit.getXPosition() + xAdj;
+                int newY = unit.getYPosition() + yAdj;
+                Integer enemyUnitID = state.unitAt(newX, newY);
+                if (enemyUnitID == null) {
+                    // no unit here, next iteration
+                    continue;
+                }
+
+                Unit.UnitView enemy = state.getUnit(enemyUnitID);
+                if (enemy.getPlayer() == unit.getPlayer()) {
+                    // this is not actually an enemy, next iteration
+                    continue;
+                }
+
+                allActions.add(Action.createPrimitiveAttack(unit.getID(), enemyUnitID));
+            }
+        }
 
         return allActions;
     }
