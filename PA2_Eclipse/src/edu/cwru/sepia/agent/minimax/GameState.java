@@ -131,14 +131,16 @@ public class GameState {
 			}
 		}
 
-//		int footmenAttacks = getThreatenedUnits(footmen.values());
-//		int archerAttacks = getThreatenedUnits(archers.values());
+		int footmenAttacks = getThreatenedUnits(footmen.values());
+		int archerAttacks = getThreatenedUnits(archers.values());
 
 		utility = 1 * getTotalHealth(footmen.values()) +
 				(-10) * getTotalHealth(archers.values()) +
 				10 * footmen.size() +
 				(-5) * archers.size() +
-				(-2) * footmanToArcherDistance;
+				(-2) * footmanToArcherDistance +
+				5 * footmenAttacks +
+				(-1) * archerAttacks;
 
 		return utility;
 	}
@@ -169,7 +171,7 @@ public class GameState {
 			int upperBound = unit.getTemplate().getRange();
 			int lowerBound = -upperBound;
 			for (int xAdj = lowerBound; xAdj <= upperBound; xAdj++) {
-				for (int yAdj = lowerBound; yAdj <= upperBound; xAdj++) {
+				for (int yAdj = lowerBound; yAdj <= upperBound; yAdj++) {
 					Unit other = state.unitAt(unit.getxPosition() + xAdj, unit.getyPosition() + yAdj);
 					if (other != null && other.getPlayer() != unit.getPlayer()) {
 						unitsThreatened++;
