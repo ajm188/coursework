@@ -206,37 +206,27 @@ public class GameState {
         List<Map<Integer, Action>> actionsList = new ArrayList<Map<Integer, Action>>();
 
         // collect all of the actions for the first unit, copying them if necessary (see the above block comment)
-        for (Action a : unitActions.get(firstUnitID))
-        {
-            for (int i = 0; i < timesToCopy; i++)
-            {
-                Map<Integer, Action> childMap = new HashMap<Integer, Action>();
-                childMap.put(firstUnitID, a);
-                actionsList.add(childMap);
-            }
-        }
+	// Liberatore is disappointed in this McCabe's complexity.
+	if (secondUnitID==null){
+		//Then there is only one unit to iterate over
+		for (Action action : unitActions.get(firstUnitID)){
+			Map<Integer, Action> temp = new HashMap<Integer, Action>();
+			temp.put(firstUnitID, action);
+			actionsList.add(temp);
+		}
+	} else {
+		for (Action action1 : unitActions.get(firstUnitID)){
+			for (Action action2 : unitActions.get(secondUnitID)){
+				if (isLegal(action1, action2)) {
+					Map<Integer, Action> temp = new HashMap<Integer, Action>();
+					temp.put(firstUnitID, action1);
+					temp.put(secondUnitID, action2);
+					actionsList.add(temp);
+				}
+			}	
+		}
+	}
 
-        if (secondUnitID != null)
-        {
-            // now add in all of the actions for the second unit, if one exists
-            for (int listIndex = 0; listIndex < actionsList.size();) 
-            {
-                for (Action a : unitActions.get(secondUnitID))
-                {
-                    Map<Integer, Action> currentMap = actionsList.get(listIndex);
-                    if (isLegal(currentMap.get(firstUnitID), a))
-                    {
-                        currentMap.put(secondUnitID, a);
-                        listIndex++;
-                    }
-                    else
-                    {
-                        actionsList.remove(listIndex);
-                        // actionsList has decreased its size by one, so there is no need to increment the counter
-                    }
-                }
-            }
-        }
 
         List<GameStateChild> children = new ArrayList<GameStateChild>();
         for (Map<Integer, Action> actions : actionsList)

@@ -3,7 +3,7 @@
 	<Player Id="0">
 		<AgentClass>
 			<ClassName>edu.cwru.sepia.agent.minimax.MinimaxAlphaBeta</ClassName>
-			<Argument>1</Argument>
+			<Argument>2</Argument>
 		</AgentClass>
 	</Player>
 	<Player Id="0">
