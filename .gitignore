@@ -1,4 +1,6 @@
 *.swp
 *.class
 !EnemyBlockerAgent.class
+!ArcherAgent.class
+!ArcherAgent\$1.class
 .DS_STORE
