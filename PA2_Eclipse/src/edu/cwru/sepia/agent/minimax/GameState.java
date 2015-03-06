@@ -4,6 +4,7 @@ import edu.cwru.sepia.action.Action;
 import edu.cwru.sepia.action.ActionType;
 import edu.cwru.sepia.action.DirectedAction;
 import edu.cwru.sepia.action.TargetedAction;
+import edu.cwru.sepia.agent.AstarAgent;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
@@ -21,6 +22,7 @@ import java.io.IOException;
  * Add any information or methods you would like to this class,
  * but do not delete or change the signatures of the provided methods.
  */
+@SuppressWarnings("unused")
 public class GameState {
 
 	private int xExtent;
@@ -131,6 +133,13 @@ public class GameState {
 			}
 		}
 
+		/* Add in Utility for A Star Search
+		 * So the lowest A* score should be mostly heavily weighted (attempted to replace footmanToArcherDistance with new method?).
+		 * Should probably keep footmenAttacks and archerAttacks but not sure why weighting is different.
+		 * Possibly arbitrary. I don't remember.
+		 * Health and size of each little army should stay.
+		 */
+		
 		int footmenAttacks = getThreatenedUnits(footmen.values());
 		int archerAttacks = getThreatenedUnits(archers.values());
 
@@ -143,6 +152,22 @@ public class GameState {
 				(-1) * archerAttacks;
 
 		return utility;
+	}
+	
+	// Loop over archers and footmen. Prefer the lowest id.
+	// TODO: Is this how I want to grab the footman and the archer?
+	// If we modify A* to use states, this needs modified too.
+	
+	// Not important to task but I rubied hard in this. Tried to clean up.
+	public int footmanToArcherDistance(State footman, State archer){
+		// Need the state. Where the hell do I get this footman's id again? Burn the "docs"
+
+		AstarAgent pathFromFootmanToArcher = new AstarAgent(footman.getId());
+		
+		Map<Integer, Action> footmanToArcherPath = pathFromFootmanToArcher.initialStep(footman.getView(footman.getID()), History? );
+		
+		//TODO: Return size of map as the score
+		return footmanToArcherPath.size();
 	}
 	
 	public void setUtility(double utility) {

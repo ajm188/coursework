@@ -44,7 +44,7 @@ public class AstarAgent extends Agent {
     }
 
     Stack<MapLocation> path;
-    int footmanID, townhallID, enemyFootmanID;
+    int footmanID, archerID, enemyFootmanID;
     MapLocation nextLoc;
 
     private long totalPlanTime = 0; // nsecs
@@ -92,16 +92,25 @@ public class AstarAgent extends Agent {
         return enemyUnitIDs;
     }
 
-    private void setTownhallID(State.StateView newstate, int enemyPlayerNum) throws Exception {
+    /* Are we allowed to change the signature of this? 
+     * If so is this like earlier where we should try using State instead StateView?
+     * To be honest, even though I understand the difference between the two,
+     * I'm still not sure when to use what.
+     * In hindsight I maybe should have just copy/pasted this method instead of refactoring 
+     * it to our specific needs, but it's late and I sometimes make bad design decisions.
+     * */
+    private void setArcherID(State.StateView newstate, int enemyPlayerNum) throws Exception {
         List<Integer> enemyUnitIDs = getEnemyUnitIDs(newstate, enemyPlayerNum);
 
-        townhallID = -1;
+        archerID = -1;
         enemyFootmanID = -1;
 
+        //changing this to archer. 
+        // TODO: How to use second archer?
         for (Integer unitID : enemyUnitIDs) {
             String unitType = newstate.getUnit(unitID).getTemplateView().getName().toLowerCase();
-            if (unitType.equals("townhall")) {
-                townhallID = unitID;    
+            if (unitType.equals("archer")) {
+                archerID = unitID;    
             } else if (unitType.equals("footman")) {
                 enemyFootmanID = unitID;
             } else {
@@ -109,8 +118,8 @@ public class AstarAgent extends Agent {
             }
         }
 
-        if (townhallID == -1) {
-            throw new Exception("Error: Couldn't find townhall");
+        if (archerID == -1) {
+            throw new Exception("Error: Couldn't find archer");
         }
     }
 
@@ -118,7 +127,7 @@ public class AstarAgent extends Agent {
     public Map<Integer, Action> initialStep(State.StateView newstate, History.HistoryView statehistory) {
         try {
             setFootmanID(newstate); // find the footman location
-            setTownhallID(newstate, findEnemyPlayerNum(newstate));
+            setArcherID(newstate, findEnemyPlayerNum(newstate));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return null;
@@ -188,7 +197,7 @@ public class AstarAgent extends Agent {
             // figure out the next direction and then put the action into the map
             actions.put(footmanID, Action.createPrimitiveMove(footmanID, getNextDirection(footmanUnit)));
         } else {
-            Unit.UnitView townhallUnit = newstate.getUnit(townhallID);
+            Unit.UnitView townhallUnit = newstate.getUnit(archerID);
 
             // if townhall was destroyed on the last turn
             if (townhallUnit == null) {
@@ -202,7 +211,7 @@ public class AstarAgent extends Agent {
             } else {
                 System.out.println("Attacking TownHall");
                 // if no more movements in the planned path then attack
-                actions.put(footmanID, Action.createPrimitiveAttack(footmanID, townhallID));
+                actions.put(footmanID, Action.createPrimitiveAttack(footmanID, archerID));
             }
         }
 
@@ -257,7 +266,7 @@ public class AstarAgent extends Agent {
      */
     private Stack<MapLocation> findPath(State.StateView state)
     {
-        Unit.UnitView townhallUnit = state.getUnit(townhallID);
+        Unit.UnitView townhallUnit = state.getUnit(archerID);
         Unit.UnitView footmanUnit = state.getUnit(footmanID);
 
         MapLocation startLoc = new MapLocation(footmanUnit.getXPosition(), footmanUnit.getYPosition(), null, 0);
