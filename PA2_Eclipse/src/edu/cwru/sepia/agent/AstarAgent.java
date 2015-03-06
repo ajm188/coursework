@@ -13,9 +13,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 
+import javax.print.attribute.HashAttributeSet;
+
 public class AstarAgent extends Agent {
 
-    class MapLocation {
+    public static class MapLocation {
         public int x, y;
 
         public MapLocation(int x, int y, MapLocation cameFrom, float cost) {
@@ -370,8 +372,54 @@ public class AstarAgent extends Agent {
 	    } 
 	    return null;
     }
+    
+    /**
+     * A more generalized version of A* to be used in assignment 2
+     * @param start
+     * @param goals
+     * @param xExtent
+     * @param yExtent
+     * @param occupiedLocations
+     * @return
+     */
+    public static Stack<MapLocation> AstarSearch(MapLocation start, Set<MapLocation> goals, int xExtent, int yExtent, Set<MapLocation> occupiedLocations)
+    {
+    	Set<ExposedAStarNode> closedList = new HashSet<ExposedAStarNode>();
+    	PriorityQueue<ExposedAStarNode> openList = new PriorityQueue<ExposedAStarNode>();
+    	
+    	int minimumDistanceToAnyGoal = Integer.MAX_VALUE;
+    	Set<ExposedAStarNode> aStarGoals = new HashSet<ExposedAStarNode>();
+    	for (MapLocation goalLoc : goals)
+    	{
+    		minimumDistanceToAnyGoal = Math.min(minimumDistanceToAnyGoal, chebyshev(start, goalLoc));
+    		aStarGoals.add(new ExposedAStarNode(goalLoc.x, goalLoc.y, 0));
+    	}
+    	ExposedAStarNode root = new ExposedAStarNode(start.x, start.y, minimumDistanceToAnyGoal);
+    	
+    	openList.add(root);
+    	
+    	while (!openList.isEmpty())
+    	{
+    		ExposedAStarNode node = openList.poll();
+    		
+    		if (aStarGoals.contains(node))
+    		{
+    			return reconstructPath(node, start, new MapLocation(node.x(), node.y(), null, 0));
+    		}
+    		
+    		Set<ExposedAStarNode> neighbors = getNeighbors(node, xExtent, xExtent, occupiedLocations);
+    		for (ExposedAStarNode n : neighbors)
+    		{
+    			if (!(openList.contains(n) || closedList.contains(n)))
+    			{
+    				openList.add(n);
+    			}
+    		}
+    	}
+    	return null;
+    }
 
-    private int chebyshev(MapLocation loc1, MapLocation loc2) {
+    private static int chebyshev(MapLocation loc1, MapLocation loc2) {
         return Math.max(Math.abs(loc2.x-loc1.x), Math.abs(loc2.y-loc1.y));
     }    
 
@@ -383,7 +431,7 @@ public class AstarAgent extends Agent {
      * @param start The actual start location. Don't include this in the stack
      * @param end The actual end location. Don't include this in the stack
      */
-    private Stack<MapLocation> reconstructPath(ExposedAStarNode goal, MapLocation start, MapLocation end) {
+    private static Stack<MapLocation> reconstructPath(ExposedAStarNode goal, MapLocation start, MapLocation end) {
         Stack<MapLocation> path = new Stack<MapLocation>();
 
         ExposedAStarNode current = goal;
@@ -395,6 +443,28 @@ public class AstarAgent extends Agent {
             current = current.previous();
         }
         return path;
+    }
+    
+    private static Set<ExposedAStarNode> getNeighbors(ExposedAStarNode current, int xExtent, int yExtent, Set<MapLocation> occupiedLocations)
+    {
+    	Set<ExposedAStarNode> neighbors = new HashSet<ExposedAStarNode>();
+    	MapLocation currentLoc = new MapLocation(current.x(), current.y(), null, 0);
+    	
+    	Direction[] directions = {Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH};
+    	for (Direction d : directions)
+    	{
+    		MapLocation newLoc = new MapLocation(current.x() + d.xComponent(), current.y() + d.yComponent(), null, 0);
+    		if (newLoc.isLegal(xExtent, yExtent))
+    		{
+    			if (!occupiedLocations.contains(newLoc))
+    			{
+    				int newG = current.g() + 1;
+    				neighbors.add(new ExposedAStarNode(newLoc.x, newLoc.y, newG, newG + chebyshev(currentLoc, newLoc), current, d));
+    			}
+    		}
+    	}
+    	
+    	return neighbors;
     }
 
     private Set<ExposedAStarNode> getNeighbors(ExposedAStarNode current, int xExtent, int yExtent, MapLocation enemyFootmanLoc, Set<MapLocation> resourceLocations) {

@@ -4,12 +4,12 @@ import edu.cwru.sepia.action.Action;
 import edu.cwru.sepia.action.ActionType;
 import edu.cwru.sepia.action.DirectedAction;
 import edu.cwru.sepia.action.TargetedAction;
-import edu.cwru.sepia.agent.AstarAgent;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
 import edu.cwru.sepia.environment.model.state.UnitTemplate;
 import edu.cwru.sepia.util.Direction;
+import edu.cwru.sepia.agent.AstarAgent;
 
 import java.util.*;
 import java.io.IOException;
@@ -22,7 +22,6 @@ import java.io.IOException;
  * Add any information or methods you would like to this class,
  * but do not delete or change the signatures of the provided methods.
  */
-@SuppressWarnings("unused")
 public class GameState {
 
 	private int xExtent;
@@ -123,27 +122,39 @@ public class GameState {
 		 *  - health of the archers (negative)
 		 *  - number of footmen (positive)
 		 *  - number of archers (negative)
-		 *  - distance from footmen to archers (negative) --> not sure if this should be positive or negative
+		 *  - distance from footmen to archers (negative) --> do it with A*
 		 * Adjust the weights as we test
 		 */
-		double footmanToArcherDistance = 0.0;
-		for (Unit footman : footmen.values()) {
-			for (Unit archer : archers.values()) {
-				footmanToArcherDistance += chebyshev(footman, archer);
-			}
+		Set<AstarAgent.MapLocation> occupiedLocations = new HashSet<AstarAgent.MapLocation>();
+		for (ResourceNode.ResourceView resource : resourceNodes)
+		{
+			occupiedLocations.add(new AstarAgent.MapLocation(resource.getXPosition(), resource.getYPosition(), null, 0));
+		}
+		
+		Set<AstarAgent.MapLocation> footmanLocations = new HashSet<AstarAgent.MapLocation>();
+		for (Unit footman : footmen.values())
+		{
+			footmanLocations.add(new AstarAgent.MapLocation(footman.getxPosition(), footman.getyPosition(), null, 0));
+		}
+		
+		occupiedLocations.addAll(footmanLocations);
+		
+		Set<AstarAgent.MapLocation> archerLocations = new HashSet<AstarAgent.MapLocation>();
+		for (Unit archer : archers.values())
+		{
+			archerLocations.add(new AstarAgent.MapLocation(archer.getxPosition(), archer.getyPosition(), null, 0));
+		}
+		
+		int footmanToArcherDistance = 0;
+		for (AstarAgent.MapLocation footman : footmanLocations)
+		{
+			footmanToArcherDistance += AstarAgent.AstarSearch(footman, archerLocations, xExtent, yExtent, occupiedLocations).size();
 		}
 
-		/* Add in Utility for A Star Search
-		 * So the lowest A* score should be mostly heavily weighted (attempted to replace footmanToArcherDistance with new method?).
-		 * Should probably keep footmenAttacks and archerAttacks but not sure why weighting is different.
-		 * Possibly arbitrary. I don't remember.
-		 * Health and size of each little army should stay.
-		 */
-		
 		int footmenAttacks = getThreatenedUnits(footmen.values());
 		int archerAttacks = getThreatenedUnits(archers.values());
 
-		utility = 1 * getTotalHealth(footmen.values()) +
+		utility = 1.0 * getTotalHealth(footmen.values()) +
 				(-10) * getTotalHealth(archers.values()) +
 				10 * footmen.size() +
 				(-5) * archers.size() +
@@ -154,29 +165,8 @@ public class GameState {
 		return utility;
 	}
 	
-	// Loop over archers and footmen. Prefer the lowest id.
-	// TODO: Is this how I want to grab the footman and the archer?
-	// If we modify A* to use states, this needs modified too.
-	
-	// Not important to task but I rubied hard in this. Tried to clean up.
-	public int footmanToArcherDistance(State footman, State archer){
-		// Need the state. Where the hell do I get this footman's id again? Burn the "docs"
-
-		AstarAgent pathFromFootmanToArcher = new AstarAgent(footman.getId());
-		
-		Map<Integer, Action> footmanToArcherPath = pathFromFootmanToArcher.initialStep(footman.getView(footman.getID()), History? );
-		
-		//TODO: Return size of map as the score
-		return footmanToArcherPath.size();
-	}
-	
 	public void setUtility(double utility) {
 		this.utility = utility;
-	}
-
-	private double chebyshev(Unit unit1, Unit unit2)
-	{
-		return Math.max(unit2.getxPosition() - unit1.getxPosition(), unit2.getyPosition() - unit1.getyPosition());
 	}
 
 	private int getTotalHealth(Collection<Unit> units)
