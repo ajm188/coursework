@@ -220,12 +220,12 @@ public class MinimaxAlphaBeta extends Agent {
             for (int i = j + 1; i < childrenArray.length; i++) {
             	if (depth % 2 == numPlys % 2) {
             		// max's turn: sort in decreasing order
-	                if (childrenArray[i].state.getUtility() > childrenArray[index].state.getUtility()) {
+	                if (childrenArray[i].state.getUtility(astarPaths) > childrenArray[index].state.getUtility(astarPaths)) {
 	                    index = i;
 	                }
             	} else {
             		// min's turn: sort in increasing order
-	                if (childrenArray[i].state.getUtility() < childrenArray[index].state.getUtility()) {
+	                if (childrenArray[i].state.getUtility(astarPaths) < childrenArray[index].state.getUtility(astarPaths)) {
 	                    index = i;
 	                }
             	}

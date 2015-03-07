@@ -130,24 +130,19 @@ public class GameState {
 		int footmenAttacks = getThreatenedUnits(footmen.values());
 		int archerAttacks = getThreatenedUnits(archers.values());
 		
-		MapLocation currentLoc = new MapLocation(xExtent, yExtent, null, 0);
 		int onOptimalPath = 0;
-		for (Unit footman : footmen.values()) {
-			int id = footman.getId();
-			Stack moves = optimalLocations.get(id);
-			if (moves.peek() == null){
-				//recalculate A* if list is empty?
-			} else if (moves.peek() == currentLoc) {
-				onOptimalPath = 1; //This is on the path
-			} else{
-				onOptimalPath = 0; //This isn't.
+		for (Integer footmanID : footmen.keySet())
+		{
+			Unit footman = footmen.get(footmanID);
+			Stack<MapLocation> moves = optimalLocations.get(footmanID);
+			
+			MapLocation currentLoc = new MapLocation(footman.getxPosition(), footman.getyPosition(), null, 0);
+			
+			if (!moves.isEmpty() && moves.peek().equals(currentLoc))
+			{
+				onOptimalPath++;
 			}
 		}
-		
-		//Iterate over optimalLocations
-		//For each id, peek at the stack
-		//If it's null, 
-		
 		
 		utility = 1000 * onOptimalPath +
 				1.0 * getTotalHealth(footmen.values()) +
