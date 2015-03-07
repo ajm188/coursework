@@ -1,11 +1,16 @@
 package edu.cwru.sepia.agent.minimax;
 
 import edu.cwru.sepia.action.Action;
+import edu.cwru.sepia.action.ActionType;
+import edu.cwru.sepia.action.DirectedAction;
 import edu.cwru.sepia.agent.Agent;
+import edu.cwru.sepia.agent.AstarAgent;
 import edu.cwru.sepia.agent.AstarAgent.MapLocation;
 import edu.cwru.sepia.environment.model.history.History;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
+import edu.cwru.sepia.environment.model.state.Unit.UnitView;
+import edu.cwru.sepia.util.Direction;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -48,6 +53,7 @@ public class MinimaxAlphaBeta extends Agent {
     	if (resourceLocations == null)
     	{
     		// these will be used in the A* search
+    		// they will also never change, so this code should only be executed once in a full run of the agent
     		resourceLocations = new HashSet<MapLocation>();
     		for (ResourceNode.ResourceView resource : newstate.getAllResourceNodes())
     		{
@@ -55,13 +61,58 @@ public class MinimaxAlphaBeta extends Agent {
     		}
     	}
     	
-    	// determine if we should recalculate any A* paths
+    	List<UnitView> footmen = newstate.getUnits(0);
+    	List<UnitView> archers = newstate.getUnits(1);
+    	
+    	Set<MapLocation> archerLocs = new HashSet<MapLocation>();
+    	for (UnitView archer : archers)
+    	{
+    		archerLocs.add(new MapLocation(archer.getXPosition(), archer.getYPosition(), null, 0));
+    	}
+    	
+    	for (UnitView footman : footmen)
+    	{
+    		Stack<MapLocation> path = astarPaths.get(footman.getID());
+    		if (path == null || path.isEmpty())
+    		{
+    			astarPaths.put(footman.getID(),
+    							AstarAgent.AstarSearch(new MapLocation(footman.getXPosition(), footman.getYPosition(), null, 0),
+    													archerLocs, newstate.getXExtent(), newstate.getYExtent(), resourceLocations));
+    		}
+    	}
 
         boolean isMax = true;
-	GameStateChild bestChild = alphaBetaSearch(new GameStateChild(newstate,isMax),
+        GameStateChild bestChild = alphaBetaSearch(new GameStateChild(newstate,isMax),
                 numPlys,
                 Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
+        
+        for (Integer footmanID : bestChild.action.keySet())
+        {
+        	// Should we recalculate anything?
+        	Action action = bestChild.action.get(footmanID);
+        	if (action.getType() == ActionType.PRIMITIVEATTACK)
+        	{
+        		// definitely want to recalculate, but on the next iteration (in case the archer moves away)
+        		astarPaths.put(footmanID, null);
+        	}
+        	else if (action.getType() == ActionType.PRIMITIVEMOVE)
+        	{
+        		Direction d = ((DirectedAction) action).getDirection();
+        		UnitView footman = newstate.getUnit(footmanID);
+        		MapLocation nextLoc = new MapLocation(footman.getXPosition() + d.xComponent(), footman.getYPosition() + d.yComponent(), null, 0);
+        		if (nextLoc.equals(astarPaths.get(footmanID).peek()))
+        		{
+        			// all good! pop the move off the stack
+        			astarPaths.get(footmanID).pop();
+        		}
+        		else
+        		{
+        			// need to recalculate on the next iteration
+        			astarPaths.put(footmanID, null);
+        		}
+        	}
+        }
 
         return bestChild.action;
     }
@@ -111,8 +162,8 @@ public class MinimaxAlphaBeta extends Agent {
             for (GameStateChild child : children) {
                 GameStateChild temp = alphaBetaSearch(child, depth - 1, alpha, beta);
                 // pass A* paths to the get utility function?
-                if (temp.state.getUtility() > nodeUtility) {
-                	nodeUtility = temp.state.getUtility();
+                if (temp.state.getUtility(astarPaths) > nodeUtility) {
+                	nodeUtility = temp.state.getUtility(astarPaths);
                 	node.state.setUtility(nodeUtility);
                 	bestChild = temp;
                 }
@@ -128,8 +179,8 @@ public class MinimaxAlphaBeta extends Agent {
             // MIN's move
             for (GameStateChild child : children) {
                 GameStateChild temp = alphaBetaSearch(child, depth - 1, alpha, beta);
-                if (temp.state.getUtility() < nodeUtility) {
-                	nodeUtility = temp.state.getUtility();
+                if (temp.state.getUtility(astarPaths) < nodeUtility) {
+                	nodeUtility = temp.state.getUtility(astarPaths);
                 	node.state.setUtility(nodeUtility);
                 	bestChild = temp;
                 }
