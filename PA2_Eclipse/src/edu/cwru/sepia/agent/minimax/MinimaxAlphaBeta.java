@@ -2,19 +2,27 @@ package edu.cwru.sepia.agent.minimax;
 
 import edu.cwru.sepia.action.Action;
 import edu.cwru.sepia.agent.Agent;
+import edu.cwru.sepia.agent.AstarAgent.MapLocation;
 import edu.cwru.sepia.environment.model.history.History;
 import edu.cwru.sepia.environment.model.state.State;
+import edu.cwru.sepia.environment.model.state.ResourceNode;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.Stack;
 
-@SuppressWarnings("unused")
 public class MinimaxAlphaBeta extends Agent {
 
     private final int numPlys;
+    
+    private Map<Integer, Stack<MapLocation>> astarPaths = new HashMap<Integer, Stack<MapLocation>>();
+    private Set<MapLocation> resourceLocations = null;
 
     public MinimaxAlphaBeta(int playernum, String[] args)
     {
@@ -37,6 +45,18 @@ public class MinimaxAlphaBeta extends Agent {
 
     @Override
     public Map<Integer, Action> middleStep(State.StateView newstate, History.HistoryView statehistory) {
+    	if (resourceLocations == null)
+    	{
+    		// these will be used in the A* search
+    		resourceLocations = new HashSet<MapLocation>();
+    		for (ResourceNode.ResourceView resource : newstate.getAllResourceNodes())
+    		{
+    			resourceLocations.add(new MapLocation(resource.getXPosition(), resource.getYPosition(), null, 0));
+    		}
+    	}
+    	
+    	// determine if we should recalculate any A* paths
+
         boolean isMax = true;
 	GameStateChild bestChild = alphaBetaSearch(new GameStateChild(newstate,isMax),
                 numPlys,
@@ -90,6 +110,7 @@ public class MinimaxAlphaBeta extends Agent {
             // MAX's move
             for (GameStateChild child : children) {
                 GameStateChild temp = alphaBetaSearch(child, depth - 1, alpha, beta);
+                // pass A* paths to the get utility function?
                 if (temp.state.getUtility() > nodeUtility) {
                 	nodeUtility = temp.state.getUtility();
                 	node.state.setUtility(nodeUtility);
