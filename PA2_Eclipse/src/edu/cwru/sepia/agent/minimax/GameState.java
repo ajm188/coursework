@@ -4,6 +4,7 @@ import edu.cwru.sepia.action.Action;
 import edu.cwru.sepia.action.ActionType;
 import edu.cwru.sepia.action.DirectedAction;
 import edu.cwru.sepia.action.TargetedAction;
+import edu.cwru.sepia.agent.AstarAgent.MapLocation;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
@@ -112,7 +113,7 @@ public class GameState {
 	 *
 	 * @return The weighted linear combination of the features
 	 */
-	public double getUtility() {
+	public double getUtility(Map<Integer, Stack<MapLocation>> optimalLocations) {
 		if (utility != null) {
 			return utility;
 		}
@@ -125,40 +126,34 @@ public class GameState {
 		 *  - distance from footmen to archers (negative) --> do it with A*
 		 * Adjust the weights as we test
 		 */
-		Set<AstarAgent.MapLocation> occupiedLocations = new HashSet<AstarAgent.MapLocation>();
-		for (ResourceNode.ResourceView resource : resourceNodes)
-		{
-			occupiedLocations.add(new AstarAgent.MapLocation(resource.getXPosition(), resource.getYPosition(), null, 0));
-		}
 		
-		Set<AstarAgent.MapLocation> footmanLocations = new HashSet<AstarAgent.MapLocation>();
-		for (Unit footman : footmen.values())
-		{
-			footmanLocations.add(new AstarAgent.MapLocation(footman.getxPosition(), footman.getyPosition(), null, 0));
-		}
-		
-		occupiedLocations.addAll(footmanLocations);
-		
-		Set<AstarAgent.MapLocation> archerLocations = new HashSet<AstarAgent.MapLocation>();
-		for (Unit archer : archers.values())
-		{
-			archerLocations.add(new AstarAgent.MapLocation(archer.getxPosition(), archer.getyPosition(), null, 0));
-		}
-		
-		int footmanToArcherDistance = 0;
-		for (AstarAgent.MapLocation footman : footmanLocations)
-		{
-			footmanToArcherDistance += AstarAgent.AstarSearch(footman, archerLocations, xExtent, yExtent, occupiedLocations).size();
-		}
-
 		int footmenAttacks = getThreatenedUnits(footmen.values());
 		int archerAttacks = getThreatenedUnits(archers.values());
-
-		utility = 1.0 * getTotalHealth(footmen.values()) +
+		
+		MapLocation currentLoc = new MapLocation(xExtent, yExtent, null, 0);
+		int onOptimalPath = 0;
+		for (Unit footman : footmen.values()) {
+			int id = footman.getId();
+			Stack moves = optimalLocations.get(id);
+			if (moves.peek() == null){
+				//recalculate A* if list is empty?
+			} else if (moves.peek() == currentLoc) {
+				onOptimalPath = 1; //This is on the path
+			} else{
+				onOptimalPath = 0; //This isn't.
+			}
+		}
+		
+		//Iterate over optimalLocations
+		//For each id, peek at the stack
+		//If it's null, 
+		
+		
+		utility = 1000 * onOptimalPath +
+				1.0 * getTotalHealth(footmen.values()) +
 				(-10) * getTotalHealth(archers.values()) +
 				10 * footmen.size() +
 				(-5) * archers.size() +
-				(-2) * footmanToArcherDistance +
 				5 * footmenAttacks +
 				(-1) * archerAttacks;
 
