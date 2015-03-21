@@ -4,3 +4,9 @@
 !ArcherAgent.class
 !ArcherAgent\$1.class
 .DS_STORE
+
+# Ignore Eclipse crap
+.metadata
+.settings
+.classpath
+.project
