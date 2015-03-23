@@ -1,5 +1,6 @@
 package edu.cwru.sepia.agent.planner;
 
+import edu.cwru.sepia.environment.model.state.ResourceType;
 import edu.cwru.sepia.environment.model.state.State;
 
 import java.util.List;
@@ -23,6 +24,12 @@ import java.util.List;
  */
 public class GameState implements Comparable<GameState> {
 
+	private State.StateView state;
+	private int playernum;
+	private int requiredGold;
+	private int requiredWood;
+	private boolean buildPeasants;
+	
     /**
      * Construct a GameState from a stateview object. This is used to construct the initial search node. All other
      * nodes should be constructed from the another constructor you create or by factory functions that you create.
@@ -34,7 +41,11 @@ public class GameState implements Comparable<GameState> {
      * @param buildPeasants True if the BuildPeasant action should be considered
      */
     public GameState(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants) {
-        // TODO: Implement me!
+        this.state = state;
+        this.playernum = playernum;
+        this.requiredGold = requiredGold;
+        this.requiredWood = requiredWood;
+        this.buildPeasants = buildPeasants;
     }
 
     /**
@@ -45,8 +56,8 @@ public class GameState implements Comparable<GameState> {
      * @return true if the goal conditions are met in this instance of game state.
      */
     public boolean isGoal() {
-        // TODO: Implement me!
-        return false;
+        return this.state.getResourceAmount(playernum, ResourceType.GOLD) >= this.requiredGold &&
+        		this.state.getResourceAmount(playernum, ResourceType.WOOD) >= this.requiredWood;
     }
 
     /**
