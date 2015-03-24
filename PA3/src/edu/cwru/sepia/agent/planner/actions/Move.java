@@ -47,7 +47,8 @@ public class Move implements StripsAction {
 							gameState.getPlayerNum(),
 							gameState.getRequiredGold(),
 							gameState.getRequiredWood(),
-							gameState.getBuildPeasants());
+							gameState.getBuildPeasants(),
+							this);
 	}
 
 }

@@ -1,5 +1,6 @@
 package edu.cwru.sepia.agent.planner;
 
+import edu.cwru.sepia.agent.planner.actions.StripsAction;
 import edu.cwru.sepia.environment.model.state.ResourceType;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
@@ -33,7 +34,9 @@ public class GameState implements Comparable<GameState> {
 
 	private Unit.UnitView peasantView;
 	private Unit.UnitView townHallView;
-	
+
+	private StripsAction stripsAction;
+
     /**
      * Construct a GameState from a stateview object. This is used to construct the initial search node. All other
      * nodes should be constructed from the another constructor you create or by factory functions that you create.
@@ -45,16 +48,25 @@ public class GameState implements Comparable<GameState> {
      * @param buildPeasants True if the BuildPeasant action should be considered
      */
     public GameState(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants) {
-        this.stateView = state;
+    	construct(state, playernum, requiredGold, requiredWood, buildPeasants, null);
+    }
+
+    public GameState(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants, StripsAction action) {
+    	construct(state, playernum, requiredGold, requiredWood, buildPeasants, action);
+    }
+
+    private void construct(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants, StripsAction action) {
+    	this.stateView = state;
         this.playernum = playernum;
         this.requiredGold = requiredGold;
         this.requiredWood = requiredWood;
         this.buildPeasants = buildPeasants;
+        this.stripsAction = action;
         
-        extractInfoFromState(state);
+        extractInfoFromStateView(state);
     }
-    
-    private void extractInfoFromState(State.StateView state) {
+
+    private void extractInfoFromStateView(State.StateView state) {
     	for (Unit.UnitView unitView : state.getUnits(playernum)) {
     		if (unitView.getTemplateView().getName().equals("peasant")) {
     			peasantView = unitView;
@@ -138,6 +150,10 @@ public class GameState implements Comparable<GameState> {
 
 	public Unit.UnitView getTownHallView() {
 		return this.townHallView;
+	}
+
+	public StripsAction getStripsAction() {
+		return this.stripsAction;
 	}
 
     /**

@@ -52,7 +52,8 @@ public class DepositGold implements StripsAction {
 				gameState.getPlayerNum(),
 				gameState.getRequiredGold(),
 				gameState.getRequiredWood(),
-				gameState.getBuildPeasants());	
+				gameState.getBuildPeasants(),
+				this);	
 	}
 	
 }
