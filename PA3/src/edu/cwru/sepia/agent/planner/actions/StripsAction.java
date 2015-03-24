@@ -22,7 +22,7 @@ public interface StripsAction {
      * @param state GameState to check if action is applicable
      * @return true if apply can be called, false otherwise
      */
-    public boolean preconditionsMet(GameState state);
+    public boolean preconditionsMet(GameState gameState);
 
     /**
      * Applies the action instance to the given GameState producing a new GameState in the process.
