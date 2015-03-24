@@ -18,7 +18,18 @@ public class Move implements StripsAction {
 	}
 
 	public boolean preconditionsMet(GameState state) {
-		Unit.UnitView peasant = state.getUnits().get(0);
+		Unit.UnitView peasant = null;
+		for (Unit.UnitView unitView : state.getUnits()) {
+			if (unitView.getTemplateView().getName().equals("peasant")) {
+				peasant = unitView;
+				break;
+			}
+		}
+
+		if (peasant == null) {
+			return false;
+		}
+
 		Position peasantPosition = new Position(peasant.getXPosition(), peasant.getYPosition());
 		
 		return peasantPosition.equals(source) &&
