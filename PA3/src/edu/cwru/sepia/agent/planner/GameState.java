@@ -4,7 +4,6 @@ import edu.cwru.sepia.environment.model.state.ResourceType;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
