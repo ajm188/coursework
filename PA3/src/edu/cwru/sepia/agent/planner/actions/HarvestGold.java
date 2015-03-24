@@ -20,12 +20,21 @@ public class HarvestGold implements StripsAction{
 	}
 	
 	public boolean preconditionsMet(GameState state) {
-		Unit.UnitView peasant = state.getUnits().get(0);
+		Unit.UnitView peasantView = state.getPeasantView();
+
+		if (peasantView == null) {
+			return false;
+		}
+
 		if (state.getStateView().isResourceAt(minePos.x, minePos.y)){
 			ResourceNode.ResourceView mine = state.getStateView().getResourceNode(state.getStateView().resourceAt(minePos.x, minePos.y));
-			return mine.getType() == ResourceNode.Type.GOLD_MINE &&	
+			Position peasantPosition = new Position(peasantView.getXPosition(), peasantView.getYPosition());
+			
+			return peasantPosition.equals(peasantPos) &&
+					peasantPos.isAdjacent(minePos) &&
+					mine.getType() == ResourceNode.Type.GOLD_MINE &&	
 					mine.getAmountRemaining() >= 100 && 
-					peasant.getCargoAmount() == 0;
+					peasantView.getCargoAmount() == 0;
 		} else {
 			return false;
 		}

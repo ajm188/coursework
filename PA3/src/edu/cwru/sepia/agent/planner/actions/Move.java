@@ -18,19 +18,13 @@ public class Move implements StripsAction {
 	}
 
 	public boolean preconditionsMet(GameState state) {
-		Unit.UnitView peasant = null;
-		for (Unit.UnitView unitView : state.getUnits()) {
-			if (unitView.getTemplateView().getName().equals("peasant")) {
-				peasant = unitView;
-				break;
-			}
-		}
+		Unit.UnitView peasantView = state.getPeasantView();
 
-		if (peasant == null) {
+		if (peasantView == null) {
 			return false;
 		}
 
-		Position peasantPosition = new Position(peasant.getXPosition(), peasant.getYPosition());
+		Position peasantPosition = new Position(peasantView.getXPosition(), peasantView.getYPosition());
 		
 		return peasantPosition.equals(source) &&
 				!state.getStateView().isUnitAt(destination.x, destination.y) &&

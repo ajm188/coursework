@@ -20,12 +20,21 @@ public class HarvestWood implements StripsAction{
 	}
 	
 	public boolean preconditionsMet(GameState state) {
-		Unit.UnitView peasant = state.getUnits().get(0);
+		Unit.UnitView peasantView = state.getPeasantView();
+
+		if (peasantView == null) {
+			return false;
+		}
+
 		if (state.getStateView().isResourceAt(forestPos.x, forestPos.y)){
 			ResourceNode.ResourceView forest = state.getStateView().getResourceNode(state.getStateView().resourceAt(forestPos.x, forestPos.y));
-			return forest.getType() == ResourceNode.Type.TREE &&	
+			Position peasantPosition = new Position(peasantView.getXPosition(), peasantView.getYPosition());
+			
+			return peasantPosition.equals(peasantPos) &&
+					peasantPos.isAdjacent(forestPos) &&
+					forest.getType() == ResourceNode.Type.TREE &&	
 					forest.getAmountRemaining() >= 100 && 
-					peasant.getCargoAmount() == 0;
+					peasantView.getCargoAmount() == 0;
 		} else {
 			return false;
 		}

@@ -30,8 +30,9 @@ public class GameState implements Comparable<GameState> {
 	private int requiredGold;
 	private int requiredWood;
 	private boolean buildPeasants;
-	
-	private List<Unit.UnitView> units;
+
+	private Unit.UnitView peasantView;
+	private Unit.UnitView townHallView;
 	
     /**
      * Construct a GameState from a stateview object. This is used to construct the initial search node. All other
@@ -54,7 +55,13 @@ public class GameState implements Comparable<GameState> {
     }
     
     private void extractInfoFromState(State.StateView state) {
-    	this.units = state.getUnits(playernum);
+    	for (Unit.UnitView unitView : state.getUnits(playernum)) {
+    		if (unitView.getTemplateView().getName().equals("peasant")) {
+    			peasantView = unitView;
+    		} else if (unitView.getTemplateView().getName().equals("townhall")) {
+    			townHallView = unitView;
+    		}
+    	}
     }
 
     /**
@@ -125,8 +132,12 @@ public class GameState implements Comparable<GameState> {
 		return this.buildPeasants;
 	}
 	
-	public List<Unit.UnitView> getUnits() {
-		return this.units;
+	public Unit.UnitView getPeasantView() {
+		return this.peasantView;
+	}
+
+	public Unit.UnitView getTownHallView() {
+		return this.townHallView;
 	}
 
     /**

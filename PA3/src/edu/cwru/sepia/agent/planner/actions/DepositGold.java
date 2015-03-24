@@ -19,11 +19,20 @@ public class DepositGold implements StripsAction {
 	}
 	
 	public boolean preconditionsMet(GameState state) {
-		Unit.UnitView peasant = state.getUnits().get(0);
-		//TODO: Check that peasant is next to town hall
+		Unit.UnitView peasantView = state.getPeasantView();
+		Unit.UnitView townHallView = state.getTownHallView();
+
+		if (peasantView == null || townHallView == null) {
+			return false;
+		}
 		
-		return peasant.getCargoAmount() == 0 && 
-				peasant.getCargoType() == ResourceType.GOLD;
+		Position peasantPosition = new Position(peasantView.getXPosition(), peasantView.getYPosition());
+		Position townHallPosition = new Position(townHallView.getXPosition(), townHallView.getYPosition());
+		return peasantPos.equals(peasantPosition) &&
+				townHallPos.equals(townHallPosition) &&
+				peasantView.getCargoAmount() == 0 &&
+				peasantPosition.isAdjacent(townHallPosition) &&
+				peasantView.getCargoType() == ResourceType.GOLD;
 	}
 
 	public GameState apply(GameState gameState) {
