@@ -2,7 +2,9 @@ package edu.cwru.sepia.agent.planner;
 
 import edu.cwru.sepia.environment.model.state.ResourceType;
 import edu.cwru.sepia.environment.model.state.State;
+import edu.cwru.sepia.environment.model.state.Unit;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -24,11 +26,13 @@ import java.util.List;
  */
 public class GameState implements Comparable<GameState> {
 
-	private State.StateView state;
+	private State.StateView stateView;
 	private int playernum;
 	private int requiredGold;
 	private int requiredWood;
 	private boolean buildPeasants;
+	
+	private List<Unit.UnitView> units;
 	
     /**
      * Construct a GameState from a stateview object. This is used to construct the initial search node. All other
@@ -41,11 +45,17 @@ public class GameState implements Comparable<GameState> {
      * @param buildPeasants True if the BuildPeasant action should be considered
      */
     public GameState(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants) {
-        this.state = state;
+        this.stateView = state;
         this.playernum = playernum;
         this.requiredGold = requiredGold;
         this.requiredWood = requiredWood;
         this.buildPeasants = buildPeasants;
+        
+        extractInfoFromState(state);
+    }
+    
+    private void extractInfoFromState(State.StateView state) {
+    	this.units = state.getUnits(playernum);
     }
 
     /**
@@ -56,8 +66,8 @@ public class GameState implements Comparable<GameState> {
      * @return true if the goal conditions are met in this instance of game state.
      */
     public boolean isGoal() {
-        return this.state.getResourceAmount(playernum, ResourceType.GOLD) >= this.requiredGold &&
-        		this.state.getResourceAmount(playernum, ResourceType.WOOD) >= this.requiredWood;
+        return this.stateView.getResourceAmount(playernum, ResourceType.GOLD) >= this.requiredGold &&
+        		this.stateView.getResourceAmount(playernum, ResourceType.WOOD) >= this.requiredWood;
     }
 
     /**
@@ -95,6 +105,30 @@ public class GameState implements Comparable<GameState> {
         // TODO: Implement me!
         return 0.0;
     }
+	
+	public State.StateView getStateView() {
+		return this.stateView;
+	}
+	
+	public int getPlayerNum() {
+		return this.playernum;
+	}
+	
+	public int getRequiredGold() {
+		return this.requiredGold;
+	}
+	
+	public int getRequiredWood() {
+		return this.requiredWood;
+	}
+	
+	public boolean getBuildPeasants() {
+		return this.buildPeasants;
+	}
+	
+	public List<Unit.UnitView> getUnits() {
+		return this.units;
+	}
 
     /**
      * This is necessary to use your state in the Java priority queue. See the official priority queue and Comparable
