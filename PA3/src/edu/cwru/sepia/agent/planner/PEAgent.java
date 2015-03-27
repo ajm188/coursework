@@ -34,7 +34,6 @@ public class PEAgent extends Agent {
         super(playernum);
         peasantIdMap = new HashMap<Integer, Integer>();
         this.plan = plan;
-
     }
 
     @Override
@@ -101,8 +100,24 @@ public class PEAgent extends Agent {
      * @param action StripsAction
      * @return SEPIA representation of same action
      */
-    private Action createSepiaAction(StripsAction action) {
-        return null;
+    private Action createSepiaAction(StripsAction action, State.StateView stateview) {
+    	if (action instanceof DepositGold){
+    		return Action.createCompoundDeposit(peasantTemplateId, townhallId);
+    	} else if (action instanceof DepositWood) {
+    		return Action.createCompoundDeposit(peasantTemplateId, townhallId);
+    	} else if (action instanceof HarvestGold) {
+    		HarvestGold gold = (HarvestGold) action;
+    		int mineId = stateview.resourceAt(gold.getMinePos().x, gold.getMinePos().y);
+    		return Action.createCompoundGather(peasantTemplateId, mineId);
+    	} else if (action instanceof HarvestWood) {
+    		HarvestWood wood = (HarvestWood) action;
+    		int forestId = stateview.resourceAt(wood.getForestPos().x, wood.getForestPos().y);
+    		return Action.createCompoundGather(peasantTemplateId, forestId);	
+    	} else {
+    		//Ya dun fucked up.
+        	return null;
+    	}
+    	
     }
 
     @Override
