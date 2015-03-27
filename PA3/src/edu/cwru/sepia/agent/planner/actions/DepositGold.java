@@ -1,6 +1,7 @@
 package edu.cwru.sepia.agent.planner.actions;
 
 import java.io.IOException;
+import java.util.List;
 
 import edu.cwru.sepia.agent.planner.GameState;
 import edu.cwru.sepia.agent.planner.Position;
@@ -12,6 +13,7 @@ public class DepositGold implements StripsAction {
 
 	private Position peasantPos;
 	private Position townHallPos;
+	private Position targetPosition;
 	
 	public DepositGold(Position peasantPos, Position townHallPos){
 		this.peasantPos = peasantPos;
@@ -28,10 +30,21 @@ public class DepositGold implements StripsAction {
 		
 		Position peasantPosition = new Position(peasantView.getXPosition(), peasantView.getYPosition());
 		Position townHallPosition = new Position(townHallView.getXPosition(), townHallView.getYPosition());
+		
+		List<Position> townHallAdjacents = townHallPosition.getAdjacentPositions();
+		boolean adjEmpty = false;
+		for (Position adjacentPosition : townHallAdjacents) {
+			if (!(state.getStateView().isResourceAt(adjacentPosition.x, adjacentPosition.y) || state.getStateView().isUnitAt(adjacentPosition.x, adjacentPosition.y))) {
+				this.targetPosition = adjacentPosition;
+				adjEmpty = true;
+				break;
+			}
+		}
+		
 		return peasantPos.equals(peasantPosition) &&
 				townHallPos.equals(townHallPosition) &&
+				adjEmpty &&
 				peasantView.getCargoAmount() == 0 &&
-				peasantPosition.isAdjacent(townHallPosition) &&
 				peasantView.getCargoType() == ResourceType.GOLD;
 	}
 
@@ -45,6 +58,7 @@ public class DepositGold implements StripsAction {
 		
 		Unit peasant = state.getUnit(gameState.getStateView().unitAt(peasantPos.x, peasantPos.y));
 		
+		state.transportUnit(peasant, targetPosition.x, targetPosition.y); // move the peasant next to the townhall
 		peasant.setCargo(ResourceType.GOLD, 0);
 		state.addResourceAmount(gameState.getPlayerNum(), ResourceType.GOLD, 100);
 		

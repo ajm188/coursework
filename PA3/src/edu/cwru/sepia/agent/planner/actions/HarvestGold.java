@@ -1,6 +1,7 @@
 package edu.cwru.sepia.agent.planner.actions;
 
 import java.io.IOException;
+import java.util.List;
 
 import edu.cwru.sepia.agent.planner.GameState;
 import edu.cwru.sepia.agent.planner.Position;
@@ -13,6 +14,7 @@ public class HarvestGold implements StripsAction{
 
 	private Position peasantPos;
 	private Position minePos;
+	private Position targetPosition;
 	
 	public HarvestGold(Position peasantPos, Position minePos){
 		this.peasantPos = peasantPos;
@@ -30,8 +32,18 @@ public class HarvestGold implements StripsAction{
 			ResourceNode.ResourceView mine = state.getStateView().getResourceNode(state.getStateView().resourceAt(minePos.x, minePos.y));
 			Position peasantPosition = new Position(peasantView.getXPosition(), peasantView.getYPosition());
 			
+			List<Position> minePosAdjacents = minePos.getAdjacentPositions();
+			boolean adjEmpty = false;
+			for (Position adjacentPosition : minePosAdjacents) {
+				if (!(state.getStateView().isResourceAt(adjacentPosition.x, adjacentPosition.y) || state.getStateView().isUnitAt(adjacentPosition.x, adjacentPosition.y))) {
+					this.targetPosition = adjacentPosition;
+					adjEmpty = true;
+					break;
+				}
+			}
+			
 			return peasantPosition.equals(peasantPos) &&
-					peasantPos.isAdjacent(minePos) &&
+					adjEmpty &&
 					mine.getType() == ResourceNode.Type.GOLD_MINE &&	
 					mine.getAmountRemaining() >= 100 && 
 					peasantView.getCargoAmount() == 0;
@@ -51,6 +63,7 @@ public class HarvestGold implements StripsAction{
 		Unit peasant = state.getUnit(gameState.getStateView().unitAt(peasantPos.x, peasantPos.y));
 		ResourceNode mine = state.resourceAt(minePos.x, minePos.y);
 
+		state.transportUnit(peasant, targetPosition.x, targetPosition.y); // move the peasant next to the townhall
 		peasant.setCargo(ResourceType.GOLD, 100);
 		mine.reduceAmountRemaining(100);
 		

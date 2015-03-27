@@ -4,7 +4,6 @@ import edu.cwru.sepia.agent.planner.actions.DepositGold;
 import edu.cwru.sepia.agent.planner.actions.DepositWood;
 import edu.cwru.sepia.agent.planner.actions.HarvestGold;
 import edu.cwru.sepia.agent.planner.actions.HarvestWood;
-import edu.cwru.sepia.agent.planner.actions.Move;
 import edu.cwru.sepia.agent.planner.actions.StripsAction;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.ResourceType;
@@ -147,13 +146,6 @@ public class GameState implements Comparable<GameState> {
         	}
         }
         
-        // try moving
-        for (Position p : peasantPosition.getAdjacentPositions()) {
-        	Move move = new Move(peasantPosition, p);
-        	if (move.preconditionsMet(this)) {
-        		children.add(move.apply(this));
-        	}
-        }
         return children;
     }
 

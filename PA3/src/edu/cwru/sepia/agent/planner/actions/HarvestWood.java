@@ -1,6 +1,7 @@
 package edu.cwru.sepia.agent.planner.actions;
 
 import java.io.IOException;
+import java.util.List;
 
 import edu.cwru.sepia.agent.planner.GameState;
 import edu.cwru.sepia.agent.planner.Position;
@@ -13,6 +14,7 @@ public class HarvestWood implements StripsAction{
 
 	private Position peasantPos;
 	private Position forestPos;
+	private Position targetPosition;
 	
 	public HarvestWood(Position peasantPos, Position forestPos){
 		this.peasantPos = peasantPos;
@@ -30,8 +32,18 @@ public class HarvestWood implements StripsAction{
 			ResourceNode.ResourceView forest = state.getStateView().getResourceNode(state.getStateView().resourceAt(forestPos.x, forestPos.y));
 			Position peasantPosition = new Position(peasantView.getXPosition(), peasantView.getYPosition());
 			
+			List<Position> forestPosAdjacents = forestPos.getAdjacentPositions();
+			boolean adjEmpty = false;
+			for (Position adjacentPosition : forestPosAdjacents) {
+				if (!(state.getStateView().isResourceAt(adjacentPosition.x, adjacentPosition.y) || state.getStateView().isUnitAt(adjacentPosition.x, adjacentPosition.y))) {
+					this.targetPosition = adjacentPosition;
+					adjEmpty = true;
+					break;
+				}
+			}
+			
 			return peasantPosition.equals(peasantPos) &&
-					peasantPos.isAdjacent(forestPos) &&
+					adjEmpty &&
 					forest.getType() == ResourceNode.Type.TREE &&	
 					forest.getAmountRemaining() >= 100 && 
 					peasantView.getCargoAmount() == 0;
@@ -51,6 +63,7 @@ public class HarvestWood implements StripsAction{
 		Unit peasant = state.getUnit(gameState.getStateView().unitAt(peasantPos.x, peasantPos.y));
 		ResourceNode forest = state.resourceAt(forestPos.x, forestPos.y);
 
+		state.transportUnit(peasant, targetPosition.x, targetPosition.y); // move the peasant next to the townhall
 		peasant.setCargo(ResourceType.WOOD, 100);
 		forest.reduceAmountRemaining(100);
 		
