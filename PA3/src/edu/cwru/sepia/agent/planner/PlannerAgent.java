@@ -4,7 +4,9 @@ import edu.cwru.sepia.action.Action;
 import edu.cwru.sepia.agent.Agent;
 import edu.cwru.sepia.agent.planner.actions.StripsAction;
 import edu.cwru.sepia.environment.model.history.History;
+import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.State;
+import edu.cwru.sepia.environment.model.state.Unit;
 
 import java.io.*;
 import java.util.*;
@@ -101,21 +103,33 @@ public class PlannerAgent extends Agent {
 		    GameState state = openList.poll();
 		    // if it's the goal, you're done
 		    if (state.isGoal()){
-			    return null; //TODO reconstructPath(node, start, goal);
+			    return reconstructPlan(state);
 		    }
 		    // else "Search Algorithm Junk"
 		    else {
-			    Set<GameState> neighbors = null;//TODO getNeighbors(node, xExtent, yExtent, enemyFootmanLoc, resourceLocations);
+			    List<GameState> children = state.generateChildren();
 			    // For all children of the current node
-			    for (GameState n : neighbors){
+			    for (GameState child : children){
 				    // if the candidate isn't already in the list, add it
-				    if (!(openList.contains(n) || closedList.contains(n))){
-					    openList.add(n);
+				    if (!(openList.contains(child) || closedList.contains(child))){
+					    openList.add(child);
 				    }
 			    }
 		    }
 	    }
         return null;
+    }
+    
+    private Stack<StripsAction> reconstructPlan(GameState goal) {
+    	Stack<StripsAction> plan = new Stack<StripsAction>();
+    	
+    	GameState current = goal;
+    	while (current.getParent() != null) {
+    		plan.add(current.getStripsAction());
+    		current = current.getParent();
+    	}
+    	
+    	return plan;
     }
 
     /**

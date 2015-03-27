@@ -59,6 +59,7 @@ public class HarvestWood implements StripsAction{
 				gameState.getRequiredGold(),
 				gameState.getRequiredWood(),
 				gameState.getBuildPeasants(),
+				gameState,
 				this);	
 	}
 }

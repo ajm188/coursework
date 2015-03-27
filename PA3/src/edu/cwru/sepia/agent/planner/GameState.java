@@ -1,10 +1,17 @@
 package edu.cwru.sepia.agent.planner;
 
+import edu.cwru.sepia.agent.planner.actions.DepositGold;
+import edu.cwru.sepia.agent.planner.actions.DepositWood;
+import edu.cwru.sepia.agent.planner.actions.HarvestGold;
+import edu.cwru.sepia.agent.planner.actions.HarvestWood;
+import edu.cwru.sepia.agent.planner.actions.Move;
 import edu.cwru.sepia.agent.planner.actions.StripsAction;
+import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.ResourceType;
 import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,9 +38,12 @@ public class GameState implements Comparable<GameState> {
 	private int requiredGold;
 	private int requiredWood;
 	private boolean buildPeasants;
+	private GameState parent;
 
 	private Unit.UnitView peasantView;
 	private Unit.UnitView townHallView;
+	
+	private List<ResourceNode.ResourceView> resourceViews;
 
 	private StripsAction stripsAction;
 
@@ -48,19 +58,20 @@ public class GameState implements Comparable<GameState> {
      * @param buildPeasants True if the BuildPeasant action should be considered
      */
     public GameState(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants) {
-    	construct(state, playernum, requiredGold, requiredWood, buildPeasants, null);
+    	construct(state, playernum, requiredGold, requiredWood, buildPeasants, null, null);
     }
 
-    public GameState(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants, StripsAction action) {
-    	construct(state, playernum, requiredGold, requiredWood, buildPeasants, action);
+    public GameState(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants, GameState parent, StripsAction action) {
+    	construct(state, playernum, requiredGold, requiredWood, buildPeasants, parent, action);
     }
 
-    private void construct(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants, StripsAction action) {
+    private void construct(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants, GameState parent, StripsAction action) {
     	this.stateView = state;
         this.playernum = playernum;
         this.requiredGold = requiredGold;
         this.requiredWood = requiredWood;
         this.buildPeasants = buildPeasants;
+        this.parent = parent;
         this.stripsAction = action;
         
         extractInfoFromStateView(state);
@@ -74,6 +85,7 @@ public class GameState implements Comparable<GameState> {
     			townHallView = unitView;
     		}
     	}
+    	this.resourceViews = state.getAllResourceNodes();
     }
 
     /**
@@ -95,8 +107,54 @@ public class GameState implements Comparable<GameState> {
      * @return A list of the possible successor states and their associated actions
      */
     public List<GameState> generateChildren() {
-        // TODO: Implement me!
-        return null;
+    	List<GameState> children = new ArrayList<GameState>();
+    	
+        Position peasantPosition = new Position(peasantView.getXPosition(), peasantView.getYPosition());
+        Position townHallPosition = new Position(townHallView.getXPosition(), townHallView.getYPosition());
+        
+        List<Position> goldPositions = new ArrayList<Position>();
+        List<Position> treePositions = new ArrayList<Position>();
+        for (ResourceNode.ResourceView resourceView : resourceViews) {
+        	Position p = new Position(resourceView.getXPosition(), resourceView.getYPosition());
+        	if (resourceView.getType() == ResourceNode.Type.GOLD_MINE) {
+        		goldPositions.add(p);
+        	} else if (resourceView.getType() == ResourceNode.Type.TREE) {
+        		treePositions.add(p);
+        	}
+        }
+        
+        // try deposits
+        DepositGold depositGoldAction = new DepositGold(peasantPosition, townHallPosition);
+        if (depositGoldAction.preconditionsMet(this)) {
+        	children.add(depositGoldAction.apply(this));
+        }
+        DepositWood depositWoodAction = new DepositWood(peasantPosition, townHallPosition);
+        if (depositWoodAction.preconditionsMet(this)) {
+        	children.add(depositWoodAction.apply(this));
+        }
+        
+        // try harvesting
+        for (Position goldMinePosition : goldPositions) {
+        	HarvestGold harvest = new HarvestGold(peasantPosition, goldMinePosition);
+        	if (harvest.preconditionsMet(this)) {
+        		children.add(harvest.apply(this));
+        	}
+        }
+        for (Position treePosition : treePositions) {
+        	HarvestWood harvest = new HarvestWood(peasantPosition, treePosition);
+        	if (harvest.preconditionsMet(this)) {
+        		children.add(harvest.apply(this));
+        	}
+        }
+        
+        // try moving
+        for (Position p : peasantPosition.getAdjacentPositions()) {
+        	Move move = new Move(peasantPosition, p);
+        	if (move.preconditionsMet(this)) {
+        		children.add(move.apply(this));
+        	}
+        }
+        return children;
     }
 
     /**
@@ -142,6 +200,10 @@ public class GameState implements Comparable<GameState> {
 	
 	public boolean getBuildPeasants() {
 		return this.buildPeasants;
+	}
+	
+	public GameState getParent() {
+		return this.parent;
 	}
 	
 	public Unit.UnitView getPeasantView() {

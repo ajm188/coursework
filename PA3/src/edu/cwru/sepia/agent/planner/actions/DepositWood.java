@@ -53,6 +53,7 @@ public class DepositWood implements StripsAction {
 				gameState.getRequiredGold(),
 				gameState.getRequiredWood(),
 				gameState.getBuildPeasants(),
+				gameState,
 				this);	
 	}
 	
