@@ -16,6 +16,14 @@ public class HarvestWood implements StripsAction{
 	private Position forestPos;
 	private Position targetPosition;
 	
+	public Position getPeasantPos(){
+		return peasantPos;		
+	}
+	
+	public Position getForestPos(){
+		return forestPos;
+	}
+	
 	public HarvestWood(Position peasantPos, Position forestPos){
 		this.peasantPos = peasantPos;
 		this.forestPos = forestPos;

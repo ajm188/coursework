@@ -15,6 +15,14 @@ public class DepositGold implements StripsAction {
 	private Position townHallPos;
 	private Position targetPosition;
 	
+	public Position getPeasantPos(){
+		return peasantPos;
+	}
+	
+	public Position getTownHallPos(){
+		return townHallPos;
+	}
+	
 	public DepositGold(Position peasantPos, Position townHallPos){
 		this.peasantPos = peasantPos;
 		this.townHallPos = townHallPos;		

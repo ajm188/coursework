@@ -16,6 +16,14 @@ public class HarvestGold implements StripsAction{
 	private Position minePos;
 	private Position targetPosition;
 	
+	public Position getPeasantPos(){
+		return peasantPos;
+	}
+	
+	public Position getMinePos(){
+		return minePos;
+	}
+	
 	public HarvestGold(Position peasantPos, Position minePos){
 		this.peasantPos = peasantPos;
 		this.minePos = minePos;
