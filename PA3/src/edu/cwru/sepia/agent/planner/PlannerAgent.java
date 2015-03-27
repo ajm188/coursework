@@ -91,7 +91,30 @@ public class PlannerAgent extends Agent {
      * @return The plan or null if no plan is found.
      */
     private Stack<StripsAction> AstarSearch(GameState startState) {
-        // TODO: Implement me!
+        PriorityQueue<GameState> openList = new PriorityQueue<GameState>();
+        Set<GameState> closedList = new HashSet<GameState>();
+        
+        openList.add(startState);
+        // while the open set is not empty
+	    while (!openList.isEmpty()){
+		    // pop a node off the open list
+		    GameState state = openList.poll();
+		    // if it's the goal, you're done
+		    if (state.isGoal()){
+			    return null; //TODO reconstructPath(node, start, goal);
+		    }
+		    // else "Search Algorithm Junk"
+		    else {
+			    Set<GameState> neighbors = null;//TODO getNeighbors(node, xExtent, yExtent, enemyFootmanLoc, resourceLocations);
+			    // For all children of the current node
+			    for (GameState n : neighbors){
+				    // if the candidate isn't already in the list, add it
+				    if (!(openList.contains(n) || closedList.contains(n))){
+					    openList.add(n);
+				    }
+			    }
+		    }
+	    }
         return null;
     }
 
