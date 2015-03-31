@@ -10,73 +10,36 @@ import edu.cwru.sepia.environment.model.state.State;
 import edu.cwru.sepia.environment.model.state.Unit;
 
 public class DepositGold implements StripsAction {
-
-	private Position peasantPos;
-	private Position townHallPos;
-	private Position targetPosition;
 	
-	public Position getPeasantPos(){
-		return peasantPos;
-	}
+	private GameState.Peasant peasant;
+	private GameState.TownHall townHall;
 	
-	public Position getTownHallPos(){
-		return townHallPos;
-	}
-	
-	public DepositGold(Position peasantPos, Position townHallPos){
-		this.peasantPos = peasantPos;
-		this.townHallPos = townHallPos;		
+	public DepositGold(GameState.Peasant peasant, GameState.TownHall townHall) {
+		this.peasant = peasant;
+		this.townHall = townHall;
 	}
 	
 	public boolean preconditionsMet(GameState state) {
-		Unit.UnitView peasantView = state.getPeasantView();
-		Unit.UnitView townHallView = state.getTownHallView();
-
-		if (peasantView == null || townHallView == null) {
+		GameState.Peasant statePeasant = state.getPeasant();
+		GameState.TownHall stateTownHall = state.getTownHall();
+		
+		if (peasant.getPosition().equals(statePeasant.getPosition()) && townHall.getPosition().equals(stateTownHall.getPosition())) {
+			return peasant.getPosition().isAdjacent(townHall.getPosition()) &&
+					peasant.getCargoType() == ResourceType.GOLD &&
+					peasant.getCargoAmount() > 0;
+		} else {
 			return false;
 		}
-		
-		Position peasantPosition = new Position(peasantView.getXPosition(), peasantView.getYPosition());
-		Position townHallPosition = new Position(townHallView.getXPosition(), townHallView.getYPosition());
-		
-		List<Position> townHallAdjacents = townHallPosition.getAdjacentPositions();
-		boolean adjEmpty = false;
-		for (Position adjacentPosition : townHallAdjacents) {
-			if (!(state.getStateView().isResourceAt(adjacentPosition.x, adjacentPosition.y) || state.getStateView().isUnitAt(adjacentPosition.x, adjacentPosition.y))) {
-				this.targetPosition = adjacentPosition;
-				adjEmpty = true;
-				break;
-			}
-		}
-		
-		return peasantPos.equals(peasantPosition) &&
-				townHallPos.equals(townHallPosition) &&
-				adjEmpty &&
-				peasantView.getCargoAmount() == 0 &&
-				peasantView.getCargoType() == ResourceType.GOLD;
 	}
 
 	public GameState apply(GameState gameState) {
-		State state;
-		try {
-			state = gameState.getStateView().getStateCreator().createState();
-		} catch (IOException e) {
-			return null;
-		}
+		GameState result = new GameState(gameState, this);
 		
-		Unit peasant = state.getUnit(gameState.getStateView().unitAt(peasantPos.x, peasantPos.y));
+		GameState.Peasant resultPeasant = result.getPeasant();
+		result.addGold(resultPeasant.getCargoAmount());
+		resultPeasant.deposit();
 		
-		state.transportUnit(peasant, targetPosition.x, targetPosition.y); // move the peasant next to the townhall
-		peasant.setCargo(ResourceType.GOLD, 0);
-		state.addResourceAmount(gameState.getPlayerNum(), ResourceType.GOLD, 100);
-		
-		return new GameState(state.getView(gameState.getPlayerNum()),
-				gameState.getPlayerNum(),
-				gameState.getRequiredGold(),
-				gameState.getRequiredWood(),
-				gameState.getBuildPeasants(),
-				gameState,
-				this);	
+		return result;
 	}
 	
 }

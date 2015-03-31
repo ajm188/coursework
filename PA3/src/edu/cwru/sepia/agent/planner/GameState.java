@@ -156,16 +156,12 @@ public class GameState implements Comparable<GameState> {
 		}
 	}
 
-	private State.StateView stateView;
 	private int playernum;
 	private int requiredGold;
 	private int requiredWood;
 	private boolean buildPeasants;
 	private GameState parent;
 	private double cost;
-
-	private Unit.UnitView peasantView;
-	private Unit.UnitView townHallView;
 	
 	private TownHall townHall;
 	private Peasant peasant;
@@ -200,6 +196,8 @@ public class GameState implements Comparable<GameState> {
     	this.requiredGold = parent.requiredGold;
     	this.requiredWood = parent.requiredWood;
     	this.buildPeasants = parent.buildPeasants;
+    	this.goldTotal = parent.goldTotal;
+    	this.woodTotal = parent.woodTotal;
     	
     	this.stripsAction = action;
     	
@@ -214,11 +212,6 @@ public class GameState implements Comparable<GameState> {
     }
 
     private void construct(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants, double cost, GameState parent, StripsAction action) {
-    	try {
-    		this.stateView = state.getStateCreator().createState().getView(playernum);
-    	} catch (IOException e) {
-    	}
-    	
         this.playernum = playernum;
         this.requiredGold = requiredGold;
         this.requiredWood = requiredWood;
@@ -336,10 +329,6 @@ public class GameState implements Comparable<GameState> {
         return cost;
     }
 	
-	public State.StateView getStateView() {
-		return this.stateView;
-	}
-	
 	public int getPlayerNum() {
 		return this.playernum;
 	}
@@ -356,16 +345,20 @@ public class GameState implements Comparable<GameState> {
 		return this.buildPeasants;
 	}
 	
-	public GameState getParent() {
-		return this.parent;
+	public Peasant getPeasant() {
+		return this.peasant;
 	}
 	
-	public Unit.UnitView getPeasantView() {
-		return this.peasantView;
+	public TownHall getTownHall() {
+		return this.townHall;
 	}
-
-	public Unit.UnitView getTownHallView() {
-		return this.townHallView;
+	
+	public void addGold(int amount) {
+		this.goldTotal += amount;
+	}
+	
+	public GameState getParent() {
+		return this.parent;
 	}
 
 	public StripsAction getStripsAction() {
@@ -404,6 +397,6 @@ public class GameState implements Comparable<GameState> {
      */
     @Override
     public int hashCode() {
-    	return this.stateView.hashCode();
+    	return 0; // TODO
     }
 }
