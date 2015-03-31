@@ -1,13 +1,7 @@
 package edu.cwru.sepia.agent.planner.actions;
 
-import java.io.IOException;
-import java.util.List;
-
 import edu.cwru.sepia.agent.planner.GameState;
-import edu.cwru.sepia.agent.planner.Position;
 import edu.cwru.sepia.environment.model.state.ResourceType;
-import edu.cwru.sepia.environment.model.state.State;
-import edu.cwru.sepia.environment.model.state.Unit;
 
 public class DepositGold implements StripsAction {
 	
