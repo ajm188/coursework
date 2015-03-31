@@ -41,5 +41,4 @@ public class DepositGold implements StripsAction {
 		
 		return result;
 	}
-	
 }

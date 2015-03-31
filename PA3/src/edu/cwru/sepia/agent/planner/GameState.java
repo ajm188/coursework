@@ -357,6 +357,10 @@ public class GameState implements Comparable<GameState> {
 		this.goldTotal += amount;
 	}
 	
+	public void addWood(int amount) {
+		this.woodTotal += amount;
+	}
+	
 	public GameState getParent() {
 		return this.parent;
 	}
