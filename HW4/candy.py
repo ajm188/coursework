@@ -1,6 +1,16 @@
 from random import randint
 import math
 
+# distributions of each of the hypotheses
+h1 = { 'cherry': 1.0, 'lime': 0.0 }
+h2 = { 'cherry': 0.75, 'lime': 0.25 }
+h3 = { 'cherry': 0.5, 'lime': 0.5 }
+h4 = { 'cherry': 0.25, 'lime': 0.75 }
+h5 = { 'cherry': 0.0, 'lime': 1.0 }
+
+# Original ditribution of the hypotheses from the textbook
+p_hypotheses = { h1: 0.1, h2: 0.2, h3: 0.4, h4: 0.2, h5: 0.1 }
+
 def _num_possible_datasets(size):
     """
     Return the number of possible datasets of the given size.
@@ -12,30 +22,6 @@ def C(n, k):
     """Return 'n choose k'. TODO: Memoize it to make it faster."""
     return math.factorial(n) / math.factorial(k) / math.factorial(n - k)
 
-def p_given_h3(d):
-    """
-    Return the conditional probability of d given h3.
-    Returns None if d is not in ['cherry', 'lime'].
-    """
-    if d == 'cherry':
-        return 0.5
-    elif d == 'lime':
-        return 0.5
-    else:
-        return None
-
-def p_given_h4(d):
-    """
-    Return the conditional probability of d given h4.
-    Returns None if d is not in ['cherry', 'lime'].
-    """
-    if d == 'cherry':
-        return 0.25
-    elif d == 'lime':
-        return 0.75
-    else:
-        return None
-
 def p_cond(D, h):
     """
     Return the conditional probability of a dataset D given a hypothesis h.
@@ -43,14 +29,14 @@ def p_cond(D, h):
     For this problem, the elements of D are statistically independent, so we can
     just take the product of the conditional probabilities of each element in D.
     """
-    return reduce((lambda acc, el: acc * h(el)), D, 1)
+    return reduce((lambda acc, el: acc * h[el]), D, 1)
 
 def p_hypothesis(h):
     """
     Return the probability of the given hypothesis.
-    For the purposes of this problem, there are 5 possible hypotheses, so this is always 1/5
+    Look up the probability of the hypothesis from the global hash.
     """
-    return 1.0 / 5
+    return p_hypotheses[h]
 
 def p_dataset(D):
     """
@@ -76,7 +62,12 @@ for i in range(1,100):
 	else:
 		h4_data.append("lime")
 
-G3, G4 = [], []
+h3_part_i, h3_part_ii, h3_part_iii, h3_part_iv = [], [], [], []
+h4_part_i, h4_part_ii, h4_part_iii, h4_part_iv = [], [], [], []
 for n in range(1,100):
+    # Parts i through iv for hypothesis 3
+    h3_part_i.append(p_cond(h3_data[0:n], p_given_h3)))
+
+
     G3.append(p_cond(h3_data[0:n], p_given_h3))
     G4.append(p_cond(h4_data[0:n], p_given_h4))
