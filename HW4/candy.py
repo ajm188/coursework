@@ -65,7 +65,7 @@ def p_dataset(D):
 h3_data = []
 h4_data = []
 
-for i in range(0,100):
+for i in range(1,100):
 	candidate = randint(0,100)
 	if candidate < 50:
 		h3_data.append("cherry")
