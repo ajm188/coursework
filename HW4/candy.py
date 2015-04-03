@@ -61,6 +61,19 @@ def compute_MAP_hypothesis(D, hypotheses, p_vector):
             MAP = hypotheses[i] # this can be modified to return just the index, if need be.
     return MAP
 
+def compute_ML_hypothesis(D, hypotheses):
+    """
+    Return the ML hypothesis for the dataset D.
+    The ML hypothesis is the hypothesis which maximizes P(D|hi).
+    For the puposes of this assignment, only consider h3 and h4.
+    """
+    ML, ML_max = None, None
+    for i in range(3,5):
+        ML_val = p_cond(D, hypotheses[i])
+        if ML_max is None or ML_max < ML_val:
+            ML = hypotheses[i]
+    return ML
+
 #Hypothesis 3: 50% Cherry, 50% Lime
 #Hypothesis 4: 25% Cherry, 75% Lime
 
@@ -126,3 +139,13 @@ for n in range(0,100):
     
     # h4 case:
     h4_MAP = compute_MAP_hypothesis(h4_data[0:n], hypotheses, p_h4_matrix[n]) 
+
+for n in range(0,100):
+    # part iv
+
+    # h3 case:
+    h3_ML = compute_ML_hypothesis(h3_data[0:n], hypotheses)
+    # Now that we have a ML hypothesis, we can compute P(d_n+1 = 'lime' | hML)
+
+    # h4 case:
+    h4_ML = compute_ML_hypothesis(h4_data[0:n], hypotheses)
