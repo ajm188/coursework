@@ -10,7 +10,7 @@ h4 = { 'cherry': 0.25, 'lime': 0.75 }
 h5 = { 'cherry': 0.0, 'lime': 1.0 }
 
 # Original ditribution of the hypotheses from the textbook
-p_hypotheses = collections.OrderedDict({ h1: 0.1, h2: 0.2, h3: 0.4, h4: 0.2, h5: 0.1 })
+p_hypotheses = [0.1, 0.2, 0.4, 0.2, 0.1]
 
 def p_cond(D, h):
     """
@@ -30,8 +30,13 @@ def compute_MAP_hypothesis(D, hypotheses, p_vector):
     MAP, MAP_max = None, None
     for i in range(3,5):
         p_hi = p_vector[i]
+        _p_cond = p_cond(D, hypotheses[i])
+        if p_hi == 0 or _p_cond == 0:
+            # Depending on the dataset, probabilities can sometimes go to 0,
+            # which breaks the log method. Don't let the happen.
+            continue
         # math.log accepts a base as the second argument
-        MAP_val = -math.log(p_cond(D, hypotheses[i]), 2) - math.log(p_hi, 2)
+        MAP_val = -math.log(_p_cond, 2) - math.log(p_hi, 2)
         if MAP_max is None or MAP_max < MAP_val:
             MAP = hypotheses[i] # this can be modified to return just the index, if need be.
     return MAP
@@ -68,10 +73,10 @@ for i in range(1,100):
         h4_data.append("lime")
 
 # Need one matrix for the h3 dataset and another for the h4 dataset
-p_h3_matrix = [p_hypotheses.values()]
-p_h4_matrix = [p_hypotheses.values()]
+p_h3_matrix = [p_hypotheses]
+p_h4_matrix = [p_hypotheses]
 
-hypotheses = p_hypotheses.keys() # for mapping and indexing
+hypotheses = [h1, h2, h3, h4, h5] # for mapping and indexing
 
 h3_part_i, h3_part_ii, h3_part_iii, h3_part_iv = [], [], [], []
 h4_part_i, h4_part_ii, h4_part_iii, h4_part_iv = [], [], [], []
