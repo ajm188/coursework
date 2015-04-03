@@ -46,6 +46,21 @@ def p_dataset(D):
     """
     return 1.0 / _num_possible_datasets(len(D))
 
+def compute_MAP_hypothesis(D, hypotheses, p_vector):
+    """
+    Return the MAP hypothesis for the dataset D.
+    p_vector is the vector of probabilities of each hypothesis.
+    For the purposes of this assignment, only consider h3 and h4.
+    """
+    MAP, MAP_max = None, None
+    for i in range(3,5):
+        p_hi = p_vector[i]
+        # math.log accepts a base as the second argument
+        MAP_val = -math.log(p_cond(D, hypotheses[i]), 2) - math.log(p_hi, 2)
+        if MAP_max is None or MAP_max < MAP_val:
+            MAP = hypotheses[i] # this can be modified to return just the index, if need be.
+    return MAP
+
 #Hypothesis 3: 50% Cherry, 50% Lime
 #Hypothesis 4: 25% Cherry, 75% Lime
 
@@ -106,16 +121,8 @@ for n in range(0,100):
     # part iii
     
     # h3 case:
-    d = h3_data[0:n]
-    row = p_h3_matrix[n]
-    current_h3_MAP, current_MAP_max = None, None
-    for i in range(3,5):
-        p_hi = row[i]
-        # only look at hypotheses 3 and 4
-        # math.log accepts a base as the second argument (thank god)
-        MAP_val = -math.log(p_cond(d, hypotheses[i]), 2) - math.log(p_hi, 2)
-        if current_MAP_max is None or current_MAP_max < MAP_val:
-            current_h3_MAP = hypotheses[i]
+    h3_MAP = compute_MAP_hypothesis(h3_data[0:n], hypotheses, p_h3_matrix[n])
     # Now that we have a MAP hypothesis, we can compute P(d_n+1 = 'lime' | hMAP)
     
-    
+    # h4 case:
+    h4_MAP = compute_MAP_hypothesis(h4_data[0:n], hypotheses, p_h4_matrix[n]) 
