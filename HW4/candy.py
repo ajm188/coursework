@@ -135,5 +135,23 @@ for n in range(0,100):
     h4_ML = compute_ML_hypothesis(h4_data[0:n], hypotheses)
     h4_part_iv.append(h4_ML['lime'])
 
-plt.plot(range(0, 100), h3_part_ii)
+
+# Graph for i for h3:
+
+
+# Graph for ii, iii, and iv for h3:
+plt.plot(range(0, 100), h3_part_ii, label = 'part ii')
+plt.plot(range(0,100),h3_part_iii, label = 'part iii')
+plt.plot(range(0,100),h3_part_iv, label = 'part iv')
+plt.legend()
 plt.show()
+
+# Graph for i for h4:
+#plt.plot(range(0,100), i)
+
+# Graph for ii, iii, iv for h4:
+#plt.plot(range(0, 100), h3_part_ii)
+#plt.plot(range(0,100),h3_part_iii)
+#plt.plot(range(0,100),h3_part_iv)
+#plt.show()
+
