@@ -61,7 +61,7 @@ def compute_ML_hypothesis(D, hypotheses):
 h3_data = []
 h4_data = []
 
-for i in range(1,100):
+for i in range(1,101):
     candidate = randint(0,100)
     if candidate < 50:
         h3_data.append("cherry")
@@ -83,7 +83,16 @@ h3_part_i, h3_part_ii, h3_part_iii, h3_part_iv = [], [], [], []
 h4_part_i, h4_part_ii, h4_part_iii, h4_part_iv = [], [], [], []
 for n in range(1,101):
     # Compute the P(hi|D[0:n]) for h1..h5. This is part i
-    next_h3_row = map((lambda el: p_cond(h3_data[0:n], el)), hypotheses)
+    prev_h3_row = p_h3_matrix[n - 1]
+    next_h3_row = []
+    for i in range(0,5):
+        p_hi = prev_h3_row[i]
+        denominator = 0.0
+        for k in range(0,5): # I hate everything
+            denominator += p_cond(h3_data[0:n], hypotheses[k]) * prev_h3_row[k]
+        p_hi_given_d = (p_cond(h3_data[0:n], hypotheses[i]) * p_hi) / denominator
+        next_h3_row.append(p_hi_given_d)
+    print next_h3_row
     p_h3_matrix.append(next_h3_row)
     
     next_h4_row = map((lambda el: p_cond(h4_data[0:n], el)), hypotheses)
