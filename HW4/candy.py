@@ -1,6 +1,7 @@
 from random import randint
 import math
 import collections
+import matplotlib.pyplot as plt
 
 # distributions of each of the hypotheses
 h1 = { 'cherry': 1.0, 'lime': 0.0 }
@@ -133,3 +134,6 @@ for n in range(0,100):
     # h4 case:
     h4_ML = compute_ML_hypothesis(h4_data[0:n], hypotheses)
     h4_part_iv.append(h4_ML['lime'])
+
+plt.plot(range(0, 100), h3_part_ii)
+plt.show()
