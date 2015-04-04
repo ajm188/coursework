@@ -37,6 +37,7 @@ def compute_MAP_hypothesis(D, hypotheses, p_vector):
             # which breaks the log method. Don't let the happen.
             continue
         # math.log accepts a base as the second argument
+        print "made it here"
         MAP_val = -math.log(_p_cond, 2) - math.log(p_hi, 2)
         if MAP_max is None or MAP_max < MAP_val:
             MAP = hypotheses[i] # this can be modified to return just the index, if need be.
@@ -92,10 +93,17 @@ for n in range(1,101):
             denominator += p_cond(h3_data[0:n], hypotheses[k]) * prev_h3_row[k]
         p_hi_given_d = (p_cond(h3_data[0:n], hypotheses[i]) * p_hi) / denominator
         next_h3_row.append(p_hi_given_d)
-    print next_h3_row
     p_h3_matrix.append(next_h3_row)
     
-    next_h4_row = map((lambda el: p_cond(h4_data[0:n], el)), hypotheses)
+    prev_h4_row = p_h4_matrix[n - 1]
+    next_h4_row = []
+    for i in range(0,5):
+        denominator = 0.0
+        for k in range(0,5):
+            denominator += p_cond(h4_data[0:n], hypotheses[k]) * prev_h4_row[k]
+        p_hi = prev_h4_row[i]
+        p_hi_given_d = (p_cond(h4_data[0:n], hypotheses[i]) * p_hi) / denominator
+        next_h4_row.append(p_hi_given_d)
     p_h4_matrix.append(next_h4_row)
 
 # more loops! Monkeys and Wabbits Loop de loop
@@ -124,6 +132,7 @@ for n in range(0,100):
     # part iii
     
     # h3 case:
+    print p_h3_matrix[n]
     h3_MAP = compute_MAP_hypothesis(h3_data[0:n], hypotheses, p_h3_matrix[n])
     # Now that we have a MAP hypothesis, we can compute P(d_n+1 = 'lime' | hMAP)
     h3_part_iii.append(h3_MAP['lime'])
