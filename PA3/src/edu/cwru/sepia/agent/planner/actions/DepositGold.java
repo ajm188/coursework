@@ -21,17 +21,18 @@ public class DepositGold implements StripsAction {
 		return this.townHall;
 	}
 	
-	public boolean preconditionsMet(GameState state) {
-		GameState.Peasant statePeasant = state.getPeasant();
-		GameState.TownHall stateTownHall = state.getTownHall();
+	public boolean preconditionsMet(GameState gameState) {
+		GameState.Peasant peasant = gameState.getPeasant();
+		GameState.TownHall townHall = gameState.getTownHall();
 		
-		if (peasant.getPosition().equals(statePeasant.getPosition()) && townHall.getPosition().equals(stateTownHall.getPosition())) {
-			return peasant.getPosition().isAdjacent(townHall.getPosition()) &&
-					peasant.getCargoType() == ResourceType.GOLD &&
-					peasant.getCargoAmount() > 0;
-		} else {
+		if (peasant.getID() != this.peasant.getID() || townHall.getID() != this.townHall.getID()) {
 			return false;
 		}
+		
+		return peasant.getCargoType() == this.peasant.getCargoType() &&
+				peasant.getCargoType() == ResourceType.GOLD &&
+				peasant.getCargoAmount() == this.peasant.getCargoAmount() &&
+				peasant.getCargoAmount() > 0;
 	}
 
 	public GameState apply(GameState gameState) {

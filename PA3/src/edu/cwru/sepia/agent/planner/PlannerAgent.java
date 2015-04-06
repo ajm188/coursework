@@ -125,7 +125,7 @@ public class PlannerAgent extends Agent {
     	
     	GameState current = goal;
     	while (current.getParent() != null) {
-    		plan.add(current.getStripsAction());
+    		plan.push(current.getStripsAction());
     		current = current.getParent();
     	}
     	
