@@ -12,76 +12,72 @@ import edu.cwru.sepia.environment.model.state.Unit;
 
 public class HarvestGold implements StripsAction{
 
-	private Position peasantPos;
-	private Position minePos;
-	private Position targetPosition;
+	private GameState.Peasant peasant;
+	private GameState.Resource mine;
+	private Position targetPosition; //TODO: Do we need this?
+	
+	public HarvestGold(GameState.Peasant peasant, GameState.Resource mine, Position targetPosition){
+		this.peasant = peasant;
+		this.mine = mine;
+		this.targetPosition = targetPosition;
+	}
 	
 	public Position getPeasantPos(){
-		return peasantPos;
+		return peasant.getPosition();
 	}
 	
 	public Position getMinePos(){
-		return minePos;
+		return mine.getPosition();
 	}
 	
-	public HarvestGold(Position peasantPos, Position minePos){
-		this.peasantPos = peasantPos;
-		this.minePos = minePos;
-	}
-	
-	public boolean preconditionsMet(GameState state) {
-		Unit.UnitView peasantView = state.getPeasantView();
+	public boolean preconditionsMet(GameState gameState) {
+		GameState.Peasant peasant = gameState.getPeasant();
 
-		if (peasantView == null) {
+		if (peasant == null) {
 			return false;
 		}
-
-		if (state.getStateView().isResourceAt(minePos.x, minePos.y)){
-			ResourceNode.ResourceView mine = state.getStateView().getResourceNode(state.getStateView().resourceAt(minePos.x, minePos.y));
-			Position peasantPosition = new Position(peasantView.getXPosition(), peasantView.getYPosition());
-			
-			List<Position> minePosAdjacents = minePos.getAdjacentPositions();
-			boolean adjEmpty = false;
-			for (Position adjacentPosition : minePosAdjacents) {
-				if (!(state.getStateView().isResourceAt(adjacentPosition.x, adjacentPosition.y) || state.getStateView().isUnitAt(adjacentPosition.x, adjacentPosition.y))) {
-					this.targetPosition = adjacentPosition;
-					adjEmpty = true;
-					break;
-				}
+		
+		
+		
+		//If the peasant is at the mine
+		//Go through all the adjacent positions for the mine
+		boolean adjEmpty = false;
+		for(Position adjacentPosition : mine.getPosition().getAdjacentPositions()){
+			if(targetPosition){
+				//if the targetPosition is the same as the adjacentPosition
+				this.targetPosition = adjacentPosition;
+				adjEmpty = true;
+				break;
 			}
-			
-			return peasantPosition.equals(peasantPos) &&
-					adjEmpty &&
-					mine.getType() == ResourceNode.Type.GOLD_MINE &&	
-					mine.getAmountRemaining() >= 100 && 
-					peasantView.getCargoAmount() == 0;
-		} else {
-			return false;
 		}
+		//PRECONDITIONS:
+		//There's an empty adjacent position next to the mine
+		//The resource is a mine and not a forest
+		//The mine has at least 100 gold remaining
+		//The peasant isn't carrying any cargo
+			
+		return adjEmpty &&
+				mine.getType() == ResourceNode.Type.GOLD_MINE &&
+				mine.getAmountRemaining() >= 100 &&
+				peasant.getCargoAmount() == 0;		
 	}
 
+	
+	//TODO: We need to talk about the different between result and resultPeasant
 	public GameState apply(GameState gameState) {
-		State state;
-		try {
-			state = gameState.getStateView().getStateCreator().createState();
-		} catch (IOException e) {
-			return null;
-		}
+		GameState result = new GameState(gameState, this);
 		
-		Unit peasant = state.getUnit(gameState.getStateView().unitAt(peasantPos.x, peasantPos.y));
-		ResourceNode mine = state.resourceAt(minePos.x, minePos.y);
+		GameState.Peasant resultPeasant = result.getPeasant();
+		
+		//POSTCONDITIONS:
+		//Reduce the amount in the mine
+		//Increase the amount of Gold the peasant has.
+		//TODO: Should we move the peasant? 
+		//TODO: Move the mine:w
+		this.mine.harvest(100);
+		resultPeasant.harvest(100, ResourceType.GOLD);;
 
-		state.transportUnit(peasant, targetPosition.x, targetPosition.y); // move the peasant next to the townhall
-		peasant.setCargo(ResourceType.GOLD, 100);
-		mine.reduceAmountRemaining(100);
-		
-		return new GameState(state.getView(gameState.getPlayerNum()),
-				gameState.getPlayerNum(),
-				gameState.getRequiredGold(),
-				gameState.getRequiredWood(),
-				gameState.getBuildPeasants(),
-				gameState,
-				this);	
+		return result;
 	}
 	
 	

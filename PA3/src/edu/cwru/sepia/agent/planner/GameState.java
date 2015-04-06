@@ -353,6 +353,10 @@ public class GameState implements Comparable<GameState> {
 		return this.townHall;
 	}
 	
+	public List<Resource> getResources(){
+		return this.resources;
+	}
+	
 	public void addGold(int amount) {
 		this.goldTotal += amount;
 	}
