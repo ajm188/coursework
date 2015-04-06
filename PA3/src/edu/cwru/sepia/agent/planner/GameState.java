@@ -13,7 +13,9 @@ import edu.cwru.sepia.environment.model.state.ResourceNode.ResourceView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class is used to represent the state of the game after applying one of the avaiable actions. It will also
@@ -165,7 +167,7 @@ public class GameState implements Comparable<GameState> {
 	
 	private TownHall townHall;
 	private Peasant peasant;
-	private List<Resource> resources;
+	private Map<Integer,Resource> resources;
 
 	private StripsAction stripsAction;
 	
@@ -202,9 +204,9 @@ public class GameState implements Comparable<GameState> {
     	this.stripsAction = action;
     	
     	// clone the resources
-    	this.resources = new ArrayList<Resource>();
-    	for (Resource resource : parent.resources) {
-    		this.resources.add(resource.clone());
+    	this.resources = new HashMap<Integer,Resource>();
+    	for (Resource resource : parent.resources.values()) {
+    		this.resources.put(resource.id,resource.clone());
     	}
     	// clone the peasant and townhall
     	this.peasant = parent.peasant.clone();
@@ -238,10 +240,10 @@ public class GameState implements Comparable<GameState> {
     			townHall = new TownHall(unitView.getID(), townHallPosition);
     		}
     	}
-    	this.resources = new ArrayList<Resource>();
+    	this.resources = new HashMap<Integer,Resource>();
     	for (ResourceView resourceView : state.getAllResourceNodes()) {
     		Position resourcePosition = new Position(resourceView.getXPosition(), resourceView.getYPosition());
-    		this.resources.add(new Resource(resourceView.getID(),
+    		this.resources.put(resourceView.getID(),new Resource(resourceView.getID(),
     										resourceView.getType(),
     										resourcePosition, 
     										resourceView.getAmountRemaining()));
@@ -270,7 +272,7 @@ public class GameState implements Comparable<GameState> {
     	        
         List<Resource> goldMines = new ArrayList<Resource>();
         List<Resource> trees = new ArrayList<Resource>();
-        for (Resource resource : resources) {
+        for (Resource resource : resources.values()) {
         	if (resource.getType() == ResourceNode.Type.GOLD_MINE) {
         		goldMines.add(resource);
         	} else if (resource.getType() == ResourceNode.Type.TREE) {
@@ -353,7 +355,7 @@ public class GameState implements Comparable<GameState> {
 		return this.townHall;
 	}
 	
-	public List<Resource> getResources(){
+	public Map<Integer,Resource> getResources(){
 		return this.resources;
 	}
 	

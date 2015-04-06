@@ -14,12 +14,10 @@ public class HarvestGold implements StripsAction{
 
 	private GameState.Peasant peasant;
 	private GameState.Resource mine;
-	private Position targetPosition; //TODO: Do we need this?
 	
-	public HarvestGold(GameState.Peasant peasant, GameState.Resource mine, Position targetPosition){
+	public HarvestGold(GameState.Peasant peasant, GameState.Resource mine){
 		this.peasant = peasant;
 		this.mine = mine;
-		this.targetPosition = targetPosition;
 	}
 	
 	public Position getPeasantPos(){
@@ -37,27 +35,13 @@ public class HarvestGold implements StripsAction{
 			return false;
 		}
 		
-		
-		
-		//If the peasant is at the mine
-		//Go through all the adjacent positions for the mine
-		boolean adjEmpty = false;
-		for(Position adjacentPosition : mine.getPosition().getAdjacentPositions()){
-			if(targetPosition){
-				//if the targetPosition is the same as the adjacentPosition
-				this.targetPosition = adjacentPosition;
-				adjEmpty = true;
-				break;
-			}
-		}
 		//PRECONDITIONS:
 		//There's an empty adjacent position next to the mine
 		//The resource is a mine and not a forest
 		//The mine has at least 100 gold remaining
 		//The peasant isn't carrying any cargo
 			
-		return adjEmpty &&
-				mine.getType() == ResourceNode.Type.GOLD_MINE &&
+		return mine.getType() == ResourceNode.Type.GOLD_MINE &&
 				mine.getAmountRemaining() >= 100 &&
 				peasant.getCargoAmount() == 0;		
 	}
@@ -72,9 +56,7 @@ public class HarvestGold implements StripsAction{
 		//POSTCONDITIONS:
 		//Reduce the amount in the mine
 		//Increase the amount of Gold the peasant has.
-		//TODO: Should we move the peasant? 
-		//TODO: Move the mine:w
-		this.mine.harvest(100);
+		result.getResources().get(this.mine.getID()).harvest(100);
 		resultPeasant.harvest(100, ResourceType.GOLD);;
 
 		return result;

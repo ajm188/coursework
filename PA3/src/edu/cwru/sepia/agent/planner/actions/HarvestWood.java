@@ -15,84 +15,39 @@ public class HarvestWood implements StripsAction{
 
 	private GameState.Peasant peasant;
 	private GameState.Resource forest;
-	//TODO: What do we do about the target? What the hell is the target? Townhall?
-	private GameState.TownHall townhall;
-//	private Position peasantPos;
-//	private Position forestPos;
-//	private Position targetPosition;
-	
-	public Position getPeasantPos(){
-		return peasant.getPosition();		
-	}
-	
-	//TODO: What if more than one forest?
-	public Position getForestPos(GameState state){
-		//TODO: Does this even belong here?
-		 for (Resource resource : state.getResources()){
-			if (resource.getType() == ResourceNode.Type.TREE){
-				return resource.getPosition();
-			}	 
-		 }
-		 return null;
-	}
 	
 	public HarvestWood(GameState state){
 		this.peasant = state.getPeasant();
 		this.forest = state.getForest();
 	}
 	
+	public Position getPeasantPos(){
+		return peasant.getPosition();		
+	}
+	
+	public Position getForestPos(GameState state){
+		 return this.forest.getPosition();
+	}
+	
 	public boolean preconditionsMet(GameState state) {
-		Unit.UnitView peasantView = state.getPeasantView();
-
-		if (peasantView == null) {
+		GameState.Peasant peasant = gameState.getPeasant();
+		if (peasant == null) {
 			return false;
 		}
-
-		if (state.getStateView().isResourceAt(forestPos.x, forestPos.y)){
-			ResourceNode.ResourceView forest = state.getStateView().getResourceNode(state.getStateView().resourceAt(forestPos.x, forestPos.y));
-			Position peasantPosition = new Position(peasantView.getXPosition(), peasantView.getYPosition());
 			
-			List<Position> forestPosAdjacents = forestPos.getAdjacentPositions();
-			boolean adjEmpty = false;
-			for (Position adjacentPosition : forestPosAdjacents) {
-				if (!(state.getStateView().isResourceAt(adjacentPosition.x, adjacentPosition.y) || state.getStateView().isUnitAt(adjacentPosition.x, adjacentPosition.y))) {
-					this.targetPosition = adjacentPosition;
-					adjEmpty = true;
-					break;
-				}
-			}
-			
-			return peasantPosition.equals(peasantPos) &&
-					adjEmpty &&
-					forest.getType() == ResourceNode.Type.TREE &&	
-					forest.getAmountRemaining() >= 100 && 
-					peasantView.getCargoAmount() == 0;
-		} else {
-			return false;
-		}
+		return forest.getType() == ResourceNode.Type.TREE &&	
+				forest.getAmountRemaining() >= 100 && 
+				peasant.getCargoAmount() == 0;
 	}
 
 	public GameState apply(GameState gameState) {
-		State state;
-		try {
-			state = gameState.getStateView().getStateCreator().createState();
-		} catch (IOException e) {
-			return null;
-		}
+		GameState result = new GameState(gameState, this);
 		
-		Unit peasant = state.getUnit(gameState.getStateView().unitAt(peasantPos.x, peasantPos.y));
-		ResourceNode forest = state.resourceAt(forestPos.x, forestPos.y);
-
-		state.transportUnit(peasant, targetPosition.x, targetPosition.y); // move the peasant next to the townhall
-		peasant.setCargo(ResourceType.WOOD, 100);
-		forest.reduceAmountRemaining(100);
+		GameState.Peasant resultPeasant = result.getPeasant();
 		
-		return new GameState(state.getView(gameState.getPlayerNum()),
-				gameState.getPlayerNum(),
-				gameState.getRequiredGold(),
-				gameState.getRequiredWood(),
-				gameState.getBuildPeasants(),
-				gameState,
-				this);	
+		result.getResources().get(this.forest.getID()).harvest(100);
+		resultPeasant.harvest(100,ResourceType.WOOD);
+		
+		return result;	
 	}
 }
