@@ -15,12 +15,12 @@ public class HarvestGold implements StripsAction{
 		this.mine = mine;
 	}
 	
-	public Position getPeasantPos(){
-		return peasant.getPosition();
+	public GameState.Peasant getPeasant() {
+		return this.peasant;
 	}
 	
-	public Position getMinePos(){
-		return mine.getPosition();
+	public GameState.Resource getMine() {
+		return this.mine;
 	}
 	
 	public boolean preconditionsMet(GameState gameState) {

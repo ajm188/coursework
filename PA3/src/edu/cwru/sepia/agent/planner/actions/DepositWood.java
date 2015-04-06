@@ -12,6 +12,14 @@ public class DepositWood implements StripsAction {
 		this.townHall = townHall;
 	}
 	
+	public GameState.Peasant getPeasant() {
+		return this.peasant;
+	}
+	
+	public GameState.TownHall getTownHall() {
+		return this.townHall;
+	}
+	
 	public boolean preconditionsMet(GameState state) {
 		GameState.Peasant statePeasant = state.getPeasant();
 		GameState.TownHall stateTownHall = state.getTownHall();

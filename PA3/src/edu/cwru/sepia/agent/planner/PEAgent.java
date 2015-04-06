@@ -100,19 +100,19 @@ public class PEAgent extends Agent {
      * @param action StripsAction
      * @return SEPIA representation of same action
      */
-    private Action createSepiaAction(StripsAction action, State.StateView stateview) {
+    private Action createSepiaAction(StripsAction action) {
     	if (action instanceof DepositGold){
-    		return Action.createCompoundDeposit(peasantTemplateId, townhallId);
+    		DepositGold depositGold = (DepositGold) action;
+    		return Action.createCompoundDeposit(depositGold.getPeasant().getID(), depositGold.getTownHall().getID());
     	} else if (action instanceof DepositWood) {
-    		return Action.createCompoundDeposit(peasantTemplateId, townhallId);
+    		DepositWood depositWood = (DepositWood) action;
+    		return Action.createCompoundDeposit(depositWood.getPeasant().getID(), depositWood.getTownHall().getID());
     	} else if (action instanceof HarvestGold) {
     		HarvestGold gold = (HarvestGold) action;
-    		int mineId = stateview.resourceAt(gold.getMinePos().x, gold.getMinePos().y);
-    		return Action.createCompoundGather(peasantTemplateId, mineId);
+    		return Action.createCompoundGather(gold.getPeasant().getID(), gold.getMine().getID());
     	} else if (action instanceof HarvestWood) {
     		HarvestWood wood = (HarvestWood) action;
-    		int forestId = stateview.resourceAt(wood.getForestPos().x, wood.getForestPos().y);
-    		return Action.createCompoundGather(peasantTemplateId, forestId);	
+    		return Action.createCompoundGather(wood.getPeasant().getID(), wood.getForest().getID());	
     	} else {
     		//Ya dun fucked up.
         	return null;

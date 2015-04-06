@@ -1,6 +1,7 @@
 package edu.cwru.sepia.agent.planner.actions;
 
 import edu.cwru.sepia.agent.planner.GameState;
+import edu.cwru.sepia.agent.planner.Position;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.ResourceType;
 
@@ -12,6 +13,14 @@ public class HarvestWood implements StripsAction{
 	public HarvestWood(GameState.Peasant peasant, GameState.Resource forest) {
 		this.peasant = peasant;
 		this.forest = forest;
+	}
+	
+	public GameState.Peasant getPeasant() {
+		return this.peasant;
+	}
+	
+	public GameState.Resource getForest() {
+		return this.forest;
 	}
 	
 	public boolean preconditionsMet(GameState gameState) {
