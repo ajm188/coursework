@@ -1,14 +1,9 @@
 package edu.cwru.sepia.agent.planner.actions;
 
-import java.io.IOException;
-import java.util.List;
-
 import edu.cwru.sepia.agent.planner.GameState;
 import edu.cwru.sepia.agent.planner.Position;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.ResourceType;
-import edu.cwru.sepia.environment.model.state.State;
-import edu.cwru.sepia.environment.model.state.Unit;
 
 public class HarvestGold implements StripsAction{
 
@@ -30,8 +25,9 @@ public class HarvestGold implements StripsAction{
 	
 	public boolean preconditionsMet(GameState gameState) {
 		GameState.Peasant peasant = gameState.getPeasant();
-
-		if (peasant == null) {
+		GameState.Resource mine = gameState.getResources().get(this.mine.getID());
+		
+		if (peasant.getID() != this.peasant.getID() || mine == null) {
 			return false;
 		}
 		
@@ -41,13 +37,14 @@ public class HarvestGold implements StripsAction{
 		//The mine has at least 100 gold remaining
 		//The peasant isn't carrying any cargo
 			
-		return mine.getType() == ResourceNode.Type.GOLD_MINE &&
+		return mine.getType() == this.mine.getType() &&
+				mine.getType() == ResourceNode.Type.GOLD_MINE &&
+				mine.getAmountRemaining() == this.mine.getAmountRemaining() &&
 				mine.getAmountRemaining() >= 100 &&
+				peasant.getCargoAmount() == this.peasant.getCargoAmount() &&
 				peasant.getCargoAmount() == 0;		
 	}
 
-	
-	//TODO: We need to talk about the different between result and resultPeasant
 	public GameState apply(GameState gameState) {
 		GameState result = new GameState(gameState, this);
 		
@@ -61,7 +58,4 @@ public class HarvestGold implements StripsAction{
 
 		return result;
 	}
-	
-	
-
 }
