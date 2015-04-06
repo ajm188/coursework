@@ -2,6 +2,7 @@ from random import randint
 import math
 import collections
 import matplotlib.pyplot as plt
+import numpy as np
 
 # distributions of each of the hypotheses
 h1 = { 'cherry': 1.0, 'lime': 0.0 }
@@ -155,12 +156,10 @@ for n in range(0,100):
 
 
 # Graph for i for h3:
-
-
 # Graph for ii, iii, and iv for h3:
-plt.plot(range(0, 100), h3_part_ii, label = 'part ii')
-plt.plot(range(0,100),h3_part_iii, label = 'part iii')
-plt.plot(range(0,100),h3_part_iv, label = 'part iv')
+plt.plot(range(0, 100), h4_part_ii, label = 'part ii')
+plt.plot(range(0,100),h4_part_iii, label = 'part iii')
+plt.plot(range(0,100),h4_part_iv, label = 'part iv')
 plt.legend()
 plt.show()
 
