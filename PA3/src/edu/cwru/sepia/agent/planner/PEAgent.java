@@ -105,7 +105,8 @@ public class PEAgent extends Agent {
     			switch (result.getFeedback()) {
     			case COMPLETED:
     				// give the unit it's next action
-    				actions.put(unitID, createSepiaAction(plan.pop()));
+    				Action action = createSepiaAction(plan.pop());
+    				actions.put(action.getUnitId(), action);
     				break;
     			case INCOMPLETE:
     				// all good
@@ -117,7 +118,7 @@ public class PEAgent extends Agent {
     			case INVALIDCONTROLLER:
     			case INVALIDTYPE:
     			case INVALIDUNIT:
-    				// oops
+    				// #oops
     				return null;
     			}
     		}
