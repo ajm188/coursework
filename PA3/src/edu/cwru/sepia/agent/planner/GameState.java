@@ -339,8 +339,15 @@ public class GameState implements Comparable<GameState> {
     		woodToGo = 0;
     	}
         
-    	// having more peasants is way better
-    	return (goldToGo + woodToGo) / (10 * this.peasants.size());
+    	/*
+    	 *  having more peasants is way better
+    	 *  multiplying the numerator produces a larger spread in the
+    	 *  values for the heuristics. then, dividing that by the number of
+    	 *  peasants to a power, causes the 3-peasant states to have a heuristic
+    	 *  way closer to 0 (which is good) than the 2-peasant states, which are
+    	 *  way closer to 0 than the 1-peasant states.
+    	 */
+    	return 100 * (goldToGo + woodToGo) / (Math.pow(this.peasants.size(), 3));
     }
 
     /**
