@@ -285,28 +285,30 @@ public class GameState implements Comparable<GameState> {
         	}
         }
         
-        // try deposits
-        DepositGold depositGoldAction = new DepositGold(peasant, townHall);
-        if (depositGoldAction.preconditionsMet(this)) {
-        	children.add(depositGoldAction.apply(this));
-        }
-        DepositWood depositWoodAction = new DepositWood(peasant, townHall);
-        if (depositWoodAction.preconditionsMet(this)) {
-        	children.add(depositWoodAction.apply(this));
-        }
+        for (Peasant peasant : this.peasants.values()) {
+        	// try deposits
+	        DepositGold depositGoldAction = new DepositGold(peasant, townHall);
+	        if (depositGoldAction.preconditionsMet(this)) {
+	        	children.add(depositGoldAction.apply(this));
+	        }
+	        DepositWood depositWoodAction = new DepositWood(peasant, townHall);
+	        if (depositWoodAction.preconditionsMet(this)) {
+	        	children.add(depositWoodAction.apply(this));
+	        }
         
-        // try harvesting
-        for (Resource goldMine : goldMines) {
-        	HarvestGold harvest = new HarvestGold(peasant, goldMine);
-        	if (harvest.preconditionsMet(this)) {
-        		children.add(harvest.apply(this));
-        	}
-        }
-        for (Resource tree : trees) {
-        	HarvestWood harvest = new HarvestWood(peasant, tree);
-        	if (harvest.preconditionsMet(this)) {
-        		children.add(harvest.apply(this));
-        	}
+	        // try harvesting
+	        for (Resource goldMine : goldMines) {
+	        	HarvestGold harvest = new HarvestGold(peasant, goldMine);
+	        	if (harvest.preconditionsMet(this)) {
+	        		children.add(harvest.apply(this));
+	        	}
+	        }
+	        for (Resource tree : trees) {
+	        	HarvestWood harvest = new HarvestWood(peasant, tree);
+	        	if (harvest.preconditionsMet(this)) {
+	        		children.add(harvest.apply(this));
+	        	}
+	        }
         }
         
         if (buildPeasants && this.peasants.size() < 3) {

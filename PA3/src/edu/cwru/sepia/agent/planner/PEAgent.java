@@ -145,7 +145,9 @@ public class PEAgent extends Agent {
     		return Action.createCompoundGather(gold.getPeasant().getID(), gold.getMine().getID());
     	} else if (action instanceof HarvestWood) {
     		HarvestWood wood = (HarvestWood) action;
-    		return Action.createCompoundGather(wood.getPeasant().getID(), wood.getForest().getID());	
+    		return Action.createCompoundGather(wood.getPeasant().getID(), wood.getForest().getID());
+    	} else if (action instanceof BuildPeasant) {
+    		return Action.createPrimitiveBuild(townhallId, peasantTemplateId);
     	} else {
     		//Ya dun fucked up.
         	return null;

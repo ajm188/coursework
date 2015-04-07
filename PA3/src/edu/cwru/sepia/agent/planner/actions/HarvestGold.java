@@ -1,7 +1,6 @@
 package edu.cwru.sepia.agent.planner.actions;
 
 import edu.cwru.sepia.agent.planner.GameState;
-import edu.cwru.sepia.agent.planner.Position;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.ResourceType;
 
@@ -24,10 +23,10 @@ public class HarvestGold implements StripsAction{
 	}
 	
 	public boolean preconditionsMet(GameState gameState) {
-		GameState.Peasant peasant = gameState.getPeasant();
+		GameState.Peasant peasant = gameState.getPeasants().get(this.peasant.getID());
 		GameState.Resource mine = gameState.getResources().get(this.mine.getID());
 		
-		if (peasant.getID() != this.peasant.getID() || mine == null) {
+		if (peasant == null || mine == null) {
 			return false;
 		}
 		
@@ -47,14 +46,12 @@ public class HarvestGold implements StripsAction{
 
 	public GameState apply(GameState gameState) {
 		GameState result = new GameState(gameState, this);
-		
-		GameState.Peasant resultPeasant = result.getPeasant();
-		
+			
 		//POSTCONDITIONS:
 		//Reduce the amount in the mine
 		//Increase the amount of Gold the peasant has.
 		result.getResources().get(this.mine.getID()).harvest(100);
-		resultPeasant.harvest(100, ResourceType.GOLD);;
+		result.getPeasants().get(this.peasant.getID()).harvest(100, ResourceType.GOLD);
 
 		return result;
 	}

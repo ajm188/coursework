@@ -1,7 +1,6 @@
 package edu.cwru.sepia.agent.planner.actions;
 
 import edu.cwru.sepia.agent.planner.GameState;
-import edu.cwru.sepia.agent.planner.Position;
 import edu.cwru.sepia.environment.model.state.ResourceNode;
 import edu.cwru.sepia.environment.model.state.ResourceType;
 
@@ -24,9 +23,9 @@ public class HarvestWood implements StripsAction{
 	}
 	
 	public boolean preconditionsMet(GameState gameState) {
-		GameState.Peasant peasant = gameState.getPeasant();
+		GameState.Peasant peasant = gameState.getPeasants().get(this.peasant.getID());
 		GameState.Resource forest = gameState.getResources().get(this.forest.getID());
-		if (peasant.getID() != this.peasant.getID() || forest == null) {
+		if (peasant == null || forest == null) {
 			return false;
 		}
 			
@@ -41,10 +40,8 @@ public class HarvestWood implements StripsAction{
 	public GameState apply(GameState gameState) {
 		GameState result = new GameState(gameState, this);
 		
-		GameState.Peasant resultPeasant = result.getPeasant();
-		
 		result.getResources().get(this.forest.getID()).harvest(100);
-		resultPeasant.harvest(100, ResourceType.WOOD);
+		result.getPeasants().get(this.peasant.getID()).harvest(100, ResourceType.WOOD);
 		
 		return result;	
 	}
