@@ -3,6 +3,7 @@ package edu.cwru.sepia.agent.planner;
 import edu.cwru.sepia.action.Action;
 import edu.cwru.sepia.action.ActionFeedback;
 import edu.cwru.sepia.action.ActionResult;
+import edu.cwru.sepia.action.ActionType;
 import edu.cwru.sepia.agent.Agent;
 import edu.cwru.sepia.agent.planner.actions.*;
 import edu.cwru.sepia.environment.model.history.History;
@@ -14,7 +15,9 @@ import edu.cwru.sepia.environment.model.state.Unit;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -116,6 +119,7 @@ public class PEAgent extends Agent {
     	Map<Integer, Action> actions = new HashMap<Integer, Action>();
         // NOTE: We do not need to check our preconditions here, because they were already checked in
     	// the planning stage.
+    	Set<Integer> busyUnits = new HashSet<Integer>();
     	
     	if (stateView.getTurnNumber() != 0) {
     		// check composite actions
@@ -125,14 +129,10 @@ public class PEAgent extends Agent {
     			switch (result.getFeedback()) {
     			case COMPLETED:
     				// give the unit it's next action
-    				if (plan.isEmpty()) {
-    					return actions;
-    				}
-    				Action action = createSepiaAction(plan.pop());
-    				actions.put(action.getUnitId(), action);
     				break;
     			case INCOMPLETE:
     				// all good
+    				busyUnits.add(unitID);
     				break;
     			case INCOMPLETEMAYBESTUCK:
     				// ??
@@ -145,13 +145,29 @@ public class PEAgent extends Agent {
     				return null;
     			}
     		}
-    	} else {
-    		if (plan.isEmpty()) {
-    			return actions;
-    		}
-    		Action action = createSepiaAction(plan.pop());
-    		actions.put(action.getUnitId(), action);
     	}
+    	
+    	while (!plan.isEmpty()) {
+    		Action nextAction = createSepiaAction(plan.peek());
+    		
+    		if (nextAction == null || busyUnits.contains(nextAction.getUnitId())) {
+    			break;
+    		}
+    		
+    		if (nextAction.getType() == ActionType.PRIMITIVEBUILD) {
+    			if (busyUnits.isEmpty()) {
+    				actions.put(nextAction.getUnitId(), nextAction);
+    				plan.pop();
+    			}
+    			break;
+    		}
+    		
+    		// the unit is not busy, and the action is not a build
+    		actions.put(nextAction.getUnitId(), nextAction);
+    		busyUnits.add(nextAction.getUnitId());
+    		plan.pop();
+    	}
+    	
         return actions;
     }
 
@@ -163,20 +179,20 @@ public class PEAgent extends Agent {
     private Action createSepiaAction(StripsAction action) {
     	if (action instanceof DepositGold){
     		DepositGold depositGold = (DepositGold) action;
-    		int realPeasantID = peasantIDMap.get(depositGold.getPeasant().getID());
-    		return Action.createCompoundDeposit(realPeasantID, depositGold.getTownHall().getID());
+    		Integer realPeasantID = peasantIDMap.get(depositGold.getPeasant().getID());
+    		return realPeasantID == null ? null : Action.createCompoundDeposit(realPeasantID, depositGold.getTownHall().getID());
     	} else if (action instanceof DepositWood) {
     		DepositWood depositWood = (DepositWood) action;
-    		int realPeasantID = peasantIDMap.get(depositWood.getPeasant().getID());
-    		return Action.createCompoundDeposit(realPeasantID, depositWood.getTownHall().getID());
+    		Integer realPeasantID = peasantIDMap.get(depositWood.getPeasant().getID());
+    		return realPeasantID == null ? null : Action.createCompoundDeposit(realPeasantID, depositWood.getTownHall().getID());
     	} else if (action instanceof HarvestGold) {
     		HarvestGold gold = (HarvestGold) action;
-    		int realPeasantID = peasantIDMap.get(gold.getPeasant().getID());
-    		return Action.createCompoundGather(realPeasantID, gold.getMine().getID());
+    		Integer realPeasantID = peasantIDMap.get(gold.getPeasant().getID());
+    		return realPeasantID == null ? null : Action.createCompoundGather(realPeasantID, gold.getMine().getID());
     	} else if (action instanceof HarvestWood) {
     		HarvestWood wood = (HarvestWood) action;
-    		int realPeasantID = peasantIDMap.get(wood.getPeasant().getID());
-    		return Action.createCompoundGather(realPeasantID, wood.getForest().getID());
+    		Integer realPeasantID = peasantIDMap.get(wood.getPeasant().getID());
+    		return realPeasantID == null ? null : Action.createCompoundGather(realPeasantID, wood.getForest().getID());
     	} else if (action instanceof BuildPeasant) {
     		return Action.createPrimitiveBuild(townhallId, peasantTemplateId);
     	} else {
