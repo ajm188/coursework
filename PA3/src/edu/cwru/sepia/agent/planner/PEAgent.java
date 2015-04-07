@@ -14,8 +14,10 @@ import edu.cwru.sepia.environment.model.state.Unit;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -26,7 +28,7 @@ import java.util.Stack;
 public class PEAgent extends Agent {
 
     // The plan being executed
-    private Stack<StripsAction> plan = null;
+    private List<StripsAction> planList = null;
 
     // maps the real unit Ids to the plan's unit ids
     // when you're planning you won't know the true unit IDs that sepia assigns. So you'll use placeholders (1, 2, 3).
@@ -38,7 +40,12 @@ public class PEAgent extends Agent {
     public PEAgent(int playernum, Stack<StripsAction> plan) {
         super(playernum);
         peasantIDMap = new HashMap<Integer, Integer>();
-        this.plan = plan;
+        // convert the plan from a stack to a list to make the parallelization easier/better
+        // we promise we're not cheating
+        this.planList = new ArrayList<StripsAction>();
+        while (!plan.isEmpty()) {
+        	planList.add(plan.pop());
+        }
     }
 
     @Override
@@ -147,25 +154,29 @@ public class PEAgent extends Agent {
     		}
     	}
     	
-    	while (!plan.isEmpty()) {
-    		Action nextAction = createSepiaAction(plan.peek());
+    	int i = 0;
+    	while (i < planList.size()) {
+    		Action nextAction = createSepiaAction(planList.get(i));
     		
-    		if (nextAction == null || busyUnits.contains(nextAction.getUnitId())) {
+    		if (nextAction == null) {
     			break;
     		}
     		
     		if (nextAction.getType() == ActionType.PRIMITIVEBUILD) {
     			if (busyUnits.isEmpty()) {
     				actions.put(nextAction.getUnitId(), nextAction);
-    				plan.pop();
+    				planList.remove(i);
     			}
     			break;
     		}
     		
-    		// the unit is not busy, and the action is not a build
-    		actions.put(nextAction.getUnitId(), nextAction);
-    		busyUnits.add(nextAction.getUnitId());
-    		plan.pop();
+    		if (!busyUnits.contains(nextAction.getUnitId())) {
+    			actions.put(nextAction.getUnitId(), nextAction);
+    			busyUnits.add(nextAction.getUnitId());
+    			planList.remove(i);
+    		} else {
+    			i++;
+    		}
     	}
     	
         return actions;
