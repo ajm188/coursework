@@ -166,7 +166,6 @@ public class GameState implements Comparable<GameState> {
 	private double cost;
 	
 	private TownHall townHall;
-	private Peasant peasant;
 	private Map<Integer, Peasant> peasants;
 	private Map<Integer,Resource> resources;
 
@@ -210,7 +209,6 @@ public class GameState implements Comparable<GameState> {
     	for (Peasant peasant : parent.peasants.values()) {
     		this.peasants.put(peasant.getID(), peasant.clone());
     	}
-    	this.peasant = parent.peasant.clone();
     	this.townHall = parent.townHall.clone();
     	
     	this.cost = parent.cost + action.getCost();
@@ -238,7 +236,7 @@ public class GameState implements Comparable<GameState> {
     		if (unitView.getTemplateView().getName().equals("Peasant")) {
     			Position peasantPosition = new Position(unitView.getXPosition(), unitView.getYPosition());
     			// currently assuming the peasant always starts carrying nothing
-    			peasant = new Peasant(unitView.getID(), peasantPosition);
+    			Peasant peasant = new Peasant(unitView.getID(), peasantPosition);
     			this.peasants.put(peasant.id, peasant);
     		} else if (unitView.getTemplateView().getName().equals("TownHall")) {
     			Position townHallPosition = new Position(unitView.getXPosition(), unitView.getYPosition());
@@ -388,10 +386,6 @@ public class GameState implements Comparable<GameState> {
 	
 	public boolean getBuildPeasants() {
 		return this.buildPeasants;
-	}
-	
-	public Peasant getPeasant() {
-		return this.peasant;
 	}
 	
 	public Map<Integer, Peasant> getPeasants() {
