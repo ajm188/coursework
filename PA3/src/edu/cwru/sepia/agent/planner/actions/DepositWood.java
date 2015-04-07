@@ -44,4 +44,11 @@ public class DepositWood implements StripsAction {
 		return result;
 	}
 	
+	/**
+	 * Assume the number of turns required to do a deposit is the number of moves to get from the
+	 * peasant to the town hall, plus 1 for the actual deposit. 
+	 */
+	public double getCost() {
+		return (this.peasant.getPosition().chebyshevDistance(this.townHall.getPosition())) + 1;
+	}
 }

@@ -37,4 +37,12 @@ public interface StripsAction {
      * @return State resulting from successful action appliction.
      */
     public GameState apply(GameState state);
+    
+    /**
+     * Return the heuristic cost of doing the given action.
+     * 
+     * The cost should be the number of turns required to complete the action in Sepia.
+     * Only return a heuristic because it is hard to determine the actual cost in the planning stage.
+     */
+    public double getCost();
 }

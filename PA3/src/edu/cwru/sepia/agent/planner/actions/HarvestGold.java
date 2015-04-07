@@ -58,4 +58,12 @@ public class HarvestGold implements StripsAction{
 
 		return result;
 	}
+	
+	/**
+	 * Assume the cost is the number of squares between the peasant and the mine, plus one more
+	 * turn to do the actual harvesting.
+	 */
+	public double getCost() {
+		return (this.peasant.getPosition().chebyshevDistance(this.mine.getPosition())) + 1;
+	}
 }

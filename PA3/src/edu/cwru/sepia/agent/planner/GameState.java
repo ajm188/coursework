@@ -186,10 +186,6 @@ public class GameState implements Comparable<GameState> {
     public GameState(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants) {
     	construct(state, playernum, requiredGold, requiredWood, buildPeasants, 0.0, null, null);
     }
-
-    public GameState(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants, double cost, GameState parent, StripsAction action) {
-    	construct(state, playernum, requiredGold, requiredWood, buildPeasants, cost, parent, action);
-    }
     
     public GameState(GameState parent, StripsAction action) {
     	this.parent = parent;
@@ -210,6 +206,8 @@ public class GameState implements Comparable<GameState> {
     	// clone the peasant and townhall
     	this.peasant = parent.peasant.clone();
     	this.townHall = parent.townHall.clone();
+    	
+    	this.cost = parent.cost + action.getCost();
     }
 
     private void construct(State.StateView state, int playernum, int requiredGold, int requiredWood, boolean buildPeasants, double cost, GameState parent, StripsAction action) {
@@ -315,8 +313,17 @@ public class GameState implements Comparable<GameState> {
      * @return The value estimated remaining cost to reach a goal state from this state.
      */
     public double heuristic() {
-        // TODO: Implement me!
-        return 0.0;
+    	int goldToGo = this.requiredGold - this.goldTotal;
+    	if (goldToGo < 0) {
+    		goldToGo = 0;
+    	}
+    	
+    	int woodToGo = this.requiredWood - this.woodTotal;
+    	if (woodToGo < 0) {
+    		woodToGo = 0;
+    	}
+        
+    	return goldToGo + woodToGo;
     }
 
     /**
@@ -327,7 +334,7 @@ public class GameState implements Comparable<GameState> {
      * @return The current cost to reach this goal
      */
     public double getCost() {
-        return cost;
+        return this.cost + heuristic();
     }
 	
 	public int getPlayerNum() {
