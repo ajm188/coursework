@@ -1,6 +1,8 @@
 package edu.cwru.sepia.agent.planner;
 
 import edu.cwru.sepia.action.Action;
+import edu.cwru.sepia.action.ActionFeedback;
+import edu.cwru.sepia.action.ActionResult;
 import edu.cwru.sepia.agent.Agent;
 import edu.cwru.sepia.agent.planner.actions.*;
 import edu.cwru.sepia.environment.model.history.History;
@@ -91,8 +93,39 @@ public class PEAgent extends Agent {
      */
     @Override
     public Map<Integer, Action> middleStep(State.StateView stateView, History.HistoryView historyView) {
-        // TODO: Implement me!
-        return null;
+    	Map<Integer, Action> actions = new HashMap<Integer, Action>();
+        // NOTE: We do not need to check our preconditions here, because they were already checked in
+    	// the planning stage.
+    	
+    	if (stateView.getTurnNumber() != 0) {
+    		// check composite actions
+    		Map<Integer, ActionResult> actionResults = historyView.getCommandFeedback(playernum, stateView.getTurnNumber() - 1);
+    		for (Integer unitID : actionResults.keySet()) {
+    			ActionResult result = actionResults.get(unitID);
+    			switch (result.getFeedback()) {
+    			case COMPLETED:
+    				// give the unit it's next action
+    				actions.put(unitID, createSepiaAction(plan.pop()));
+    				break;
+    			case INCOMPLETE:
+    				// all good
+    				break;
+    			case INCOMPLETEMAYBESTUCK:
+    				// ??
+    				break;
+    			case FAILED:
+    			case INVALIDCONTROLLER:
+    			case INVALIDTYPE:
+    			case INVALIDUNIT:
+    				// oops
+    				return null;
+    			}
+    		}
+    	} else {
+    		Action action = createSepiaAction(plan.pop());
+    		actions.put(action.getUnitId(), action);
+    	}
+        return actions;
     }
 
     /**
