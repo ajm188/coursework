@@ -1,5 +1,6 @@
 package edu.cwru.sepia.agent.planner;
 
+import edu.cwru.sepia.agent.planner.actions.BuildPeasant;
 import edu.cwru.sepia.agent.planner.actions.DepositGold;
 import edu.cwru.sepia.agent.planner.actions.DepositWood;
 import edu.cwru.sepia.agent.planner.actions.HarvestGold;
@@ -308,6 +309,14 @@ public class GameState implements Comparable<GameState> {
         	}
         }
         
+        if (buildPeasants && this.peasants.size() < 3) {
+        	// try building peasants
+        	BuildPeasant build = new BuildPeasant();
+        	if (build.preconditionsMet(this)) {
+        		children.add(build.apply(this));
+        	}
+        }
+        
         return children;
     }
 
@@ -344,6 +353,17 @@ public class GameState implements Comparable<GameState> {
     public double getCost() {
         return this.cost + heuristic();
     }
+    
+    /**
+     * Create a new peasant, and place him/her next to the town hall, carrying nothing.
+     */
+    public void addPeasant() {
+    	// assume there is an open square
+    	Position newPeasantPosition = this.townHall.getPosition().getAdjacentPositions().get(0);
+    	
+    	Peasant recruit = new Peasant(this.peasants.size() + 1, newPeasantPosition);
+    	this.peasants.put(recruit.id, recruit);
+    }
 	
 	public int getPlayerNum() {
 		return this.playernum;
@@ -365,12 +385,20 @@ public class GameState implements Comparable<GameState> {
 		return this.peasant;
 	}
 	
+	public Map<Integer, Peasant> getPeasants() {
+		return this.peasants;
+	}
+	
 	public TownHall getTownHall() {
 		return this.townHall;
 	}
 	
 	public Map<Integer,Resource> getResources(){
 		return this.resources;
+	}
+	
+	public int getGoldTotal() {
+		return this.goldTotal;
 	}
 	
 	public void addGold(int amount) {
