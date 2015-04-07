@@ -28,26 +28,31 @@ public class PEAgent extends Agent {
     // maps the real unit Ids to the plan's unit ids
     // when you're planning you won't know the true unit IDs that sepia assigns. So you'll use placeholders (1, 2, 3).
     // this maps those placeholders to the actual unit IDs.
-    private Map<Integer, Integer> peasantIdMap;
+    private Map<Integer, Integer> peasantIDMap;
     private int townhallId;
     private int peasantTemplateId;
 
     public PEAgent(int playernum, Stack<StripsAction> plan) {
         super(playernum);
-        peasantIdMap = new HashMap<Integer, Integer>();
+        peasantIDMap = new HashMap<Integer, Integer>();
         this.plan = plan;
     }
 
     @Override
     public Map<Integer, Action> initialStep(State.StateView stateView, History.HistoryView historyView) {
         // gets the townhall ID and the peasant ID
+    	/* 
+    	 * our planner assumes the peasant id starts at 1 and goes up sequentially
+    	 * use this as the key in the map
+    	 */
+    	int peasantCounter = 1;
         for(int unitId : stateView.getUnitIds(playernum)) {
             Unit.UnitView unit = stateView.getUnit(unitId);
             String unitType = unit.getTemplateView().getName().toLowerCase();
             if(unitType.equals("townhall")) {
                 townhallId = unitId;
             } else if(unitType.equals("peasant")) {
-                peasantIdMap.put(unitId, unitId);
+                peasantIDMap.put(peasantCounter++, unitId);
             }
         }
 
@@ -93,6 +98,21 @@ public class PEAgent extends Agent {
      */
     @Override
     public Map<Integer, Action> middleStep(State.StateView stateView, History.HistoryView historyView) {
+    	/* 
+    	 * our planner assumes the peasant id starts at 1 and goes up sequentially
+    	 * use this as the key in the map
+    	 */
+    	int peasantCounter = 1;
+        for(int unitId : stateView.getUnitIds(playernum)) {
+            Unit.UnitView unit = stateView.getUnit(unitId);
+            String unitType = unit.getTemplateView().getName().toLowerCase();
+            if(unitType.equals("townhall")) {
+                townhallId = unitId;
+            } else if(unitType.equals("peasant")) {
+                peasantIDMap.put(peasantCounter++, unitId);
+            }
+        }
+        
     	Map<Integer, Action> actions = new HashMap<Integer, Action>();
         // NOTE: We do not need to check our preconditions here, because they were already checked in
     	// the planning stage.
@@ -105,6 +125,9 @@ public class PEAgent extends Agent {
     			switch (result.getFeedback()) {
     			case COMPLETED:
     				// give the unit it's next action
+    				if (plan.isEmpty()) {
+    					return actions;
+    				}
     				Action action = createSepiaAction(plan.pop());
     				actions.put(action.getUnitId(), action);
     				break;
@@ -123,6 +146,9 @@ public class PEAgent extends Agent {
     			}
     		}
     	} else {
+    		if (plan.isEmpty()) {
+    			return actions;
+    		}
     		Action action = createSepiaAction(plan.pop());
     		actions.put(action.getUnitId(), action);
     	}
@@ -137,16 +163,20 @@ public class PEAgent extends Agent {
     private Action createSepiaAction(StripsAction action) {
     	if (action instanceof DepositGold){
     		DepositGold depositGold = (DepositGold) action;
-    		return Action.createCompoundDeposit(depositGold.getPeasant().getID(), depositGold.getTownHall().getID());
+    		int realPeasantID = peasantIDMap.get(depositGold.getPeasant().getID());
+    		return Action.createCompoundDeposit(realPeasantID, depositGold.getTownHall().getID());
     	} else if (action instanceof DepositWood) {
     		DepositWood depositWood = (DepositWood) action;
-    		return Action.createCompoundDeposit(depositWood.getPeasant().getID(), depositWood.getTownHall().getID());
+    		int realPeasantID = peasantIDMap.get(depositWood.getPeasant().getID());
+    		return Action.createCompoundDeposit(realPeasantID, depositWood.getTownHall().getID());
     	} else if (action instanceof HarvestGold) {
     		HarvestGold gold = (HarvestGold) action;
-    		return Action.createCompoundGather(gold.getPeasant().getID(), gold.getMine().getID());
+    		int realPeasantID = peasantIDMap.get(gold.getPeasant().getID());
+    		return Action.createCompoundGather(realPeasantID, gold.getMine().getID());
     	} else if (action instanceof HarvestWood) {
     		HarvestWood wood = (HarvestWood) action;
-    		return Action.createCompoundGather(wood.getPeasant().getID(), wood.getForest().getID());
+    		int realPeasantID = peasantIDMap.get(wood.getPeasant().getID());
+    		return Action.createCompoundGather(realPeasantID, wood.getForest().getID());
     	} else if (action instanceof BuildPeasant) {
     		return Action.createPrimitiveBuild(townhallId, peasantTemplateId);
     	} else {

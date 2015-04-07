@@ -236,7 +236,7 @@ public class GameState implements Comparable<GameState> {
     		if (unitView.getTemplateView().getName().equals("Peasant")) {
     			Position peasantPosition = new Position(unitView.getXPosition(), unitView.getYPosition());
     			// currently assuming the peasant always starts carrying nothing
-    			Peasant peasant = new Peasant(unitView.getID(), peasantPosition);
+    			Peasant peasant = new Peasant(this.peasants.size() + 1, peasantPosition);
     			this.peasants.put(peasant.id, peasant);
     		} else if (unitView.getTemplateView().getName().equals("TownHall")) {
     			Position townHallPosition = new Position(unitView.getXPosition(), unitView.getYPosition());
