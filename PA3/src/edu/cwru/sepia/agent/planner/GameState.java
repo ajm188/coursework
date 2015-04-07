@@ -166,6 +166,7 @@ public class GameState implements Comparable<GameState> {
 	
 	private TownHall townHall;
 	private Peasant peasant;
+	private Map<Integer, Peasant> peasants;
 	private Map<Integer,Resource> resources;
 
 	private StripsAction stripsAction;
@@ -203,7 +204,11 @@ public class GameState implements Comparable<GameState> {
     	for (Resource resource : parent.resources.values()) {
     		this.resources.put(resource.id,resource.clone());
     	}
-    	// clone the peasant and townhall
+    	// clone the peasant(s) and townhall
+    	this.peasants = new HashMap<Integer, Peasant>();
+    	for (Peasant peasant : parent.peasants.values()) {
+    		this.peasants.put(peasant.getID(), peasant.clone());
+    	}
     	this.peasant = parent.peasant.clone();
     	this.townHall = parent.townHall.clone();
     	
@@ -227,11 +232,13 @@ public class GameState implements Comparable<GameState> {
     }
 
     private void extractInfoFromStateView(State.StateView state) {
+    	this.peasants = new HashMap<Integer, Peasant>();
     	for (Unit.UnitView unitView : state.getUnits(playernum)) {
     		if (unitView.getTemplateView().getName().equals("Peasant")) {
     			Position peasantPosition = new Position(unitView.getXPosition(), unitView.getYPosition());
     			// currently assuming the peasant always starts carrying nothing
     			peasant = new Peasant(unitView.getID(), peasantPosition);
+    			this.peasants.put(peasant.id, peasant);
     		} else if (unitView.getTemplateView().getName().equals("TownHall")) {
     			Position townHallPosition = new Position(unitView.getXPosition(), unitView.getYPosition());
     			townHall = new TownHall(unitView.getID(), townHallPosition);
@@ -323,7 +330,8 @@ public class GameState implements Comparable<GameState> {
     		woodToGo = 0;
     	}
         
-    	return goldToGo + woodToGo;
+    	// having more peasants is way better
+    	return (goldToGo + woodToGo) / (10 * this.peasants.size());
     }
 
     /**
