@@ -36,6 +36,7 @@ public class PEAgent extends Agent {
     private Map<Integer, Integer> peasantIDMap;
     private int townhallId;
     private int peasantTemplateId;
+    private long startTime;
 
     public PEAgent(int playernum, Stack<StripsAction> plan) {
         super(playernum);
@@ -50,21 +51,7 @@ public class PEAgent extends Agent {
 
     @Override
     public Map<Integer, Action> initialStep(State.StateView stateView, History.HistoryView historyView) {
-        // gets the townhall ID and the peasant ID
-    	/* 
-    	 * our planner assumes the peasant id starts at 1 and goes up sequentially
-    	 * use this as the key in the map
-    	 */
-    	int peasantCounter = 1;
-        for(int unitId : stateView.getUnitIds(playernum)) {
-            Unit.UnitView unit = stateView.getUnit(unitId);
-            String unitType = unit.getTemplateView().getName().toLowerCase();
-            if(unitType.equals("townhall")) {
-                townhallId = unitId;
-            } else if(unitType.equals("peasant")) {
-                peasantIDMap.put(peasantCounter++, unitId);
-            }
-        }
+        startTime = System.currentTimeMillis();
 
         // Gets the peasant template ID. This is used when building a new peasant with the townhall
         for(Template.TemplateView templateView : stateView.getTemplates(playernum)) {
@@ -122,8 +109,8 @@ public class PEAgent extends Agent {
                 peasantIDMap.put(peasantCounter++, unitId);
             }
         }
-        
-    	Map<Integer, Action> actions = new HashMap<Integer, Action>();
+
+        Map<Integer, Action> actions = new HashMap<Integer, Action>();
         // NOTE: We do not need to check our preconditions here, because they were already checked in
     	// the planning stage.
     	Set<Integer> busyUnits = new HashSet<Integer>();
@@ -152,6 +139,11 @@ public class PEAgent extends Agent {
     				return null;
     			}
     		}
+    	}
+    	
+    	if (planList.isEmpty() && busyUnits.isEmpty()) {
+    		terminalStep(stateView, historyView);
+    		return actions;
     	}
     	
     	int i = 0;
@@ -215,7 +207,7 @@ public class PEAgent extends Agent {
 
     @Override
     public void terminalStep(State.StateView stateView, History.HistoryView historyView) {
-
+    	System.out.println("Execution time was: " + (System.currentTimeMillis() - startTime) + " milliseconds.");
     }
 
     @Override
