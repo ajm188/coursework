@@ -285,7 +285,6 @@ public class RLAgent extends Agent {
     	double[] featureVectors = new double[3];
     	Unit.UnitView defender = stateView.getUnit(defenderId);
     	Position defenderPos = new Position(defender.getXPosition(), defender.getYPosition());
-    	int i = 0;
     	for(Integer footmanID : myFootmen)
     	{
     		Unit.UnitView ally = stateView.getUnit(footmanID);
