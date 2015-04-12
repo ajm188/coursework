@@ -93,7 +93,7 @@ public class RLAgent extends Agent {
     @Override
     public Map<Integer, Action> initialStep(State.StateView stateView, History.HistoryView historyView) {
 
-        // You will need to add code to check if you are in a testing or learning episode
+        // TODO:You will need to add code to check if you are in a testing or learning episode
 
         // Find all of your units
         myFootmen = new LinkedList<>();
@@ -139,7 +139,7 @@ public class RLAgent extends Agent {
      *
      * You should also check for completed actions using the history view. Obviously you never want a footman just
      * sitting around doing nothing (the enemy certainly isn't going to stop attacking). So at the minimum you will
-     * have an even whenever one your footmen's targets is killed or an action fails. Actions may fail if the target
+     * have an event whenever one your footmen's targets is killed or an action fails. Actions may fail if the target
      * is surrounded or the unit cannot find a path to the unit. To get the action results from the previous turn
      * you can do something similar to the following. Please be aware that on the first turn you should not call this
      *
@@ -164,7 +164,7 @@ public class RLAgent extends Agent {
     @Override
     public void terminalStep(State.StateView stateView, History.HistoryView historyView) {
 
-        // MAKE SURE YOU CALL printTestData after you finish a test episode.
+        // TODO: MAKE SURE YOU CALL printTestData after you finish a test episode.
 
         // Save your weights
         saveWeights(weights);
@@ -277,7 +277,32 @@ public class RLAgent extends Agent {
                                            History.HistoryView historyView,
                                            int attackerId,
                                            int defenderId) {
-        return null;
+        /* Features: (F attacking E)
+    	*	0. # of other units attacking E
+    	*	1. 1 if E attacking F (0 otherwise)
+    	*	2. 1/chebychev 
+    	*/
+    	double[] featureVectors = new double[3];
+    	Unit.UnitView defender = stateView.getUnit(defenderId);
+    	Position defenderPos = new Position(defender.getXPosition(), defender.getYPosition());
+    	int i = 0;
+    	for(Integer footmanID : myFootmen)
+    	{
+    		Unit.UnitView ally = stateView.getUnit(footmanID);
+    		Position p = new Position(ally.getXPosition(), ally.getYPosition());
+    		if (attackerId == footmanID){
+				if (p.isAdjacent(defenderPos)){
+					featureVectors[0] += 1.0;
+					featureVectors[1] = 1.0;	
+				}
+	    		featureVectors[2] = 1/p.chebyshevDistance(defenderPos);
+    		} else {
+    			if (p.isAdjacent(defenderPos)){
+					featureVectors[0] += 1.0;
+				}
+    		}
+    	}
+    	return featureVectors;
     }
 
     /**
