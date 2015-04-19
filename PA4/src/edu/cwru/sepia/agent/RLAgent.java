@@ -195,7 +195,22 @@ public class RLAgent extends Agent {
      * @return The enemy footman ID this unit should attack
      */
     public int selectAction(State.StateView stateView, History.HistoryView historyView, int attackerId) {
-        return -1;
+    	double randomDouble = this.random.nextDouble();
+    	if (randomDouble < this.epsilon) {
+    		// exploration: pick a random enemy
+    		return this.random.nextInt(this.enemyFootmen.size());
+    	} else {
+    		int best = -1;
+    		double bestValue = Double.NEGATIVE_INFINITY;
+    		for (Integer enemyFootmanID : enemyFootmen) {
+    			double qValue = calcQValue(stateView, historyView, attackerId, enemyFootmanID);
+    			if (qValue > bestValue) {
+    				best = enemyFootmanID;
+    				bestValue = qValue;
+    			}
+    		}
+    		return best;
+    	}
     }
 
     /**
