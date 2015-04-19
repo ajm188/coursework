@@ -182,6 +182,15 @@ public class RLAgent extends Agent {
      * @return The updated weight vector.
      */
     public double[] updateWeights(double[] oldWeights, double[] oldFeatures, double totalReward, State.StateView stateView, History.HistoryView historyView, int footmanId) {
+    	double expectedReward = 0.0;
+    	for (int i = 0; i < oldWeights.length; i++) {
+    		expectedReward += oldWeights[i] * oldFeatures[i];
+    	}
+    	
+    	double[] newWeights = new double[oldWeights.length];
+    	for (int i = 0; i < oldWeights.length; i++) {
+    		newWeights[i] = oldWeights[i] + oldFeatures[i] * (totalReward - expectedReward);
+    	}
         return null;
     }
 
