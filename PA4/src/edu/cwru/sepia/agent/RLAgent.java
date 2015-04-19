@@ -253,7 +253,13 @@ public class RLAgent extends Agent {
                              History.HistoryView historyView,
                              int attackerId,
                              int defenderId) {
-        return 0;
+        double qValue = 0.0;
+        double[] featureVector = calculateFeatureVector(stateView, historyView, attackerId, defenderId);
+        for (int i = 0; i < this.weights.length; i++) {
+        	qValue += this.weights[i] * featureVector[i];
+        }
+        
+        return qValue;
     }
 
     /**
