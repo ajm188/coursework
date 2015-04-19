@@ -191,7 +191,7 @@ public class RLAgent extends Agent {
     	for (int i = 0; i < oldWeights.length; i++) {
     		newWeights[i] = oldWeights[i] + oldFeatures[i] * (totalReward - expectedReward);
     	}
-        return null;
+        return newWeights;
     }
 
     /**
