@@ -256,7 +256,27 @@ public class RLAgent extends Agent {
      * @return The current reward
      */
     public double calculateReward(State.StateView stateView, History.HistoryView historyView, int footmanId) {
-        return 0;
+        double reward = 0.0;
+        
+        Set<Integer> unitsIAttacked = new HashSet<Integer>();
+        for (DamageLog damageLog : historyView.getDamageLogs(stateView.getTurnNumber() - 1)) {
+        	if (damageLog.getAttackerID() == footmanId) {
+        		reward += damageLog.getDamage();
+        		unitsIAttacked.add(damageLog.getDefenderID());
+        	}
+        	
+        	if (damageLog.getDefenderID() == footmanId) {
+        		reward -= damageLog.getDamage();
+        	}
+        }
+        
+        for (DeathLog deathLog : historyView.getDeathLogs(stateView.getTurnNumber() - 1)) {
+        	if (unitsIAttacked.contains(deathLog.getDeadUnitID())) {
+        		reward += 100;
+        	}
+        }
+        
+        return reward;
     }
 
     /**
