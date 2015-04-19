@@ -37,7 +37,7 @@ public class RLAgent extends Agent {
     /**
      * Set this to whatever size your feature vector is.
      */
-    public static final int NUM_FEATURES = 5;
+    public static final int NUM_FEATURES = 3;
 
     /** Use this random number generator for your epsilon exploration. When you submit we will
      * change this seed so make sure that your agent works for more than the default seed.
@@ -312,7 +312,7 @@ public class RLAgent extends Agent {
     	*	1. 1 if E attacking F (0 otherwise)
     	*	2. 1/chebychev 
     	*/
-    	double[] featureVectors = new double[3];
+    	double[] featureVectors = new double[NUM_FEATURES];
     	Unit.UnitView defender = stateView.getUnit(defenderId);
     	Position defenderPos = new Position(defender.getXPosition(), defender.getYPosition());
     	for(Integer footmanID : myFootmen)
