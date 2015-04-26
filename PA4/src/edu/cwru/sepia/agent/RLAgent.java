@@ -159,27 +159,30 @@ public class RLAgent extends Agent {
     	for(Integer myFootman : myFootmen){
     		reward += calculateReward(stateView, historyView, myFootman);
     	}
-    	
-    	//Update the total reward
     	boolean event = false;
-    	for (DeathLog deathLog : historyView.getDeathLogs(stateView.getTurnNumber() - 1)){
-    		if (playernum == deathLog.getController()){
-    			myFootmen.remove(deathLog.getDeadUnitID());
-    			event = true;
-    		} else if (ENEMY_PLAYERNUM == deathLog.getController()){
-    			enemyFootmen.remove(deathLog.getDeadUnitID());
-    			event = true;    			
-    		} 
+
+    	//Update the total reward
+    	if (stateView.getTurnNumber() > 0){
+	    	for (DeathLog deathLog : historyView.getDeathLogs(stateView.getTurnNumber() - 1)){
+	    		if (playernum == deathLog.getController()){
+	    			myFootmen.remove(deathLog.getDeadUnitID());
+	    			event = true;
+	    		} else if (ENEMY_PLAYERNUM == deathLog.getController()){
+	    			enemyFootmen.remove(deathLog.getDeadUnitID());
+	    			event = true;    			
+	    		} 
+	    	}
+	    	
+	    	
+	    	Map<Integer,ActionResult> commandFeedback = historyView.getCommandFeedback(playernum, stateView.getTurnNumber() - 1);
+	    	for (ActionResult action : commandFeedback.values()) {
+	    		if (action.getFeedback() != ActionFeedback.INCOMPLETE){
+	    			event = true; 
+	    		}
+	    	}
     	}
     	
-    	Map<Integer,ActionResult> commandFeedback = historyView.getCommandFeedback(playernum, stateView.getTurnNumber() - 1);
-    	for (ActionResult action : commandFeedback.values()) {
-    		if (action.getFeedback() != ActionFeedback.INCOMPLETE){
-    			event = true; 
-    		}
-    	}
-    	
-    	if (event){
+    	if (event || stateView.getTurnNumber() == 0){
     		for(Integer footman : myFootmen){
     			ourHouse.put(footman, Action.createCompoundAttack(footman, selectAction(stateView, historyView, footman)));
     			
