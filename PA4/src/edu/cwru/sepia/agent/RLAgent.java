@@ -27,6 +27,11 @@ public class RLAgent extends Agent {
      */
     private List<Integer> myFootmen;
     private List<Integer> enemyFootmen;
+    
+    // maps a footman id to his/her cumulative discounted reward
+    private Map<Integer, Double> discountedRewards = new HashMap<Integer, Double>();
+    
+    private Map<Integer, Integer> currentTargets = new HashMap<Integer, Integer>();
 
     /**
      * Convenience variable specifying enemy agent number. Use this whenever referring
@@ -158,7 +163,13 @@ public class RLAgent extends Agent {
     	
     	//Calculate the reward
     	for(Integer myFootman : myFootmen){
-    		reward += calculateReward(stateView, historyView, myFootman);
+    		Double cumulativeReward = discountedRewards.get(myFootman);
+    		if (cumulativeReward == null) {
+    			cumulativeReward = 0.0;
+    		}
+    		double reward = calculateReward(stateView, historyView, myFootman);
+    		this.reward += reward;
+    		discountedRewards.put(myFootman, cumulativeReward + gamma * reward);
     	}
     	boolean event = false;
 
@@ -167,6 +178,7 @@ public class RLAgent extends Agent {
 	    	for (DeathLog deathLog : historyView.getDeathLogs(stateView.getTurnNumber() - 1)){
 	    		if (playernum == deathLog.getController()){
 	    			myFootmen.remove(myFootmen.indexOf(deathLog.getDeadUnitID()));
+	    			currentTargets.remove(myFootmen);
 	    			event = true;
 	    		} else if (ENEMY_PLAYERNUM == deathLog.getController()){
 	    			enemyFootmen.remove(enemyFootmen.indexOf(deathLog.getDeadUnitID()));
@@ -178,21 +190,43 @@ public class RLAgent extends Agent {
 	    	Map<Integer,ActionResult> commandFeedback = historyView.getCommandFeedback(playernum, stateView.getTurnNumber() - 1);
 	    	for (ActionResult action : commandFeedback.values()) {
 	    		if (action.getFeedback() != ActionFeedback.INCOMPLETE){
-	    			event = true; 
+	    			event = true;
 	    		}
 	    	}
     	}
     	
-//    	if (event) {
-//    		double[] oldWeights = new double[NUM_FEATURES];
-//    		for (int i = 0; i < NUM_FEATURES; i++) {
-//    			oldWeights[i] = this.weights[i].doubleValue();
-//    		}
-//    		double[] newWeights = updateWeights(oldWeights, calculateFeatureVector(stateView, historyView, myFootmen.get(0), enemyFootmen.get(0)), reward, stateView, historyView, myFootmen.get(0));
-//    		for (int i = 0; i < NUM_FEATURES; i++) {
-//    			this.weights[i] = newWeights[i];
-//    		}
-//    	}
+    	if (event) {
+    		double[] oldWeights = new double[NUM_FEATURES];
+    		for (int i = 0; i < NUM_FEATURES; i++) {
+    			oldWeights[i] = this.weights[i].doubleValue();
+    		}
+    		
+    		double[] newWeights = new double[NUM_FEATURES];
+    		for (Integer footman : myFootmen) {
+    			Integer target = currentTargets.get(footman);
+    			if (target == null || !enemyFootmen.contains(target)) {
+    				Unit.UnitView footmanView = stateView.getUnit(footman);
+    				Position myPosition = new Position(footmanView.getXPosition(), footmanView.getYPosition());
+    				double closestDistance = Double.POSITIVE_INFINITY;
+    				for (Integer enemy : enemyFootmen) {
+    					Unit.UnitView enemyView = stateView.getUnit(enemy);
+    					Position enemyPosition = new Position(enemyView.getXPosition(), enemyView.getYPosition());
+    					double distance = myPosition.chebyshevDistance(enemyPosition);
+    					if (distance < closestDistance) {
+    						closestDistance = distance;
+    						target = enemy;
+    					}
+    				}
+    			}
+    			double[] oldFeatures = calculateFeatureVector(stateView, historyView, footman, target);
+    			newWeights = updateWeights(oldWeights, oldFeatures, discountedRewards.get(footman), stateView, historyView, footman);
+    			oldWeights = newWeights;
+    		}
+    		
+    		for (int i = 0; i < NUM_FEATURES; i++) {
+    			this.weights[i] = newWeights[i];
+    		}
+    	}
     	
     	if (event || stateView.getTurnNumber() == 0){
     		for(Integer footman : myFootmen){
@@ -231,15 +265,20 @@ public class RLAgent extends Agent {
      * @return The updated weight vector.
      */
     public double[] updateWeights(double[] oldWeights, double[] oldFeatures, double totalReward, State.StateView stateView, History.HistoryView historyView, int footmanId) {
-    	double expectedReward = 0.0;
-    	for (int i = 0; i < oldWeights.length; i++) {
-    		expectedReward += oldWeights[i] * oldFeatures[i];
-    	}
-    	
     	double[] newWeights = new double[oldWeights.length];
-    	for (int i = 0; i < oldWeights.length; i++) {
-    		newWeights[i] = oldWeights[i] + oldFeatures[i] * (totalReward - expectedReward);
+    	
+    	double reward = calculateReward(stateView, historyView, footmanId);
+    	double bestQ = Double.NEGATIVE_INFINITY;
+    	for (Integer enemy : enemyFootmen) {
+    		double q = calcQValue(stateView, historyView, footmanId, enemy);
+    		if (q > bestQ) {
+    			bestQ = q;
+    		}
     	}
+    	for (int i = 0; i < oldWeights.length; i++) {
+    		newWeights[i] = oldWeights[i] + learningRate * ((reward + gamma * totalReward) - bestQ) * oldFeatures[i];
+    	}
+
         return newWeights;
     }
 
