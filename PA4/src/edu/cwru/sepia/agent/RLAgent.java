@@ -152,7 +152,41 @@ public class RLAgent extends Agent {
      */
     @Override
     public Map<Integer, Action> middleStep(State.StateView stateView, History.HistoryView historyView) {
-        return null;
+        Map<Integer, Action> ourHouse = new HashMap<Integer, Action>(); //in the middle of the street
+    	
+    	//Calculate the reward
+    	int reward = 0;
+    	for(Integer myFootman : myFootmen){
+    		reward += calculateReward(stateView, historyView, myFootman);
+    	}
+    	
+    	//Update the total reward
+    	boolean event = false;
+    	for (DeathLog deathLog : historyView.getDeathLogs(stateView.getTurnNumber() - 1)){
+    		if (playernum == deathLog.getController()){
+    			myFootmen.remove(deathLog.getDeadUnitID());
+    			event = true;
+    		} else if (ENEMY_PLAYERNUM == deathLog.getController()){
+    			enemyFootmen.remove(deathLog.getDeadUnitID());
+    			event = true;    			
+    		} 
+    	}
+    	
+    	Map<Integer,ActionResult> commandFeedback = historyView.getCommandFeedback(playernum, stateView.getTurnNumber() - 1);
+    	for (ActionResult action : commandFeedback.values()) {
+    		if (action.getFeedback() != ActionFeedback.INCOMPLETE){
+    			event = true; 
+    		}
+    	}
+    	
+    	if (event){
+    		for(Integer footman : myFootmen){
+    			ourHouse.put(footman, Action.createCompoundAttack(footman, selectAction(stateView, historyView, footman)));
+    			
+    		}
+    	}
+    	
+    	return ourHouse; //get out of our house
     }
 
     /**
