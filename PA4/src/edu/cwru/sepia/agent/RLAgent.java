@@ -165,10 +165,10 @@ public class RLAgent extends Agent {
     	if (stateView.getTurnNumber() > 0){
 	    	for (DeathLog deathLog : historyView.getDeathLogs(stateView.getTurnNumber() - 1)){
 	    		if (playernum == deathLog.getController()){
-	    			myFootmen.remove(deathLog.getDeadUnitID());
+	    			myFootmen.remove(myFootmen.indexOf(deathLog.getDeadUnitID()));
 	    			event = true;
 	    		} else if (ENEMY_PLAYERNUM == deathLog.getController()){
-	    			enemyFootmen.remove(deathLog.getDeadUnitID());
+	    			enemyFootmen.remove(enemyFootmen.indexOf(deathLog.getDeadUnitID()));
 	    			event = true;    			
 	    		} 
 	    	}
