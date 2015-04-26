@@ -96,7 +96,7 @@ public class RLAgent extends Agent {
         // TODO:You will need to add code to check if you are in a testing or learning episode
 
         // Find all of your units
-        myFootmen = new LinkedList<>();
+        myFootmen = new LinkedList<Integer>();
         for (Integer unitId : stateView.getUnitIds(playernum)) {
             Unit.UnitView unit = stateView.getUnit(unitId);
 
@@ -109,7 +109,7 @@ public class RLAgent extends Agent {
         }
 
         // Find all of the enemy units
-        enemyFootmen = new LinkedList<>();
+        enemyFootmen = new LinkedList<Integer>();
         for (Integer unitId : stateView.getUnitIds(ENEMY_PLAYERNUM)) {
             Unit.UnitView unit = stateView.getUnit(unitId);
 
@@ -462,7 +462,7 @@ public class RLAgent extends Agent {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(path));
             String line;
-            List<Double> weights = new LinkedList<>();
+            List<Double> weights = new LinkedList<Double>();
             while((line = reader.readLine()) != null) {
                 weights.add(Double.parseDouble(line));
             }
