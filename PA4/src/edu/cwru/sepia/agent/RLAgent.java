@@ -344,7 +344,7 @@ public class RLAgent extends Agent {
      * @return The current reward
      */
     public double calculateReward(State.StateView stateView, History.HistoryView historyView, int footmanId) {
-        double reward = 0.0;
+        double reward = -0.1; // -0.1 for each "step". specified in the assignment description
         
         Set<Integer> unitsIAttacked = new HashSet<Integer>();
         for (DamageLog damageLog : historyView.getDamageLogs(stateView.getTurnNumber() - 1)) {
