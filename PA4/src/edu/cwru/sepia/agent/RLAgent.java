@@ -32,6 +32,10 @@ public class RLAgent extends Agent {
     private Map<Integer, Double> discountedRewards = new HashMap<Integer, Double>();
     
     private Map<Integer, Integer> currentTargets = new HashMap<Integer, Integer>();
+    
+    public int currentEpisode = 0;
+    public boolean evaluationMode = false;
+    public int evaluationCount = 0;
 
     /**
      * Convenience variable specifying enemy agent number. Use this whenever referring
@@ -100,7 +104,10 @@ public class RLAgent extends Agent {
     @Override
     public Map<Integer, Action> initialStep(State.StateView stateView, History.HistoryView historyView) {
 
-        // TODO:You will need to add code to check if you are in a testing or learning episode
+    	if (!evaluationMode && currentEpisode % 10 == 0) {
+    		evaluationMode = true;
+    		evaluationCount = 0;
+    	}
 
         // Find all of your units
         myFootmen = new LinkedList<Integer>();
@@ -195,7 +202,7 @@ public class RLAgent extends Agent {
 	    	}
     	}
     	
-    	if (event) {
+    	if (event && !evaluationMode) {
     		double[] oldWeights = new double[NUM_FEATURES];
     		for (int i = 0; i < NUM_FEATURES; i++) {
     			oldWeights[i] = this.weights[i].doubleValue();
@@ -248,6 +255,17 @@ public class RLAgent extends Agent {
     public void terminalStep(State.StateView stateView, History.HistoryView historyView) {
 
         // TODO: MAKE SURE YOU CALL printTestData after you finish a test episode.
+    	if (evaluationMode) {
+    		evaluationCount++;
+    		if (evaluationCount == 5) {
+    			evaluationMode = false;
+    			evaluationCount = 0;
+    			currentEpisode++;
+    			printTestData(new LinkedList<Double>());
+    		}
+    	} else {
+    		currentEpisode++;
+    	}
 
         // Save your weights
         saveWeights(weights);
