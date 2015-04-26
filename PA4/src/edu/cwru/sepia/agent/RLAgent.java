@@ -48,6 +48,8 @@ public class RLAgent extends Agent {
      * Your Q-function weights.
      */
     public Double[] weights;
+    
+    public double reward;
 
     /**
      * These variables are set for you according to the assignment definition. You can change them,
@@ -155,7 +157,6 @@ public class RLAgent extends Agent {
         Map<Integer, Action> ourHouse = new HashMap<Integer, Action>(); //in the middle of the street
     	
     	//Calculate the reward
-    	int reward = 0;
     	for(Integer myFootman : myFootmen){
     		reward += calculateReward(stateView, historyView, myFootman);
     	}
@@ -181,6 +182,17 @@ public class RLAgent extends Agent {
 	    		}
 	    	}
     	}
+    	
+//    	if (event) {
+//    		double[] oldWeights = new double[NUM_FEATURES];
+//    		for (int i = 0; i < NUM_FEATURES; i++) {
+//    			oldWeights[i] = this.weights[i].doubleValue();
+//    		}
+//    		double[] newWeights = updateWeights(oldWeights, calculateFeatureVector(stateView, historyView, myFootmen.get(0), enemyFootmen.get(0)), reward, stateView, historyView, myFootmen.get(0));
+//    		for (int i = 0; i < NUM_FEATURES; i++) {
+//    			this.weights[i] = newWeights[i];
+//    		}
+//    	}
     	
     	if (event || stateView.getTurnNumber() == 0){
     		for(Integer footman : myFootmen){
