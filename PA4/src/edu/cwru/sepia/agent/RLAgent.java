@@ -59,6 +59,7 @@ public class RLAgent extends Agent {
     public Double[] weights;
     
     public double reward;
+    public List<Double> rewards = new ArrayList<Double>();
 
     /**
      * These variables are set for you according to the assignment definition. You can change them,
@@ -107,6 +108,7 @@ public class RLAgent extends Agent {
     	if (!evaluationMode && currentEpisode % 10 == 0) {
     		evaluationMode = true;
     		evaluationCount = 0;
+    		reward = 0;
     	}
 
         // Find all of your units
@@ -175,7 +177,9 @@ public class RLAgent extends Agent {
     			cumulativeReward = 0.0;
     		}
     		double reward = calculateReward(stateView, historyView, myFootman);
-    		this.reward += reward;
+    		if (evaluationMode) {
+    			this.reward += reward;
+    		}
     		discountedRewards.put(myFootman, cumulativeReward + gamma * reward);
     	}
     	boolean event = false;
@@ -253,7 +257,11 @@ public class RLAgent extends Agent {
      */
     @Override
     public void terminalStep(State.StateView stateView, History.HistoryView historyView) {
-
+    	if (currentEpisode > numEpisodes) {
+    		System.out.println("All done!");
+    		System.exit(0);
+    	}
+    	
         // TODO: MAKE SURE YOU CALL printTestData after you finish a test episode.
     	if (evaluationMode) {
     		evaluationCount++;
@@ -261,7 +269,8 @@ public class RLAgent extends Agent {
     			evaluationMode = false;
     			evaluationCount = 0;
     			currentEpisode++;
-    			printTestData(new LinkedList<Double>());
+    			rewards.add(reward/5);
+    			printTestData(rewards);
     		}
     	} else {
     		currentEpisode++;
