@@ -1,0 +1,182 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\author{Andrew Mason}
+\title{EECS 440 HW3}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+  % #1
+  \item
+    \begin{proof} $V(X+Y) = V(X) + V(Y)$ for independent random variables $X$ and $Y$.\\
+
+      First, show how $V(X)$ and $V(Y)$ can be found from $V(X+Y)$
+      \begin{equation}
+        \begin{split}
+          V(X+Y) &= E[(X+Y)^2] - (E[X+Y])^2 \\
+          &= E[X^2 + XY + Y^2] - (E[X] + E[Y])^2 \\
+          &= E[X^2] + E[XY] + E[Y^2] - (E[X])^2 - E[X]E[Y] - (E[Y^2]) \\
+          &= E[X^2] - (E[X])^2 + E[Y^2] - (E[Y^2]) + E[XY] - E[X]E[Y] \\
+          &= V(X) + V(Y) + E[XY] - E[X]E[Y] \\
+        \end{split}
+      \end{equation}
+
+      Next, show that $E[XY] = E[X]E[Y]$ when $X$ and $Y$ are independent.
+      \begin{equation}
+        \begin{split}
+        E[XY] &= \sum_{x}\sum_{y}xyf_{X,Y}(x,y) \\
+        &= \sum_{x}\sum_{y}xyf_X(x)f_Y(y)\text{ Since $X,Y$ are independent.} \\
+        &= \sum_{x}xf_X(x)\sum_{y}yf_Y(y) \\
+        &= E[X]E[Y] \\
+        \end{split}
+      \end{equation}
+
+      So, finally, we have
+      \begin{equation}
+        \begin{split}
+          V(X+Y) &= V(X) + V(Y) + E[XY] - E[X]E[Y] \\
+          &= V(X) + V(Y) + 0 \\
+          &= V(X) + V(Y) \\
+        \end{split}
+      \end{equation}
+    \end{proof}
+  % #2
+  \item
+    \begin{proof} For a convex function $f$, every local minimum is a global minimum.\\
+
+      Define $x^*$ to be the global mininmum of $f$.\\
+      Let $\bar{x}$ be a local minimum that is not a global minimum. That is,
+      $f(x^*)<f(\bar{x})$. \\
+      Also, define $H$ to be the neighborhood of $\bar{x}$. That is,\\
+      $\forall x\in H f(\bar{x})\leq f(x)$. \\
+      Define $x_0=\lambda x^*+(1-\lambda)\bar{x}$, for $\lambda\in[0, 1)$\\
+      Then, from Jensen`s Inequality:\\
+      \begin{equation}
+        \begin{split}
+          f(x_0)&\leq\lambda f(x^*)+(1-\lambda)f(\bar{x}) \\
+          &<\lambda f(\bar{x})+(1-\lambda)f(\bar{x}) \\
+          &<f(\bar{x})\\
+        \end{split}
+      \end{equation}
+      There are two cases to consider.\\
+      If $x_0\in H$, then $\bar{x}$ is not a local minimum by contradiction.\\
+      If $x_0\notin H$, then $f$ is not convex.
+      \begin{equation}
+        \begin{split}
+        f(\lambda x_0+(1-\lambda)\bar{x})&\leq \lambda f(x_0)+(1-\lambda)f(\bar{x}) \\
+        &<\lambda f(\bar{x})+(1-\lambda)f(\bar{x}) \\
+        &<f(\bar{x}) \\
+        \end{split}
+      \end{equation}
+      In the case that $\lambda = 0$ above, this causes the contradiction that $f(\bar{x})<f(\bar{x})$.\\
+    \end{proof}
+  % #3
+  \item
+    % Can NOT be: chess, recognize lions, drive, grouping images by content,
+    %             recognize X, learning a language, 
+    \begin{enumerate}
+      \item
+        Task: Learn to play Mario (or any simple video game)\\
+        Goal: Win\\
+        Performance Measure: Score in the game\\
+
+        One way to store examples is a string of button presses, along with an end score.
+        So, "UUDDABLR, 21", for example. Or, perhaps a better format would be a list of
+        two-tuples, where each tuple is a key press and then the effect on the score. So,
+        [(U, 0), (U, 0), (D, 5), (D, 5), (A, 10), (B, 0), (L, 0), (R, 1)].\\
+
+        Unsupervised learning seems most appropriate for this task. As far as I'm aware,
+        there is not a set of generally-accepted ``good'' strategies for playing Mario.
+        I feel it would be far better to turn an ML algorithm loose on the data, and let
+        it look for patterns of button presses that are beneficial in terms of the score.\\
+
+        A sequential representation seems most appropriate for the examples. In this format,
+        the score at each step can be an annotation on each button press ``element'' of the
+        sequence.\\
+
+        If the hypothesis space is defined to be ``all possible sequences of button presses'',
+        this creates the obvious issue where the hypothesis space is unbounded. Furthermore,
+        a single hypothesis can be unbounded. The second issue can be corrected by specifying
+        a constraint on the hypotheses that they must have finite length. This in turn creates
+        an issue that now all hypotheses in the hypothesis space are \textit{cycles} - and not
+        sequences - of button presses; this may not actually be correct (i.e. not the target
+        concept).\\
+
+        Another issue is that the score benefit of a button press is context dependent, not
+        just on the button presses surrounding it, but also on time. The same sequence ``AAB'',
+        beginning in the exact same state in the game, may yield a score of 10 if there is a
+        1 ms delay between presses, or a score of 0 if there is a 1 second delay.
+      \item
+        Task: Learn speech recognition.\\
+        Goal: Listen to human speech (English), and ``understand'' it\\
+        To ensure the agent heard the words properly, it could simply output a textual
+        representation of what it thinks was said.\\
+        Performance Measure: Percentage of words heard correctly.\\
+
+        Examples could be binary encodings of audio of actual humans speaking.
+        Supervised learning is best here, so the machine can see what the expected
+        output was, and adjust its hypothesis accordingly. As a result, the examples
+        should be annotated with the textual representation of the speech contained
+        in the example.\\
+
+        The hypothesis space for this problem is the set of all functions that take a
+        finite length binary encoding of human speech and output a string of text
+        which represents the speech.\\
+
+        There are many issues that may not fit well. First, there is the issue of accents,
+        pitch, and intonation, namely that two people can say exactly the same word and make
+        it sound completely different. Second, there is the issue of pauses (``um'', ``uh'', etc)
+        in regular human speech. This increases the amount of noise in the examples - a large
+        number of ``uh''s in two very different examples can make them seem much more similar
+        than they actually are.
+    \end{enumerate}
+  % #4
+  \item
+    \begin{enumerate}
+      \item
+        \begin{proof} There are $2^n$ distinct examples in this setting.\\
+          There are two choices (True or False) for the first variable,
+          then two choices (independent of the first variable's value) for
+          the second variable, and so on for $n$ variables. This is a simple
+          combinatorics problem that reduces to $2*2*2*...*2 = \prod_{i=1}^{n} 2 = 2^n$
+        \end{proof}
+      \item
+        \begin{proof} There are $2^{2^n}$ distinct hypotheses in this setting.\\
+          As proved in the previous problem, there are $2^n$ possible distinct
+          examples in this setting. Another way to phrase this is that the truth
+          table for the $n$ boolean variables has $2^n$ rows. Each hypothesis is
+          some subset of this truth table. For a set $S$, there are $2^{|S|}$
+          distinct subsets of $S$. So, there are $2^{2^n}$ distinict hypotheses
+          and decision trees, since there is a one-to-one correspondence between
+          hypothesis and decision tree.
+        \end{proof}
+    \end{enumerate}
+  % #5
+  \item
+    \begin{proof} The entropy of a Bernoulli random variable, $X$, is a concave function.\\
+      Define $P(X = 1) = p$, $P(X = 0) = 1 - p = q$.\\
+      \begin{equation}
+        \begin{split}
+          H(S)&=-\sum_{i=1}^{n}p_i\log_2p_i \\
+          H(X)&=- p\log_2 p - q\log_2 q\\
+        \end{split}
+      \end{equation}
+      Now consider $-H(X) = f(p) = p\log_2p + q\log_2q = p\log_2p + (1-p)\log_2(1-p)$\\
+      \begin{equation}
+        \begin{split}
+          \frac{d}{dp}p\log_2p+(1-p)\log_2(1-p)&=\log_2(p)+\log_2(1-p) \\
+          \frac{d^2}{dp^2}p\log_2p+(1-p)\log_2(1-p)&=\frac{1}{p\log(2)-p^2\log(2)} \\
+        \end{split}
+      \end{equation}
+      For $f$ to be convex, $f'>0$ and $f''<0$ for the interval $(1,\infty)$.\\
+      $\log_2(x)> 0$ for $x\in(1,\infty)$, so $f'$ is positive.\\
+      $p\log(2)(1-p)<0$ for $x\in(1,\infty)$, so $f''$ is negative.\\
+      Thus, $f$ is convex, and $H(X)$ is concave.\\
+    \end{proof}
+\end{enumerate}
+\end{document}
