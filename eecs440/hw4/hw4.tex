@@ -1,5 +1,8 @@
 \documentclass[12pt]{article}
 
+\usepackage{amsmath}
+\usepackage{amsthm}
+
 \title{EECS 440 HW4}
 \author{Andrew Mason}
 
@@ -46,7 +49,64 @@
     existed, since this algorthim would be doing tabular rasa learning.
   \item
     % 3
+    \begin{proof} For a binary classification task, the information gain for
+    any binary split variable, $X$, is always nonnegative.\\
+
+    Let $Y$ be the random variable which takes on the value of the class
+    label. Then, $IG(X)=H(Y)-H(Y|X)$.\\
+
+    Define mutual information $I(X;Y)$ to be
+    $$\sum_{x,y}p(x,y)\log\frac{p(x,y)}{p(x)p(y)}$$\\
+
+    Then,
+    \begin{equation}
+      \begin{split}
+      I(X;Y)&=\sum_{x,y}p(x,y)\log\frac{p(y|x)}{p(x)}\\
+      &=H(Y)-H(Y|X)\\
+      \end{split}
+    \end{equation}
+
+    Applying Jensen's inequality to any term of the sum, we have
+    \begin{equation}
+      \begin{split}
+      -p(x,y)\log\frac{p(x,y)}{p(x)p(y)}&=-p(x,y)\log\frac{p(x)p(y)}{p(x,y)}\\
+      &\leq\log p(x,y)\frac{p(x)p(y)}{p(x,y)}\\
+      &\leq\log p(x)p(y)\\
+      \end{split}
+    \end{equation}
+
+    Now,
+    \begin{equation}
+      \begin{split}
+      -I(X;Y)&=\sum_{x,y}-p(x,y)\log\frac{p(x)p(y)}{p(x,y)}\\
+      &\leq\log\sum_{x,y}p(x,y)\\
+      &\leq\log 1\\
+      &\leq 0\\
+      \end{split}
+    \end{equation}
+
+    So, $I(X;Y)$ is nonnegative, as is information gain.\\
+    \end{proof}
   \item
     % 4
+    \begin{proof} For a continuous attribute $X$, max $IG(X)$ occurs between
+      points with different labels.\\
+
+      Considering the setup given in the assignment (candidate split point $S$
+      in the middle of $N$ examples with the same labels, to the right of $n$ such
+      examples; to the left there are $L_0$ examples with negative label and $L_1$
+      examples with positive label and likewise to the right ($R_0$, $R_1$)), we can
+      define $IG(S)$ as a function of $n$.\\
+
+      $IG(S,n)=H(Y)-H(Y|S\leq n)\ n\in[0,N]$\\
+
+      Since $H(Y)$ does not depend on $n$, maximizing $IG(S,n)$ is
+      equivalent to maximizing $-H(Y|S\leq n)$ or minimizing $H(Y|S\leq n)$.\\
+
+      Now, $H(X)$ is a concave function, so to find a minimum over [0,N], we only
+      need to consider the extreme points of the interval. This means that
+      $-H(Y|S\leq n)$ (and, by extension, $IG(S,n)$), is maximized either when
+      $n=0$ or $n=N$.\\
+    \end{proof}
 \end{enumerate}
 \end{document}
