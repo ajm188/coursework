@@ -57,7 +57,7 @@ def get_classifier(**options):
         return META_ALGORITHMS[meta](
             algorithm=classifier_name,
             iters=iters,
-            **options,
+            **options
         )
     else:
         return CLASSIFIERS[classifier_name](**options)
@@ -72,56 +72,48 @@ def get_folds(X, y, k):
     @param k : number of folds
     @return (train_X, train_y, test_X, test_y) for each fold
     """
-    folds = {}
+    # temporarily change the 1/-1 nature of y to 1/0
+    _y = (y + 1) / 2
     # partition the examples into postive and negative sets
-    positive_indices = np.argwhere(y == 1)
-    negative_indices = np.argwhere(y == -1)
+    positive_indices = np.where(_y)[0]
+    negative_indices = np.where(_y - 1)[0]
     assert len(positive_indices) + len(negative_indices) == len(y)
-    for example, label in zip(X, y):
-        l = positive if label == 1 else negative
-        l.append((example, label))
+
     # number of pos/neg that should be in each fold
-    positive_len = len(positive) / k
-    negative_len = len(negative) / k
+    positive_len = len(positive_indices) / k
+    negative_len = len(negative_indices) / k
+
     # shuffle both lists
-    np.random.shuffle(positive)
-    np.random.shuffle(negative)
-    # put len(pos) / k positives and len(neg) / k negatives in each fold
-    for i in xrange(k):
-        positive_start = i * positive_len
-        negative_start = i * negative_len
-        fold_positive = positive[positive_start:(positive_start + positive_len)]
-        fold_negative = negative[negative_start:(negative_start + negative_len)]
-        fold_X, fold_y = [], []
-        for t in fold_positive + fold_negative:
-            fold_X.append(t[0])
-            fold_y.append(t[1])
-        folds[i] = [fold_X, fold_y]
+    np.random.shuffle(positive_indices)
+    np.random.shuffle(negative_indices)
 
-    # for pos/neg leftovers, randomly distribute into the folds
-    leftovers = positive[(k-1)*positive_len:] + \
-            negative[(k-1)*negative_len:]
-    for leftover in leftovers:
-        (example, label) = leftover
-        fold_index = np.random.randint(0, k)
-        fold = folds[fold_index]
-        fold[0].append(example)
-        fold[1].append(label)
+    # create k buckets of indices of (approximately) equal size
+    positive_folds_indices = \
+        np.array(np.array_split(positive_indices, positive_len))
+    negative_folds_indices = \
+        np.array(np.array_split(negative_indices, negative_len))
 
-    # for each fold, hold it aside for testing, and use the rest of the folds
-    # as training data
     train_X, train_y, test_X, test_y = [], [], [], []
     for i in xrange(k):
-        train_folds = [folds[j] for j in folds.keys() if i != j]
-        test_fold = folds[i]
-        train_examples, train_labels = [], []
-        for f in train_folds:
-            train_examples.extend(f[0])
-            train_labels.extend(f[1])
-        train_X.append(train_examples)
-        train_y.append(train_labels)
-        test_X.append(test_fold[0])
-        test_y.append(test_fold[1])
+        train_folds = np.concatenate((np.arange(0, i), np.arange(i+1, k)))
+        pos_train_indices = np.concatenate(positive_folds_indices[train_folds])
+        #import pdb;pdb.set_trace()
+        neg_train_indices = np.concatenate(negative_folds_indices[train_folds])
+        pos_test_indices = positive_folds_indices[i]
+        neg_test_indices = negative_folds_indices[i]
+
+        train_X.append(
+            np.concatenate((X[pos_train_indices], X[neg_train_indices]))
+        )
+        train_y.append(
+            np.concatenate((y[pos_train_indices], y[neg_train_indices]))
+        )
+        test_X.append(
+            np.concatenate((X[pos_test_indices], X[neg_test_indices]))
+        )
+        test_y.append(
+            np.concatenate((y[pos_test_indices], y[neg_test_indices]))
+        )
 
     return zip(train_X, train_y, test_X, test_y)
 
