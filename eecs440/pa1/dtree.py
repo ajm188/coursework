@@ -3,6 +3,8 @@ The Decision Tree Classifier
 """
 from __future__ import print_function
 
+import collections
+
 import numpy as np
 import numpy.random
 import scipy
@@ -14,10 +16,14 @@ def continuous_counts(X, value):
     return np.array([lhs, len(X) - lhs])
 
 
+def discrete_counts(X):
+    return np.array([v for v in collections.Counter(X).values()])
+
+
 def H(Y, given=None, continuous_value=None):
     if given is not None:
         X = given
-        X_counts = np.bincount(X) if continuous_value is None else \
+        X_counts = discrete_counts(X) if continuous_value is None else \
             continuous_counts(X, continuous_value)
         X_probs = X_counts / float(len(X))
         if continuous_value:
@@ -37,7 +43,7 @@ def H(Y, given=None, continuous_value=None):
 
     if not len(Y):
         return 0
-    counts = np.bincount(Y) if continuous_value is None else \
+    counts = discrete_counts(Y) if continuous_value is None else \
         continuous_counts(Y, continuous_value)
     probabilities = counts / float(len(Y))
     log_probabilities = np.log2(probabilities)
@@ -219,8 +225,7 @@ class DecisionTree(object):
             right = np.where(X[:, feature] > split)[0]
             rows = [left, right]
         else:
-            x_bins = np.bincount(X[:, feature])
-            values = np.where(x_bins != 0)[0]
+            values = [k for k in collections.Counter(X[:, feature]).keys()]
             rows = [np.where(X[:, feature] == v)[0] for v in values]
 
         return [(X[r], y[r]) for r in rows]
