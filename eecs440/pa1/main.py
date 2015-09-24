@@ -155,6 +155,8 @@ def main(**options):
             train_X = selector.transform(train_X)
 
         classifier.fit(train_X, train_y)
+        first_test = classifier.root.feature
+        print schema.feature_names[first_test]
         train_time = (train_start - time.time())
         sizes.append(classifier.size())
         depths.append(classifier.depth())
