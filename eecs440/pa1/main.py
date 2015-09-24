@@ -170,7 +170,7 @@ def main(**options):
     print ('      Accuracy: %.03f %.03f' %
            stats_manager.get_statistic('accuracy', pooled=False))
     print ('      Average Size: %.03f' % np.mean(sizes))
-    print ('      Maximum Depth: %i' % max(depths))
+    print ('      Average Depth: %.03f' % np.mean(depths))
     '''
     print ('     Precision: %.03f %.03f'
         % stats_manager.get_statistic('precision', pooled=False))
