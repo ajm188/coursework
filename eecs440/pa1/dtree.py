@@ -71,6 +71,20 @@ class DecisionTree(object):
                     # way with the duplicated code
                     return (-1) ** np.random.random_integers(0, 1)
 
+        def size(self):
+            if not self.test:
+                return 1
+            return sum([child.size() for child in self.test.values()])
+
+        def depth(self):
+            if not self.test:
+                return 1
+            return 1 + max(
+                map(
+                    lambda child: child.depth(),
+                    self.test.values(),
+                )
+            )
 
     def __init__(self, depth=None, **kwargs):
         """
@@ -89,11 +103,12 @@ class DecisionTree(object):
             X,
             (y + 1) / 2,  # convert 1/-1 to 1/0
             set(range(len(self._schema.feature_names))),
+            0,
         )
 
-    def _fit(self, X, y, features, parent=None):
+    def _fit(self, X, y, features, depth, parent=None):
         if not features or \
-                self._depth - 1 == self.depth() or \
+                self._depth == depth or \
                 self.pure_partition(y):
 
             # convert 1/0 back to 1/-1
@@ -111,7 +126,7 @@ class DecisionTree(object):
         _features = features - set([best_feature])
         for x_part, y_part in partition:
             value = x_part[0][best_feature]
-            n.add_test(value, self._fit(x_part, y_part, _features))
+            n.add_test(value, self._fit(x_part, y_part, _features, depth + 1))
         return n
 
     def partition(self, X, y, feature):
@@ -154,11 +169,15 @@ class DecisionTree(object):
         """
         Return the number of nodes in the tree
         """
-        pass
+        if self.root is None:
+            return 0
+        return self.root.size()
 
     def depth(self):
         """
         Returns the maximum depth of the tree
         (A tree with a single root node has depth 0)
         """
-        pass
+        if self.root is None:
+            return 0
+        return self.root.depth() - 1
