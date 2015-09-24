@@ -144,7 +144,7 @@ class DecisionTree(object):
 
     def predict(self, X):
         """ Return the -1/1 predictions of the decision tree """
-        return [self.root.predict(x) for x in X]
+        return np.array([self.root.predict(x) for x in X])
 
     def predict_proba(self, X):
         """ Return the probabilistic output of label prediction """
