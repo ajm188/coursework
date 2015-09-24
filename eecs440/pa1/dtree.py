@@ -9,55 +9,93 @@ import scipy
 import scipy.stats
 
 
-def H(Y, given=None):
+def continuous_counts(X, value):
+    lhs = len(np.where(X <= value)[0])
+    return np.array([lhs, len(X) - lhs])
+
+
+def H(Y, given=None, continuous_value=None):
     if given is not None:
         X = given
-        X_counts = np.bincount(X)
+        X_counts = np.bincount(X) if continuous_value is None else \
+            continuous_counts(X, continuous_value)
         X_probs = X_counts / float(len(X))
-        cond_entropies = np.apply_along_axis(
-            lambda i: H(Y[np.where(X == i)[0]]),
-            0,
-            np.where(X_counts != 0)[0],
-        )
+        if continuous_value:
+            cond_entropies = np.array(
+                [
+                    H(Y[np.where(X <= continuous_value)]),
+                    H(Y[np.where(X > continuous_value)]),
+                ],
+            )
+        else:
+            cond_entropies = np.apply_along_axis(
+                lambda i: H(Y[np.where(X == i)[0]]),
+                0,
+                np.where(X_counts != 0)[0],
+            )
         return np.sum(cond_entropies)
 
     if not len(Y):
         return 0
-    probabilities = np.bincount(Y) / float(len(Y))
+    counts = np.bincount(Y) if continuous_value is None else \
+        continuous_counts(Y, continuous_value)
+    probabilities = counts / float(len(Y))
     log_probabilities = np.log2(probabilities)
     log_probabilities[log_probabilities == -np.inf] = 0
     return -np.dot(probabilities, log_probabilities)
 
 
-def IG(X, y):
-    return H(y) - H(y, given=X)
+def IG(X, y, continuous_value=None):
+    return H(y) - H(y, given=X, continuous_value=continuous_value)
 
 
-def gain_ratio(X, y):
-    H_X = H(X)
+def gain_ratio(X, y, continuous_value=None):
+    H_X = H(X, continuous_value=continuous_value)
     if not H_X:
         return 0
-    return IG(X, y) / H_X
+    return IG(X, y, continuous_value=continuous_value) / H_X
 
 
 class DecisionTree(object):
 
     class Node(object):
 
-        def __init__(self, feature=None, label=None, parent=None):
+        def __init__(self, feature=None, label=None, parent=None, split=None):
             self.feature = feature
             self.parent = parent
             self.label = label
+            self.split = split
+            if self.split:
+                self.splits = []
             self.test = {}
 
         def add_test(self, v, n):
-            if v in self.test:
-                raise Exception("can't set the same value twice")
-            self.test[v] = n
+            if self.split:
+                if len(self.splits) > 2:
+                    message = "splitting is binary. \
+                               there can only be 2 children"
+                    raise Exception(message)
+                # Based on the way partition is defined (below), the left
+                # partition should always be added first.
+                self.splits.append(n)
+                # also, stick the node in self.test so "depth" and "size"
+                # still work correctly. gross, I know, but hey it's getting
+                # late
+                self.test[len(self.splits)] = n
+            else:
+                if v in self.test:
+                    raise Exception("can't set the same value twice")
+                self.test[v] = n
 
         def predict(self, x):
             if self.label:
                 return self.label
+            elif self.split:
+                # Since the left partition is always added first, if
+                # x[feature] is less than the split, take the first node,
+                # otherwise, take the second
+                splits_index = 0 if x[self.feature] <= self.split else 1
+                return self.splits[splits_index]
             else:
                 try:
                     return self.test[x[self.feature]].predict(x)
@@ -93,7 +131,7 @@ class DecisionTree(object):
         @param depth=None : maximum depth of the tree,
                             or None for no maximum depth
         """
-        self._depth = depth
+        self._depth = depth or None  # makes 0 None as well
         self._schema = kwargs['schema']
         self.root = None
 
@@ -103,10 +141,11 @@ class DecisionTree(object):
             X,
             (y + 1) / 2,  # convert 1/-1 to 1/0
             set(range(len(self._schema.feature_names))),
+            {},
             0,
         )
 
-    def _fit(self, X, y, features, depth, parent=None):
+    def _fit(self, X, y, features, used_splits, depth, parent=None):
         if not features or \
                 self._depth == depth or \
                 self.pure_partition(y):
@@ -114,32 +153,76 @@ class DecisionTree(object):
             # convert 1/0 back to 1/-1
             return self.majority_node((y * 2) - 1, parent)
 
-        best_feature, best_GR = None, -np.inf
+        _features = features
+        best_feature, best_GR, best_split = None, -np.inf, None
         for feature in features:
-            X_values = X[:,feature]
-            gr = gain_ratio(X_values, y)
-            if gr > best_GR:
-                best_GR = gr
-                best_feature = feature
-        n = DecisionTree.Node(feature=best_feature, parent=parent)
-        partition = self.partition(X, y, best_feature)
-        _features = features - set([best_feature])
+            X_values = X[:, feature]
+            if not self._schema.is_nominal(feature):
+                sorted_indices = np.argsort(X_values)
+                sorted_y = y[sorted_indices]
+                test_values = set([X_values[i]
+                                   for i in range(len(X_values) - 1) if
+                                   sorted_y[i] != sorted_y[i + 1]])
+                test_values = test_values - used_splits.get(feature, set())
+                if not test_values:
+                    # if there are no values left to test, stop checking
+                    _features = _features - set([feature])
+                for tv in test_values:
+                    gr = gain_ratio(X_values, y, continuous_value=tv)
+                    if gr > best_GR:
+                        best_GR = gr
+                        best_feature = feature
+                        best_split = tv
+            else:
+                gr = gain_ratio(X_values, y)
+                if gr > best_GR:
+                    best_GR = gr
+                    best_feature = feature
+                    best_split = None
+        if best_split:
+            # If we ended up choosing a continuous feature, record the split
+            # index we used so we don't use it again deeper in the subtree
+            used_feature_splits = used_splits.get(best_feature, set())
+            used_splits[best_feature] = used_feature_splits | set([best_split])
+
+        n = DecisionTree.Node(
+            feature=best_feature,
+            split=best_split,
+            parent=parent,
+        )
+        partition = self.partition(X, y, best_feature, split=best_split)
+        if not best_split:
+            # Only remove features from consideration if they are discrete
+            _features = _features - set([best_feature])
         for x_part, y_part in partition:
-            value = x_part[0][best_feature]
-            n.add_test(value, self._fit(x_part, y_part, _features, depth + 1))
+            value = best_split or x_part[0][best_feature]
+            n.add_test(
+                value,
+                self._fit(
+                    x_part,
+                    y_part,
+                    _features,
+                    dict(used_splits),
+                    depth + 1,
+                ),
+            )
         return n
 
-    def partition(self, X, y, feature):
+    def partition(self, X, y, feature, split=None):
         """
         Partition examples (X) and labels (y) based on the feature.
         Returns a list of tuples, one tuple for each "bucket" of the
         partition.
         """
-        x_bins = np.bincount(X[:,feature])
-        values = np.where(x_bins != 0)[0]
-        rows = []
-        for v in values:
-            rows.append(np.where(X[:,feature] == v)[0])
+        if split:
+            left = np.where(X[:, feature] <= split)[0]
+            right = np.where(X[:, feature] > split)[0]
+            rows = [left, right]
+        else:
+            x_bins = np.bincount(X[:, feature])
+            values = np.where(x_bins != 0)[0]
+            rows = [np.where(X[:, feature] == v)[0] for v in values]
+
         return [(X[r], y[r]) for r in rows]
 
     def majority_node(self, y, parent):
