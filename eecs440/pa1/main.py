@@ -146,7 +146,6 @@ def main(**options):
     for train_X, train_y, test_X, test_y in folds:
 
         # Construct classifier instance
-        print options
         classifier = get_classifier(**options)
 
         # Train classifier
