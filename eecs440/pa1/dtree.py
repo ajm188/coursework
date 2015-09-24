@@ -3,8 +3,6 @@ The Decision Tree Classifier
 """
 from __future__ import print_function
 
-import collections
-
 import numpy as np
 import numpy.random
 import scipy
@@ -17,7 +15,7 @@ def continuous_counts(X, value):
 
 
 def discrete_counts(X):
-    return np.array([v for k, v in collections.Counter(X).iteritems()])
+    return np.bincount(X.astype(int))
 
 
 def H(Y, given=None, continuous_value=None):
@@ -35,7 +33,7 @@ def H(Y, given=None, continuous_value=None):
             )
         else:
             cond_entropies = np.array(
-                [H(Y[np.where(X == i)[0]]) for i in np.unique(X)],
+                [H(Y[np.where(X == i)[0]]) for i in range(len(X_counts))],
             )
         return -np.dot(X_probs, cond_entropies)
 
@@ -223,8 +221,10 @@ class DecisionTree(object):
             right = np.where(X[:, feature] > split)[0]
             rows = [left, right]
         else:
-            values = [k for k in collections.Counter(X[:, feature]).keys()]
-            rows = [np.where(X[:, feature] == v)[0] for v in values]
+            counts = np.bincount(X.astype(int)[:, feature])
+            rows = [np.where(X[:, feature] == v)[0]
+                    for v in xrange(len(counts)) 
+                    if counts[v] != 0]
 
         return [(X[r], y[r]) for r in rows]
 
