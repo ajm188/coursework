@@ -14,11 +14,10 @@ def H(Y, given=None):
         X = given
         X_counts = np.bincount(X)
         X_probs = X_counts / float(len(X))
-        import pdb; pdb.set_trace()
         cond_entropies = np.apply_along_axis(
-            lambda i: H(Y[np.where(X[X == i])[0]]),
+            lambda i: H(Y[np.where(X == i)[0]]),
             0,
-            np.where(X[X_counts != 0])[0],
+            np.where(X_counts != 0)[0],
         )
         return np.sum(cond_entropies)
 
@@ -105,6 +104,11 @@ class DecisionTree(object):
         return n
 
     def partition(self, X, y, feature):
+        """
+        Partition examples (X) and labels (y) based on the feature.
+        Returns a list of tuples, one tuple for each "bucket" of the
+        partition.
+        """
         x_bins = np.bincount(X[:,feature])
         values = np.where(x_bins != 0)[0]
         rows = []
@@ -113,6 +117,10 @@ class DecisionTree(object):
         return [(X[r], y[r]) for r in rows]
 
     def majority_node(self, y, parent):
+        """
+        Return a node which assigns the majority class label for an example.
+        If the set of labels (y) is empty, pick between 1 and -1 randomly.
+        """
         if len(y):
             label = scipy.stats.mode(y).mode[0]
         else:
