@@ -159,6 +159,7 @@ def main(**options):
         print_str = schema.feature_names[first_test]
         if classifier.root.split:
             print_str += " <= %f" % classifier.root.split
+        # Print the first test of each learned classifier
         print "First test: %s" % print_str
         train_time = (train_start - time.time())
         sizes.append(classifier.size())
