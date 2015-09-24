@@ -156,7 +156,10 @@ def main(**options):
 
         classifier.fit(train_X, train_y)
         first_test = classifier.root.feature
-        print schema.feature_names[first_test]
+        print_str = schema.feature_names[first_test]
+        if classifier.root.split:
+            print_str += " <= %f" % classifier.root.split
+        print "First test: %s" % print_str
         train_time = (train_start - time.time())
         sizes.append(classifier.size())
         depths.append(classifier.depth())
