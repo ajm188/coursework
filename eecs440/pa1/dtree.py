@@ -59,7 +59,18 @@ class DecisionTree(object):
             if self.label:
                 return self.label
             else:
-                return self.test[x[self.feature]].predict(x)
+                try:
+                    return self.test[x[self.feature]].predict(x)
+                except:
+                    # In the event we don't have a node for the given
+                    # attribute of x (i.e. the partition would have been empty
+                    # when constructing the decision tree) just pick between
+                    # 1/-1 with probability 1/2. Note that this is the same
+                    # behavior as if DecisionTree._fit had been called on the
+                    # empty partition - it was just easier to implement it this
+                    # way with the duplicated code
+                    return (-1) ** np.random.random_integers(0, 1)
+
 
     def __init__(self, depth=None, **kwargs):
         """
