@@ -157,8 +157,6 @@ def main(**options):
             train_X = selector.transform(train_X)
 
         classifier.fit(train_X, train_y)
-        import pdb
-        pdb.set_trace()
         train_time = (train_start - time.time())
 
         if fs_alg:
