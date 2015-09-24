@@ -17,7 +17,7 @@ def continuous_counts(X, value):
 
 
 def discrete_counts(X):
-    return np.array([v for v in collections.Counter(X).values()])
+    return np.array([v for k, v in collections.Counter(X).iteritems()])
 
 
 def H(Y, given=None, continuous_value=None):
@@ -26,7 +26,7 @@ def H(Y, given=None, continuous_value=None):
         X_counts = discrete_counts(X) if continuous_value is None else \
             continuous_counts(X, continuous_value)
         X_probs = X_counts / float(len(X))
-        if continuous_value:
+        if continuous_value is not None:
             cond_entropies = np.array(
                 [
                     H(Y[np.where(X <= continuous_value)]),
@@ -34,12 +34,10 @@ def H(Y, given=None, continuous_value=None):
                 ],
             )
         else:
-            cond_entropies = np.apply_along_axis(
-                lambda i: H(Y[np.where(X == i)[0]]),
-                0,
-                np.where(X_counts != 0)[0],
+            cond_entropies = np.array(
+                [H(Y[np.where(X == i)[0]]) for i in np.unique(X)],
             )
-        return np.sum(cond_entropies)
+        return -np.dot(X_probs, cond_entropies)
 
     if not len(Y):
         return 0
