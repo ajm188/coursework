@@ -80,19 +80,15 @@ def get_folds(X, y, k):
     negative_indices = np.where(_y - 1)[0]
     assert len(positive_indices) + len(negative_indices) == len(y)
 
-    # number of pos/neg that should be in each fold
-    positive_len = len(positive_indices) / k
-    negative_len = len(negative_indices) / k
-
     # shuffle both lists
     np.random.shuffle(positive_indices)
     np.random.shuffle(negative_indices)
 
     # create k buckets of indices of (approximately) equal size
     positive_folds_indices = \
-        np.array(np.array_split(positive_indices, positive_len))
+        np.array(np.array_split(positive_indices, k))
     negative_folds_indices = \
-        np.array(np.array_split(negative_indices, negative_len))
+        np.array(np.array_split(negative_indices, k))
 
     train_X, train_y, test_X, test_y = [], [], [], []
     for i in xrange(k):
