@@ -140,6 +140,8 @@ def main(**options):
     options['schema'] = schema
     folds = get_folds(X, y, k)
     stats_manager = StatisticsManager()
+    sizes = []
+    depths = []
     for train_X, train_y, test_X, test_y in folds:
 
         # Construct classifier instance
@@ -154,6 +156,8 @@ def main(**options):
 
         classifier.fit(train_X, train_y)
         train_time = (train_start - time.time())
+        sizes.append(classifier.size())
+        depths.append(classifier.depth())
 
         if fs_alg:
             test_X = selector.transform(test_X)
@@ -165,6 +169,8 @@ def main(**options):
 
     print ('      Accuracy: %.03f %.03f' %
            stats_manager.get_statistic('accuracy', pooled=False))
+    print ('      Average Size: %.03f' % np.mean(sizes))
+    print ('      Maximum Depth: %i' % max(depths))
     '''
     print ('     Precision: %.03f %.03f'
         % stats_manager.get_statistic('precision', pooled=False))
