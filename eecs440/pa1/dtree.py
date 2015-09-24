@@ -1,10 +1,44 @@
 """
 The Decision Tree Classifier
 """
-import numpy
+from __future__ import print_function
+
+import numpy as np
 import numpy.random
 import scipy
 import scipy.stats
+
+
+def H(Y, given=None):
+    if given is not None:
+        X = given
+        X_counts = np.bincount(X)
+        X_probs = X_counts / float(len(X))
+        import pdb; pdb.set_trace()
+        cond_entropies = np.apply_along_axis(
+            lambda i: H(Y[np.where(X[X == i])[0]]),
+            0,
+            np.where(X[X_counts != 0])[0],
+        )
+        return np.sum(cond_entropies)
+
+    if not len(Y):
+        return 0
+    probabilities = np.bincount(Y) / float(len(Y))
+    log_probabilities = np.log2(probabilities)
+    log_probabilities[log_probabilities == -np.inf] = 0
+    return -np.dot(probabilities, log_probabilities)
+
+
+def IG(X, y):
+    return H(y) - H(y, given=X)
+
+
+def gain_ratio(X, y):
+    H_X = H(X)
+    if not H_X:
+        return 0
+    return IG(X, y) / H_X
 
 
 class DecisionTree(object):
@@ -16,6 +50,11 @@ class DecisionTree(object):
             self.parent = parent
             self.label = label
             self.test = {}
+
+        def add_test(self, v, n):
+            if v in self.test:
+                raise Exception("can't set the same value twice")
+            self.test[v] = n
 
         def predict(self, x):
             if self.label:
@@ -38,8 +77,8 @@ class DecisionTree(object):
         """ Build a decision tree classifier trained on data (X, y) """
         self.root = self._fit(
             X,
-            y,
-            list(range(len(self._schema.feature_names))),
+            (y + 1) / 2,  # convert 1/-1 to 1/0
+            set(range(len(self._schema.feature_names))),
         )
 
     def _fit(self, X, y, features, parent=None):
@@ -47,48 +86,42 @@ class DecisionTree(object):
                 self._depth - 1 == self.depth() or \
                 self.pure_partition(y):
 
-            return self.majority_node(y, parent)
+            # convert 1/0 back to 1/-1
+            return self.majority_node((y * 2) - 1, parent)
 
         best_feature, best_GR = None, -np.inf
         for feature in features:
-            gr = self.gain_ratio(X, y, feature)
+            X_values = X[:,feature]
+            gr = gain_ratio(X_values, y)
             if gr > best_GR:
                 best_GR = gr
                 best_feature = feature
-        n = Node(parent=parent)
-        X_part, y_part = self.partition(X, y, feature)
-        _features = features - best_feature
-        for i in range(len(self._schema.nominal_values(best_feature))):
-            value = self._schema.nominal_values(best_feature)[i]
-            n.map(value, self._fit(X_part[i], y_part[i], _features))
+        n = DecisionTree.Node(feature=best_feature, parent=parent)
+        partition = self.partition(X, y, best_feature)
+        _features = features - set([best_feature])
+        for x_part, y_part in partition:
+            value = x_part[0][best_feature]
+            n.add_test(value, self._fit(x_part, y_part, _features))
         return n
 
-    def gain_ratio(self, X, y, feature):
-        pass
-
-    def information_gain(self, X, y, feature):
-        pass
-
-    def entropy(self, X, y, feature):
-        prob_f = numpy.vectorize(lambda v: numpy.sum(X[x == v]) / len(X))
-        probs = numpy.apply_along_axis(
-            prob_f,
-            feature,
-            self._schema.nominal_values(feature),
-        )
-        H = numpy.vectorize(lambda p: 0 if not p else p * numpy.log2(p))
-        return -numpy.sum(numpy.nan_to_num(H(probs)))
+    def partition(self, X, y, feature):
+        x_bins = np.bincount(X[:,feature])
+        values = np.where(x_bins != 0)[0]
+        rows = []
+        for v in values:
+            rows.append(np.where(X[:,feature] == v)[0])
+        return [(X[r], y[r]) for r in rows]
 
     def majority_node(self, y, parent):
-        if y:
+        if len(y):
             label = scipy.stats.mode(y).mode[0]
         else:
             # Choose between 1 and -1 randomly if the set of labels is empty
-            label = (-1) ** numpy.random.random_integers(0, 1)
-        return Node(label=label, parent=parent)
+            label = (-1) ** np.random.random_integers(0, 1)
+        return DecisionTree.Node(label=label, parent=parent)
 
     def pure_partition(self, y):
-        return len(numpy.unique(y)) <= 1
+        return len(np.unique(y)) <= 1
 
     def predict(self, X):
         """ Return the -1/1 predictions of the decision tree """

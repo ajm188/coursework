@@ -143,8 +143,6 @@ def main(**options):
     options['schema'] = schema
     folds = get_folds(X, y, k)
     stats_manager = StatisticsManager()
-    import pdb
-    pdb.set_trace()
     for train_X, train_y, test_X, test_y in folds:
 
         # Construct classifier instance
@@ -157,7 +155,10 @@ def main(**options):
             selector = FS_ALGORITHMS[fs_alg](n=fs_n)
             selector.fit(train_X)
             train_X = selector.transform(train_X)
+
         classifier.fit(train_X, train_y)
+        import pdb
+        pdb.set_trace()
         train_time = (train_start - time.time())
 
         if fs_alg:
