@@ -20,6 +20,7 @@ from booster import Booster
 
 from feature_selection import PCA
 '''
+np.seterr(divide='ignore')  # tell numpy to be quiet for 0log0
 
 
 CLASSIFIERS = {
