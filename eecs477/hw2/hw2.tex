@@ -458,18 +458,18 @@
           \begin{split}
             x_1=0&\ \text{or}\ \pi_1-\pi_3+\pi_5=1\\
             x_2=0&\ \text{or}\ \pi_3+\pi_4+\pi_6=1\\
-            x_3=0&\ \text{or}\ \pi_1-\pi_2+\pi_7=1\\
-            x_4=0&\ \text{or}\ \pi_2+\pi_4+\pi_8=1\\
-            x_5=0&\ \text{or}\ \pi_1+\pi_4+\pi_9=1\\
+            x_3=0&\ \text{or}\ \pi_1-\pi_2+\pi_7=3\\
+            x_4=0&\ \text{or}\ \pi_2+\pi_4+\pi_8=2\\
+            x_5=0&\ \text{or}\ \pi_1+\pi_4+\pi_9=4\\
             \pi_1=0&\ \text{or}\ x_1+x_3+x_5=2\\
             \pi_2=0&\ \text{or}\ -x_3+x_4=1\\
             \pi_3=0&\ \text{or}\ -x_1+x_2=-1\\
             \pi_4=0&\ \text{or}\ x_2+x_4+x_5=2\\
-            \pi_5=0&\ \text{or}\ x_1=1\\
-            \pi_6=0&\ \text{or}\ x_2=1\\
-            \pi_7=0&\ \text{or}\ x_3=1\\
-            \pi_8=0&\ \text{or}\ x_4=1\\
-            \pi_9=0&\ \text{or}\ x_5=1\\
+            \pi_5=0&\ \text{or}\ -x_1=-1\\
+            \pi_6=0&\ \text{or}\ -x_2=-2\\
+            \pi_7=0&\ \text{or}\ -x_3=-1\\
+            \pi_8=0&\ \text{or}\ -x_4=-3\\
+            \pi_9=0&\ \text{or}\ -x_5=-2\\
           \end{split}
         \end{equation}
       \item
@@ -481,37 +481,36 @@
             \pi_2=0&\ \text{or}\ 1=1\\
             \pi_3=0&\ \text{or}\ -1=-1\\
             \pi_4=0&\ \text{or}\ 2=2\\
-            \pi_5=0&\ \text{or}\ 1=1\\
-            \pi_6=0&\ \text{or}\ 0=1\\
-            \pi_7=0&\ \text{or}\ 0=1\\
-            \pi_8=0&\ \text{or}\ 1=1\\
-            \pi_9=0&\ \text{or}\ 1=1\\
+            \pi_5=0&\ \text{or}\ -1=-1\\
+            \pi_6=0&\ \text{or}\ 0=-2\\
+            \pi_7=0&\ \text{or}\ 0=-1\\
+            \pi_8=0&\ \text{or}\ -1=-3\\
+            \pi_9=0&\ \text{or}\ -1=-2\\
           \end{split}
         \end{equation}
-        From this, we know that $\pi_6,\pi_7=0$. Now the complementary slackness
-        conditions for the $x$s become:
+        From this, we know that $\pi_6,\pi_7,\pi_8,\pi_9=0$. Now the
+        complementary slackness conditions for the $x$s become:
         \begin{equation}
           \begin{split}
             x_1=0&\ \text{or}\ \pi_1-\pi_3+\pi_5=1\\
             x_2=0&\ \text{or}\ \pi_3+\pi_4=1\\
-            x_3=0&\ \text{or}\ \pi_1-\pi_2=1\\
-            x_4=0&\ \text{or}\ \pi_2+\pi_4+\pi_8=1\\
-            x_5=0&\ \text{or}\ \pi_1+\pi_4+\pi_9=1\\
+            x_3=0&\ \text{or}\ \pi_1-\pi_2=3\\
+            x_4=0&\ \text{or}\ \pi_2+\pi_4=2\\
+            x_5=0&\ \text{or}\ \pi_1+\pi_4=4\\
           \end{split}
         \end{equation}
         We can also remove the equations for which $x_2,x_3=0$, so:
         \begin{equation}
           \begin{split}
             x_1=0&\ \text{or}\ \pi_1-\pi_3+\pi_5=1\\
-            x_4=0&\ \text{or}\ \pi_2+\pi_4+\pi_8=1\\
-            x_5=0&\ \text{or}\ \pi_1+\pi_4+\pi_9=1\\
+            x_4=0&\ \text{or}\ \pi_2+\pi_4=2\\
+            x_5=0&\ \text{or}\ \pi_1+\pi_4=4\\
           \end{split}
         \end{equation}
-        The complementary slackness conditions allow any of
-        $\pi_1,\pi_2,\pi_3,\pi_4,\pi_5,\pi_8,\pi_9$ to be 0, so let
-        $\pi_3,\pi_4,\pi_5,\pi_8,\pi_9=0$ and let $\pi_1,\pi_2=1$.\\
+        We can now pick the $\pi_i$s. If we let $\pi_1=4,\pi_2=2,\pi_3=3$ and
+        $\pi_4,\pi_5=0$, the equations are satisfied.\\
 
-        Thus, $\pi^*=(1,1,0,0,0,0,0,0,0)$ satisfies the complementary
+        Thus, $\pi^*=(4,2,3,0,0,0,0,0,0)$ satisfies the complementary
         slackness conditions.\\
     \end{enumerate}
   % #6
