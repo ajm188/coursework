@@ -1,0 +1,628 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage[margin=1in]{geometry}
+\usepackage{mathtools}
+
+\title{EECS 477 HW2}
+\author{Andrew Mason}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+  % #1
+  \item
+    As in HW1, begin by putting the problem in standard form:\\
+
+    \begin{equation}
+      \begin{split}
+        \text{min }& -3x_1 + 5x_2 \\
+        \text{s.t. }& 4x_1 + 5x_2 - s = 3 \\
+        & 6x_1 - 6x_2 = 7 \\
+        & x_1 + 8x_2 + t = 20 \\
+        & x_1, x_2, s, t\geq 0 \\
+      \end{split}
+    \end{equation}
+
+    Again, from HW1, we have that
+    $x^*=(\frac{7}{6},0,\frac{7}{6},\frac{113}{6})$.\\
+
+    Stating this in terms of $\mathcal{B}$ and $\mathcal{L}$, we get
+    $\bar{x}=(x_1,x_3,x_4,x_2)$, where $x_\mathcal{B}=(x_1,x_3,x_4)$ (since
+    these $x_i$ were nonzero), and $x_\mathcal{L}=(x_2)$.\\
+
+    Then, $\mathcal{B},\mathcal{L}$ are the following matrices:\\
+    \begin{equation}
+      \begin{split}
+        \mathcal{B}&=
+          \begin{bmatrix*}
+            4 & -1 & 0 \\
+            6 & 0 & 0 \\
+            1 & 0 & 1 \\
+          \end{bmatrix*} \\
+        \mathcal{L}&=
+          \begin{bmatrix*}
+            -1 \\
+            0 \\
+            0 \\
+          \end{bmatrix*}
+      \end{split}
+    \end{equation}
+
+    Further, we know that $\pi^T=c^T_\mathcal{B}\mathcal{B}^{-1}$:\\
+    \begin{equation}
+      \begin{split}
+        \pi^T&=
+          \begin{bmatrix*}-3 & 0 & 0 \\\end{bmatrix*}
+          \begin{bmatrix*}
+            4 & -1 & 0 \\
+            6 & 0 & 0 \\
+            1 & 0 & 1 \\
+          \end{bmatrix*} \\
+        &=
+          \begin{bmatrix*}
+            15 \\
+            0 \\
+            3 \\
+          \end{bmatrix*}
+      \end{split}
+    \end{equation}
+
+    So the corresponding $\pi$s are $(\pi_1,\pi_2,\pi_3)=(15,0,3)$.\\
+  % #2
+  \item
+    \begin{enumerate}
+      \item
+        % 2.a
+        \begin{enumerate}
+          \item
+            The optimal solution is $(x_1,x_2)=(1.25,1.5)$.\\
+            (see ``problem2a.m'').\\
+          \item
+            The dual is
+            \begin{equation}
+              \begin{split}
+                \text{min}\ &5\pi_1+3\pi_2+24\pi_3+9\pi_4\\
+                \text{s.t.}\ &\pi_1+6\pi_2+5\pi_3\geq1\\
+                &\pi_1-3\pi_2+6\pi_4\geq 2\\
+                &\pi_1,\pi_2\pi_3\pi_4\geq0\\
+              \end{split}
+            \end{equation}
+
+            And the complementary slackness conditions are
+            \begin{equation}
+              \begin{split}
+                x_1=0&\ \text{or}\ \pi_1+6\pi_2+5\pi_3=1\\
+                x_2=0&\ \text{or}\ \pi_1-3\pi_2+6\pi_4=2\\
+                \pi_1=0&\ \text{or}\ x_1+x_2=5\\
+                \pi_2=0&\ \text{or}\ 6x_1-3x_2=3\\
+                \pi_3=0&\ \text{or}\ 5x_1=24\\
+                \pi_4=0&\ \text{or}\ 6x_2=9\\
+              \end{split}
+            \end{equation}
+          \item
+            Given $x^* = (1.25, 1.5)$, the complementary slackness conditions
+            for the $\pi$s become:
+            \begin{equation}
+              \begin{split}
+                \pi_1=0&\ \text{or}\ 2.75=5\\
+                \pi_2=0&\ \text{or}\ 3=3\\
+                \pi_3=0&\ \text{or}\ 6.25=24\\
+                \pi_4=0&\ \text{or}\ 9=9\\
+              \end{split}
+            \end{equation}
+            From this, we know that $\pi_1,\pi_3=0$. Now the complementary
+            slackness conditions for the $x$s become:
+            \begin{equation}
+              \begin{split}
+                x_1=0&\ \text{or}\ 6\pi_2=1\\
+                x_2=0&\ \text{or}\ -3\pi_2+6\pi_4=2\\
+              \end{split}
+            \end{equation}
+            Since $x_1, x_2\geq0$, $\pi_2,\pi_4$ must satisfy the equations on
+            the right. Solving these gives
+            $\pi^*=(0,\frac{1}{6},0,\frac{5}{12})$.\\
+        \end{enumerate}
+      \item
+        % 2.b
+        \begin{enumerate}
+          \item
+            The optimal solution is $(x_1,x_2,x_3)=(0,0,3)$\\
+            (see the code in ``problem2b.m'').
+          \item
+            The dual is
+            \begin{equation}
+              \begin{split}
+              \text{max}\ &-5\pi_1+6\pi_2\\
+              \text{s.t.}\ &-\pi_1+\pi_2\leq 1\\
+              &-2\pi_1\leq 0\\
+              &2\pi_2\leq 1\\
+              & \pi_1\geq 0, \pi_2\ \text{unconstrained}\\
+              \end{split}
+            \end{equation}
+
+            And the complementary slackness conditions are
+            \begin{equation}
+              \begin{split}
+                x_1=0&\ \text{or}\ \pi_1+\pi_2=1\\
+                x_2=0&\ \text{or}\ 2\pi_1=0\\
+                x_3=0&\ \text{or}\ 2\pi_2=6\\
+                \pi_1=0&\ \text{or}\ x_1+2x_2=5\\
+                \pi_2=0&\ \text{or}\ x_1+2x_3=6\\
+              \end{split}
+            \end{equation}
+          \item
+            Given $x^* = (0,0,3)$, the complementary slackness conditions
+            for the $\pi$s become:
+            \begin{equation}
+              \begin{split}
+                \pi_1=0&\ \text{or}\ 0=5\\
+                \pi_2=0&\ \text{or}\ 6=6\\
+              \end{split}
+            \end{equation}
+            From this, we know that $\pi_1=0$. Now the complementary slackness
+            conditions for the $x$s become:
+            \begin{equation}
+              \begin{split}
+                x_1=0&\ \text{or}\ \pi_2=1\\
+                x_2=0&\ \text{or}\ 0=0\\
+                x_3=0&\ \text{or}\ 2\pi_2=6\\
+              \end{split}
+            \end{equation}
+            Since $x_3\ne0$, and the first and third equations cannot both be
+            satisfied, we let the first equation go unsatisfied, and find
+            $\pi^*=(0, 3)$.\\
+        \end{enumerate}
+      \item
+        % 2.c
+        \begin{enumerate}
+          \item
+            The optimal solution is $(x_1,x_2)=(1.1667,0)$.\\
+            (see ``problem2c.m'').\\
+          \item
+            The dual is
+            \begin{equation}
+              \begin{split}
+                \text{min}\ &-3\pi_1+7\pi_2+20\pi_3\\
+                \text{s.t.}\ &-4\pi_1+6\pi_2+\pi_3\geq3\\
+                &-5\pi_1-6\pi_2+8\pi_3\geq-5\\
+                &\pi_1,\pi_3\geq0,\pi_2\ \text{unconstrained}\\
+              \end{split}
+            \end{equation}
+
+            And the complementary slackness conditions are
+            \begin{equation}
+              \begin{split}
+                x_1=0&\ \text{or}\ 4\pi_1+6\pi_2+\pi_3=3\\
+                x_2=0&\ \text{or}\ 5\pi_1-6\pi_2+8\pi_3=-5\\
+                \pi_1=0&\ \text{or}\ 4x_1+5x_2=3\\
+                \pi_2=0&\ \text{or}\ 6x_1-6x_2=7\\
+                \pi_3=0&\ \text{or}\ x_1+8x_2=20\\
+              \end{split}
+            \end{equation}
+          \item
+            Given $x^* = (\frac{7}{6},0)$, the complementary slackness conditions
+            for the $\pi$s become:
+            \begin{equation}
+              \begin{split}
+                \pi_1=0&\ \text{or}\ \frac{14}{3}=3\\
+                \pi_2=0&\ \text{or}\ 7=7\\
+                \pi_3=0&\ \text{or}\ \frac{7}{6}=20\\
+              \end{split}
+            \end{equation}
+            From this, we know that $\pi_1,\pi_3=0$. Now the complementary slackness
+            conditions for the $x$s become:
+            \begin{equation}
+              \begin{split}
+                x_1=0&\ \text{or}\ 6\pi_2=3\\
+                x_2=0&\ \text{or}\ -6\pi_2=-5\\
+              \end{split}
+            \end{equation}
+            Since $x_2=0$, we can leave the second equation unsatisfied, and
+            find $\pi^*=(0,\frac{1}{2},0)$.\\
+        \end{enumerate}
+      \item
+        %2.d
+        \begin{enumerate}
+          \item
+            The primal solution is infeasible, according to octave. (problem2d.m)
+          \item
+            The dual is
+            \begin{equation}
+              \begin{split}
+                \text{min}\ &-8\pi_1+23\pi_2-\pi_3+4\pi_4\\
+                \text{s.t.}\ &5\pi_1+4\pi_2-6\pi_3+\pi_4=3\\
+                &3\pi_1+2\pi_2-7\pi_3=2\\
+                &\pi_1+8\pi_2-3\pi_3\geq5\\
+                &\pi_2,\pi_3,\pi_4\geq0,\pi_1\ \text{unconstrained}\\
+              \end{split}
+            \end{equation}
+
+            And the complementary slackness conditions are
+            \begin{equation}
+              \begin{split}
+                x_1=0&\ \text{or}\ 5\pi_1+4\pi_2+6\pi_3+\pi_4=3\\
+                x_2=0&\ \text{or}\ 3\pi_1+2\pi_2+7\pi_3=2\\
+                x_3=0&\ \text{or}\ \pi_1+8\pi_2+3\pi_3+\pi_5=5\\
+                \pi_1=0&\ \text{or}\ 5x_1+3x_2+x_3=-8\\
+                \pi_2=0&\ \text{or}\ 4x_1+2x_2+8x_3=23\\
+                \pi_3=0&\ \text{or}\ 6x_1+7x_2+3x_3=1\\
+                \pi_4=0&\ \text{or}\ x_1=4\\
+                \pi_5=0&\ \text{or}\ x_3=0\\
+              \end{split}
+            \end{equation}
+          \item
+            The primal is infeasible, so skipping this step.\\
+        \end{enumerate}
+      \item
+        % 2.e
+        \begin{enumerate}
+          \item
+            Taking the third equation, we get:\\
+            $x_1=1-x_2-x_3$
+
+            Plugging $x_1$ into the inequalities gives us the following
+            system of inequalities. Note that since the objective function
+            does not depend on $x_i,i=1,2,3$, any feasible solution is optimal.
+
+            \begin{equation}
+              \begin{split}
+                1+x_2-\frac{1}{2}x_3&\leq c\\
+                3-x_2-2x_3&\leq c\\
+              \end{split}
+            \end{equation}
+
+            Rearranging the first inequality gives $x_3\geq-2c+2+2x_2$, which
+            we can substitute into the second inequality, yielding
+            $x_2\geq\frac{3c-1}{5}$. Putting this back into the first
+            inequality yields $x_3\geq\frac{9-7c}{5}$. Going back to the
+            first equation, if we take $x_2=\frac{3c-1}{5},x_3=\frac{9-7c}{5}$,
+            we find that $x_1=\frac{4c-3}{5}$.
+
+            So, a feasible - and therefore optimal - solution is
+            $(\frac{4c-3}{5},\frac{3c-1}{5},\frac{9-7c}{5})$\\
+          \item
+            The dual is
+            \begin{equation}
+              \begin{split}
+                \text{max}\ &-c\pi_1-c\pi_2+\pi_3\\
+                \text{s.t.}\ &-\pi_1-3\pi_2+\pi_3\leq0\\
+                &-2\pi_1-2\pi_2+\pi_3\leq0\\
+                &-\frac{1}{2}\pi_1-\pi_2+\pi_3\leq0\\
+                &\pi_1,\pi_2\geq0,\pi_3\ \text{unconstrained}\\
+              \end{split}
+            \end{equation}
+
+            And the complementary slackness conditions are
+            \begin{equation}
+              \begin{split}
+                x_1=0&\ \text{or}\ \pi_1+3\pi_2+\pi_3=0\\
+                x_2=0&\ \text{or}\ 2\pi_1+2\pi_2+\pi_3=0\\
+                x_3=0&\ \text{or}\ \frac{1}{2}\pi_1+\pi_2+\pi_3=0\\
+                \pi_1=0&\ \text{or}\ x_1+3x_2+\frac{1}{2}x_3=c\\
+                \pi_2=0&\ \text{or}\ 3x_1+2x_2+x_3=c\\
+                \pi_3=0&\ \text{or}\ x_1+x_2+x_3=1\\
+              \end{split}
+            \end{equation}
+          \item
+            Given that we took the equality case for each inequality to find
+            $x^*$, none of the $\pi_i$ need to be zero. However, there are no
+            constraints preventing the $\pi_i$ from being zero. In fact,
+            $\pi^*=(0,0,0)$ solves the complementary slackness conditions for
+            the $\pi$s.
+        \end{enumerate}
+    \end{enumerate}
+  % #3
+  \item
+    The dual is
+    \begin{equation}
+      \begin{split}
+        \text{min}\ &60\pi_1+\pi_2+\pi_3+\pi_4+\pi_5+\pi_6\\
+        \text{s.t.}\ &5\pi_1+\pi_2\geq30\\
+        &10\pi_1+\pi_3\geq20\\
+        &20\pi_1+\pi_4\geq100\\
+        &30\pi_1+\pi_5\geq90\\
+        &40\pi_1+\pi_6\geq160\\
+        &\pi_1\pi_2\pi_3\pi_4\pi_5\pi_6\geq0\\
+      \end{split}
+    \end{equation}
+
+    And the complementary slackness conditions are
+    \begin{equation}
+      \begin{split}
+        x_1=0&\ \text{or}\ 5\pi_1+\pi_2=30\\
+        x_2=0&\ \text{or}\ 10\pi_1+\pi_3=20\\
+        x_3=0&\ \text{or}\ 20\pi_1+\pi_4=100\\
+        x_4=0&\ \text{or}\ 30\pi_1+\pi_5=90\\
+        x_5=0&\ \text{or}\ 40\pi_1+\pi_6=160\\
+        \pi_1=0&\ \text{or}\ 5x_1+10x_2+20x_3+30x_4+40x_5=60\\
+        \pi_2=0&\ \text{or}\ x_1=1\\
+        \pi_3=0&\ \text{or}\ x_2=1\\
+        \pi_4=0&\ \text{or}\ x_3=1\\
+        \pi_5=0&\ \text{or}\ x_4=1\\
+        \pi_6=0&\ \text{or}\ x_5=1\\
+      \end{split}
+    \end{equation}
+  % #4
+  \item
+    Let $k$ be a parameter to the contractor problem, with the problem
+    defined as follows:
+    \begin{itemize}
+      \item The $j\textsuperscript{th}$ district requires $r_j$ teams.
+      \item If $i<k$, $c_i$ is a skilled contractor. Otherwise, $c_i$ is
+        unskilled.
+      \item Each district must have at least one skilled team.
+      \item The $i\textsuperscript{th}$ contractor has $u_i$ teams.
+      \item There are $m$ contractors and $n$ districts. $k\leq m$.
+      \item Decision variables are $x_{ij}$, where $x_{ij}$ represents the
+        number of teams sent from contractor $i$ to region $j$. Similarly,
+        the costs are $c_{ij}$
+    \end{itemize}
+    The primal is therefore (in standard form):
+    \begin{alignat*}{2}
+      &\text{min}&\sum_{i=1}^{m}\sum_{j=1}^{n}c_{ij}x_{ij}&\\
+      &\text{s.t.}&\sum_{i=1}^kx_{ij}\geq1;\quad&j=1,\ldots,n\\
+      &&\sum_{i=1}^mx_{ij}\geq r_j;\quad&j=1,\ldots,n\\
+      &&-\sum_{j=1}^nx_{ij}\geq-u_i;\quad&i=1,\ldots,m\\
+    \end{alignat*}
+
+    Since the primal has $m\times n$ decision variables and $2n+m$ constraints,
+    the dual will have $2n+m$ decision variables and $m\times n$ constraints.
+    Before stating the dual, I will first define the function $f$ to be:
+    \begin{equation}
+      f(x) =
+        \begin{cases}
+          1&\text{if}\ x=0\\
+          0&\text{otherwise}\\
+        \end{cases}
+    \end{equation}
+    Then, the dual can be written as:
+    \begin{alignat*}{2}
+      &\text{max}
+        &\sum_{j=1}^n\pi_j+\sum_{j=1}^nr_j\pi_{n+j}+\sum_{i=1}^m-u_i\pi_{2n+i}\\
+      &\text{s.t.}
+        &f(i-j)\pi_j+\pi_{n+j}-f(i-j)\pi_{2n+i}\leq c_{ij};\quad
+        &i=1,\ldots,k;j=1,\ldots,n\\
+      &&\pi_{n+j}-f(i-j)\pi_{2n+i}\leq c_{ij};\quad
+        &i=k+1,\ldots,m;j=1,\ldots,n\\
+    \end{alignat*}
+
+    Consequently, the complementary slackness conditions are:
+    \begin{alignat*}{2}
+      &\pi_j=0\ \text{or}\ 
+        &\sum_{i=1}^kx_{ij}=1;\ &j=1,\ldots,n\\
+      &\pi_{n+j}=0\ \text{or}\
+        &\sum_{i=1}^mx_{ij}= r_j;\ &j=1,\ldots,n\\
+      &\pi_{2n+i}=0\ \text{or}\
+        &-\sum_{j=1}^nx_{ij}=-u_i;\quad&i=1,\ldots,m\\
+      &x_{ij}=0\ \text{or}\
+        &f(i-j)\pi_j+\pi_{n+j}-f(i-j)\pi_{2n+i}\leq c_{ij};\
+        &i=1,\ldots,k;j=1,\ldots,n\\
+      &x_{ij}=0\ \text{or}\
+        &\pi_{n+j}-f(i-j)\pi_{2n+i}\leq c_{ij};\
+        &i=k+1,\ldots,m;j=1,\ldots,n\\
+    \end{alignat*}
+  % #5
+  \item
+    \begin{enumerate}
+      \item
+        \begin{proof} Every basic feasible solution is integer.\\
+          The matrix given by the problem is (after adding slack variables)\\
+          \begin{align*}
+            M &=
+            \begin{bmatrix*}
+              1 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+              0 & 0 & -1 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+              -1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+              0 & 1 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0\\
+              1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+              0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+              0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+              0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0\\
+              0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1\\
+            \end{bmatrix*}
+          \end{align*}
+
+          This is a $10\times9$ matrix, so there are 10 $9\times9$ submatrices
+          that we need to test, each obtained by removing a column from the
+          above matrix.\\
+          Note that the top four rows are linearly dependent, by taking the sum
+          of the first three rows and subtracting the fourth. Also note that
+          this holds when any single column is removed. Therefore, all of these
+          submatrices have a 0 determinant, so $M$ is unimodular, and so by
+          Cramer`s rule, $Mx=b$, with $b$ integer, is satisfiable by an integer
+          $x$. Since $b$ for this linear program is integer, any basic feasible
+          solution is integer.\\
+        \end{proof}
+      \item
+        See ``problem5b.m'' for the code. An optimal basic feasible solution
+        is $(x_1,x_2,x_3,x_4,x_5)=(1,0,0,1,1)$.
+      \item
+        The dual is
+        \begin{equation}
+          \begin{split}
+            \text{max}\ &2\pi_1+\pi_2-\pi_3+2\pi_4-\pi_5-2\pi_6-\pi_7-3\pi_8-2\pi_9\\
+            \text{s.t.}\ &\pi_1-\pi_3-\pi_5\leq1\\
+            &\pi_3+\pi_4-\pi_6\leq1\\
+            &\pi_1-\pi_2-\pi_7\leq3\\
+            &\pi_2+\pi_4-\pi_8\leq2\\
+            &\pi_1+\pi_4-\pi_9\leq4\\
+            &\pi_1,\pi_2\pi_3\pi_4\ \text{unconstrained},\pi_5,\pi_6\pi_7\pi_8,\pi_9\geq0\\
+          \end{split}
+        \end{equation}
+
+        And the complementary slackness conditions are
+        \begin{equation}
+          \begin{split}
+            x_1=0&\ \text{or}\ \pi_1-\pi_3+\pi_5=1\\
+            x_2=0&\ \text{or}\ \pi_3+\pi_4+\pi_6=1\\
+            x_3=0&\ \text{or}\ \pi_1-\pi_2+\pi_7=1\\
+            x_4=0&\ \text{or}\ \pi_2+\pi_4+\pi_8=1\\
+            x_5=0&\ \text{or}\ \pi_1+\pi_4+\pi_9=1\\
+            \pi_1=0&\ \text{or}\ x_1+x_3+x_5=2\\
+            \pi_2=0&\ \text{or}\ -x_3+x_4=1\\
+            \pi_3=0&\ \text{or}\ -x_1+x_2=-1\\
+            \pi_4=0&\ \text{or}\ x_2+x_4+x_5=2\\
+            \pi_5=0&\ \text{or}\ x_1=1\\
+            \pi_6=0&\ \text{or}\ x_2=1\\
+            \pi_7=0&\ \text{or}\ x_3=1\\
+            \pi_8=0&\ \text{or}\ x_4=1\\
+            \pi_9=0&\ \text{or}\ x_5=1\\
+          \end{split}
+        \end{equation}
+      \item
+        Given $x^* = (1,0,0,1,1)$, the complementary slackness conditions
+        for the $\pi$s become:
+        \begin{equation}
+          \begin{split}
+            \pi_1=0&\ \text{or}\ 2=2\\
+            \pi_2=0&\ \text{or}\ 1=1\\
+            \pi_3=0&\ \text{or}\ -1=-1\\
+            \pi_4=0&\ \text{or}\ 2=2\\
+            \pi_5=0&\ \text{or}\ 1=1\\
+            \pi_6=0&\ \text{or}\ 0=1\\
+            \pi_7=0&\ \text{or}\ 0=1\\
+            \pi_8=0&\ \text{or}\ 1=1\\
+            \pi_9=0&\ \text{or}\ 1=1\\
+          \end{split}
+        \end{equation}
+        From this, we know that $\pi_6,\pi_7=0$. Now the complementary slackness
+        conditions for the $x$s become:
+        \begin{equation}
+          \begin{split}
+            x_1=0&\ \text{or}\ \pi_1-\pi_3+\pi_5=1\\
+            x_2=0&\ \text{or}\ \pi_3+\pi_4=1\\
+            x_3=0&\ \text{or}\ \pi_1-\pi_2=1\\
+            x_4=0&\ \text{or}\ \pi_2+\pi_4+\pi_8=1\\
+            x_5=0&\ \text{or}\ \pi_1+\pi_4+\pi_9=1\\
+          \end{split}
+        \end{equation}
+        We can also remove the equations for which $x_2,x_3=0$, so:
+        \begin{equation}
+          \begin{split}
+            x_1=0&\ \text{or}\ \pi_1-\pi_3+\pi_5=1\\
+            x_4=0&\ \text{or}\ \pi_2+\pi_4+\pi_8=1\\
+            x_5=0&\ \text{or}\ \pi_1+\pi_4+\pi_9=1\\
+          \end{split}
+        \end{equation}
+        The complementary slackness conditions allow any of
+        $\pi_1,\pi_2,\pi_3,\pi_4,\pi_5,\pi_8,\pi_9$ to be 0, so let
+        $\pi_3,\pi_4,\pi_5,\pi_8,\pi_9=0$ and let $\pi_1,\pi_2=1$.\\
+
+        Thus, $\pi^*=(1,1,0,0,0,0,0,0,0)$ satisfies the complementary
+        slackness conditions.\\
+    \end{enumerate}
+  % #6
+  \item
+    \begin{enumerate}
+      \item
+        Let the objective function of the linear program be $z(x)=0$. Then
+        $A$ is defined by the coefficients of the $m$ linear inequalities, and
+        $b_i$ is the right-hand-side of the $i$\textsuperscript{th} linear
+        inequality.\\
+
+        Define $LP$ to be the linear program which minimizes $z(x)$ subject to
+        the constraints imposed by $A$ and $b$ (without loss of generality,
+        define $A,b$ such that the original $m$ inequalities are all
+        lower-bounds, by multiplying by $-1$ or adding slack variables where
+        appropriate). That is, LP is
+        \begin{equation}
+          \begin{split}
+            \text{min}\ &z(x)=0\\
+            \text{min}\ &Ax\geq b\\
+          \end{split}
+        \end{equation}
+        Note that because the objective function is 0 (any constant will do,
+        actually), it does not depend on $x$, so any feasible solution is
+        optimal. In this way, if we apply our linear programming algorithm to
+        $LP$, and it finds \textit{any} solution, then the original system of
+        inequalities can be satisfied. If the algorithm cannot find a solution,
+        then the system of inequalities cannot be satisfied.
+      \item
+        Begin with the inputs to a linear program:
+          \begin{itemize}
+            \item $A$: the matrix of coefficients
+            \item $b$: the vector of constraints
+            \item $c$: the coefficients of the objective function
+          \end{itemize}
+        With the LP in standard form ($Ax=b, x\geq0$).\\
+
+        Let L.I.F. be the algorithm which solves the linear inequality
+        feasibility problem. That is L.I.F.($A, b$) returns a vector $x$
+        where $Ax\geq b$ or nil if $Ax\geq b$ is unfeasible.\\
+
+        If we compute L.I.F.($A, b$), this will give us \textit{a} feasible
+        solution to the LP, but it is not necessarily optimal, since $c$ is not
+        considered at all. However, if we take advantage of duality, we can
+        construct a LIF problem which solves both the primal and the dual of
+        the LP simultaneously, or not at all if there is no solution.\\
+
+        By weak duality, we know that for any feasible $x,\pi$ ($x$ feasible
+        in the primal, and $\pi$ in the dual), the following holds:
+        \begin{equation}
+          \pi^Tb\leq\pi^TAx\leq c^Tx
+        \end{equation}
+
+        Further, by strong duality, the inequalities become strict equality
+        when $x, \pi$ are respectively optimal. That is,
+        \begin{equation}
+          \begin{split}
+            \pi^Tb=\pi^TAx=c^Tx\\
+            \pi^Tb=c^Tx\\
+          \end{split}
+        \end{equation}
+
+        To express these strict equality constraints ($i=j$) in the LIF
+        problem, we need two constraints, $i\geq j$ and $-i\geq j$. This
+        enforces an equality constraint.\\
+
+        So, if we define the following matrix $\bar{A}$ and vector $\bar{b}$:
+        \begin{equation}
+          \begin{split}
+            \bar{A}&=
+              \begin{bmatrix*}
+                A & 0 \\
+                -A & 0 \\
+                I & 0 \\
+                0 & A^T \\
+                0 & -A^T \\
+                0 & I \\
+                -c^T & b^T \\
+                c^T & -b^T
+              \end{bmatrix*}\\
+            \bar{b}&=
+              \begin{bmatrix*}
+                b \\ -b \\ \vec{0} \\ c \\ -c \\ \vec{0} \\ 0 \\ 0
+              \end{bmatrix*}
+          \end{split}
+        \end{equation}
+
+        We can now get the result of $\text{LIF}(\bar{A},\bar{b})$, $y$.\\
+        $y$ satisfies $\bar{A}y\geq\bar{b}$, and further, $y=(x^*,\pi^*)$.\\
+
+        Consider the first three rows of $\bar{A}y\geq\bar{b}$. This expresses
+        a feasible solution to the LP: $Ax=b,x\geq0$.\\
+
+        Now consider the next three rows of $\bar{A}y\geq\bar{b}$. This
+        expresses a feasible solution to the LP: $A^T\pi=c,\pi\geq0$, which is
+        also a feasible solution to the dual of the LP expressed by the first
+        three rows.\\
+
+        The last two rows express the strong duality constraint that, if
+        $x,\pi$ optimal are respectively feasible to the primal and the dual,
+        then $\pi^Tb=c^Tx$.\\
+
+        All together, $\bar{A}y\geq\bar{b}$ yields $y=(x^*,\pi^*)$, where
+        $x^*$ is feasible in the primal, $\pi^*$ is feasible in the dual, and
+        $x^*,\pi^*$ satisfy strong duality.\\
+
+        If LIF can find a $y$ which satisfies $\bar{A}y\geq\bar{b}$, then
+        $y_i,i=1,2\ldots,q$ is an optimal solution to the primal, and
+        $y_i,i=q+1,q+2\ldots,q+p$ is an optimal solution to the dual. If LIF
+        cannot find such a $y$ then at least one of the primal or the dual is
+        infeasible or unbounded.\\
+    \end{enumerate}
+\end{enumerate}
+\end{document}
