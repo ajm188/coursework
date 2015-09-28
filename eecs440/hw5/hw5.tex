@@ -28,6 +28,35 @@
     better results if you trained on larger sets.\\
   \item
     % 3
+    \begin{proof} The Precision-Recall curve of A dominates the
+      Precision-Recall curve of B.\\
+      Let $P$ be the number of actual positives.\\
+      Let $N$ be the number of actual negatives.\\
+
+      Assume that the PR curve of A does not dominate the PR curve of B. Then
+      there is a point such that the recall of A and B are equal, but
+      $Precision(B)>Precision(A)$.\\
+
+      Since $Recall(A)=Recall(B)=TPR(A)=TPR(B)$, we have
+      $\frac{TP_A}{P}=\frac{TP_B}{P}$, so $TP_A=TP_B$, which we can now just
+      call $TP$.
+
+      Since the ROC curve of A dominates B`s, we also have that $FPR(B)\geq
+      FPR(A)$, so $\frac{FP_B}{N}\geq\frac{FP_A}{N}$, so $FP_B\geq FP_A$.\\
+
+      Now, if we look at the precision of A and B, we have
+      \begin{equation}
+        \begin{split}
+          Precision(A)&=\frac{TP}{FP_A+TP}\\
+          Precision(B)&=\frac{TP}{FP_B+TP}\\
+        \end{split}
+      \end{equation}
+
+      From this, we have that $Precision(B)\leq Precision(A)$, which
+      contradicts with the original assumption that $Precision(B)>Precision(A)$
+      , so the Precision-Recall curve of A must dominate the Precision-Recall
+      curve of B.\\
+    \end{proof}
   \item
     % 4
     \begin{enumerate}
