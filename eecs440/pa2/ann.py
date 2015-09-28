@@ -4,10 +4,15 @@ The Artificial Neural Network
 import numpy as np
 import scipy
 
+
 class ArtificialNeuralNetwork(object):
 
-
-    def __init__(self, gamma, layer_sizes, num_hidden, epsilon=None, max_iters=None):
+    def __init__(self,
+                 gamma,
+                 layer_sizes,
+                 num_hidden,
+                 epsilon=None,
+                 max_iters=None):
         """
         Construct an artificial neural network classifier
 
@@ -23,7 +28,10 @@ class ArtificialNeuralNetwork(object):
         pass
 
     def fit(self, X, y, sample_weight=None):
-        """ Fit a neural network of layer_sizes * num_hidden hidden units using X, y """
+        """
+        Fit a neural network of layer_sizes * num_hidden hidden units using
+        X, y.
+        """
         pass
 
     def predict(self, X):
