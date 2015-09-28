@@ -104,5 +104,35 @@
     \end{enumerate}
   \item
     % 5
+    The loss function is
+    \begin{equation}
+      \begin{split}
+        L(w)&=-\sum_{i}y_i\log\hat{y_i}+(1-y_i)\log(1-\hat{y_i})\\
+        &=-\sum_{i}y_i\log(\boldsymbol{w}\cdot\boldsymbol{x_i})
+        +(1-y_i)\log(1-\boldsymbol{w}\cdot\boldsymbol{x_i})\\
+      \end{split}
+    \end{equation}
+    For the hidden layer, we take the first derivative of the loss function,
+    getting
+    \begin{equation}
+      \begin{split}
+        \frac{\partial L}{\partial \boldsymbol{w}}&=
+          -\sum_{i}y_i\frac{1}{\boldsymbol{w}}
+          +(1-y_i)\frac{\boldsymbol{x_i}}
+                       {\boldsymbol{w}\cdot\boldsymbol{x_i}-1}\\
+      \end{split}
+    \end{equation}
+    Then, we take the derivative again for the input layer
+    \begin{equation}
+      \begin{split}
+        \frac{\partial^2 L}{\partial \boldsymbol{w}^2}&=
+          -\sum_{i}-y_i\frac{1}{\boldsymbol{w}^2}
+          +(1-y_i)\frac{-\boldsymbol{x_i}^2}
+                       {(\boldsymbol{w}\cdot\boldsymbol{x_i}-1)^2}\\
+          &=\sum_{i}y_i\frac{1}{\boldsymbol{w}^2}
+          -(1-y_i)\frac{\boldsymbol{x_i}^2}
+                       {(\boldsymbol{w}\cdot\boldsymbol{x_i}-1)^2}\\
+      \end{split}
+    \end{equation}
 \end{enumerate}
 \end{document}
