@@ -30,6 +30,49 @@
     % 3
   \item
     % 4
+    \begin{enumerate}
+      \item
+        \begin{proof} The ROC graph must be monotonically increasing.\\
+        By induction on the confidence threshold.\\
+        Let $P$ be the number of positive examples and $N$ be the number of
+        negative examples.\\
+        If the confidence is 0, then both the true positive rate and the
+        false postive rate are 0. So the ROC curve starts at (0,0).\\
+
+        If the confidence is increased to mark one more example as positive:\\
+
+        Case 1: The example is actually positive.\\
+        True positive rate increases by $\frac{1}{P}$. This moves the graph
+        upward (vertically increasing).\\
+
+        Case 2: The example is actually negative.\\
+        False positive rate increases by $\frac{1}{N}$. This moves the graph to
+        the right (horizontally increasing).\\
+
+        In either case, the graph increases. Thus, it does not decrease.\\
+        So by induction, the entire ROC curve is non-decreasing.\\
+        \end{proof}
+      \item
+        For a majority class classifier, all examples are labelled positive (or
+        negative) with a confidence of 1. As a result, there are only two
+        points on the ROC curve. One point is for the confidence threshold of
+        1, in which none of the examples are labelled positive, so both the TPR
+        and FPR rates are 0. The other point is for the confidence threshold of
+        0, in which all of the examples are labelled positive, so the TPR is
+        the number of positive examples divided by the number of total
+        examples, and the false positive rate is the number of negative
+        examples divided by the total number of examples. So the ROC curve is
+        the straight line connecting (0, 0) to this point.\\
+      \item
+        For this classifier, each example will be be assigned a confidence of 0
+        or 1, each with equal probability. So, by a similar argument to part b,
+        we have only two points on the ROC curve. One is at confidence 1, where
+        none of the examples are labelled positive (and TPR=FPR=0), and the
+        other is at $0<\text{confidence}<1$, where all the examples that were
+        randomly assigned the positive label (confidence 1) are positive. The
+        TPR and FPR don`t really matter here (both are nonzero), since the ROC
+        curve is still the straight line connecting these two points.\\
+    \end{enumerate}
   \item
     % 5
 \end{enumerate}
