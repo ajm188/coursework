@@ -15,6 +15,39 @@
     % 1
   \item
     % 2
+    \begin{proof} A neural network with a single hidden layer and a single
+      output unit all with sigmoid activation is equivalent to a network where
+      the hidden unit activations are $\tanh$ functions, and the ouput unit
+      still has a sigmoid activation.\\
+
+      \begin{equation}
+        \begin{split}
+          \tanh(w,x,a,b)&=a\frac{e^{b\boldsymbol{w}\cdot \boldsymbol{x}}-
+                                 e^{-b\boldsymbol{w}\cdot\boldsymbol{x}}}
+                                {e^{b\boldsymbol{w}\cdot\boldsymbol{x}}+
+                                 e^{-b\boldsymbol{w}\cdot\boldsymbol{x}}}\\
+          &=a\frac{\frac{e^{2b\boldsymbol{w}\cdot \boldsymbol{x}}-1}
+                   {e^{b\boldsymbol{w}\cdot\boldsymbol{x}}}}
+                  {\frac{e^{2b\boldsymbol{w}\cdot\boldsymbol{x}}+1}
+                   {e^{b\boldsymbol{w}\cdot\boldsymbol{x}}}}\\
+          &=a\frac{e^{2b\boldsymbol{w}\cdot \boldsymbol{x}}-1}
+                  {e^{2b\boldsymbol{w}\cdot\boldsymbol{x}}+1}\\
+          &=a\left(1-\frac{2}
+                         {e^{2b\boldsymbol{w}\cdot\boldsymbol{x}}+1}\right)\\
+          \tanh(w,x,-2,-\frac{1}{2})&=
+            \frac{2}
+                 {e^{-\boldsymbol{w}\cdot\boldsymbol{x}}+1}-1\\
+        \end{split}
+      \end{equation}
+
+      This expression is $2\times\text{sigmoid}(w,x)-1$. Which means the range
+      of the function is (-1,1), whereas the range of the sigmoid function is
+      (0,1). At this point, all we need is a function which maps from the range
+      (-1,1) to the range (0,1); this defines the weights needed for the output
+      unit. This is easy to do, since we can just map the values below zero to
+      the range (0, 0.5), and the values $\geq0$ to the range
+      $\left[0.5, 1\right)$, using the function $f(x)=\frac{x+1}{2}$.\\
+    \end{proof}
   \item
     % 3
     We need an output layer that fires whenever $-7\leq x_1+x_2\leq7$.\\
