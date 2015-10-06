@@ -58,7 +58,7 @@ def get_classifier(**options):
         return META_ALGORITHMS[meta](
             algorithm=classifier_name,
             iters=iters,
-            **options,
+            **options
          )
     else:
         return CLASSIFIERS[classifier_name](**options)
@@ -135,6 +135,7 @@ def main(**options):
         fs_n = options.pop("fs_features")
 
     schema, X, y = get_dataset(dataset, dataset_directory)
+    options['schema'] = options
     folds = get_folds(X, y, k)
     stats_manager = StatisticsManager()
     import pdb;pdb.set_trace()
