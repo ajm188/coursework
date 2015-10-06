@@ -2,6 +2,8 @@
 
 \usepackage{amsmath}
 \usepackage{amsthm}
+\usepackage{float}
+\usepackage{graphicx}
 \usepackage{tikz}
 
 \title{EECS 440 HW6}
@@ -211,6 +213,28 @@
     \end{enumerate}
   \item
     % 4
+    \begin{enumerate}
+      \item
+        Generated from ``boundaries.py''.
+        \begin{figure}[H]
+          \includegraphics[width=\linewidth]{neg_10_10.png}
+        \end{figure}
+      \item
+        Generated from ``boundaries.py''.
+        \begin{figure}[H]
+          \includegraphics[width=\linewidth]{neg_3_3.png}
+        \end{figure}
+      \item
+        Generated from ``boundaries.py''.
+        \begin{figure}[H]
+          \includegraphics[width=\linewidth]{neg_01_01.png}
+        \end{figure}
+    \end{enumerate}
+
+    When the weights are given more freedom to range over, the resulting
+    ANN can fit the data better - which is shown by the $\left[-10,10\right)$
+    graph having a more even positive negative split, as opposed to the
+    strictly negative graph for part c.
   \item
     % 5
     You cannot do this for an arbitrary ANN, because it could alter the final
