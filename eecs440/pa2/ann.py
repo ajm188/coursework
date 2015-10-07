@@ -1,18 +1,42 @@
 """
 The Artificial Neural Network
 """
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
+import numpy.random
 import scipy
 
 
+def range_size_and_offset(lower, upper):
+    return (upper - lower, lower)
+
+
+def random_weights(dimensions, range):
+    size, offset = range_size_and_offset(*range)
+    return np.random.rand(*dimensions) * size + offset
+
+
+def sigmoid(u):
+    return 1 / (1 + np.exp(-u))
+
+
+sigmoid_ufunc = np.vectorize(sigmoid)
+
+
 class ArtificialNeuralNetwork(object):
+
+    STARTING_WEIGHT_RANGE = [-0.1, 0.1]
+    NU = 0.01
 
     def __init__(self,
                  gamma,
                  layer_sizes,
                  num_hidden,
                  epsilon=None,
-                 max_iters=None):
+                 max_iters=None,
+                 **kwargs):
         """
         Construct an artificial neural network classifier
 
@@ -25,19 +49,95 @@ class ArtificialNeuralNetwork(object):
                             gradient descent for
                             (need at least one of [epsilon, max_iters])
         """
-        pass
+        assert layer_sizes == 1
+
+        self._max_iters = max_iters
+        self._schema = kwargs['schema']
+
+        self.hidden_weights = random_weights(
+            [num_hidden, len(self._schema.feature_names)],
+            ArtificialNeuralNetwork.STARTING_WEIGHT_RANGE,
+        )
+        self.output_weights = random_weights(
+            [num_hidden],
+            ArtificialNeuralNetwork.STARTING_WEIGHT_RANGE,
+        )
+        self._build_normalization_table()
 
     def fit(self, X, y, sample_weight=None):
         """
         Fit a neural network of layer_sizes * num_hidden hidden units using
         X, y.
         """
-        pass
+        X = np.apply_along_axis(self.normalize, 1, X.astype('float64'))
+        # Uncomment if I need to standardize.
+        # self.means = np.mean(X, 0)
+        # self.std_devs = np.std(X, 0)
+        # self.standardize(X)
+        iterations = 0
+        # Adding 1 is a hack to ensure that we don't "converge" on the first
+        # iteration.
+        old_hidden_weights = self.hidden_weights + 1
+        old_output_weights = self.output_weights + 1
+        while not self.stop_fitting(iterations,
+                                    old_hidden_weights,
+                                    old_output_weights):
+            old_hidden_weights = self.hidden_weights
+            old_output_weights = self.output_weights
+            print(iterations)
+            iterations += 1
+            for i, x in enumerate(X):
+                o_h, o_o = self.propagate(x)
+                output_error = o_o * (1 - o_o) * (y[i] - o_o)
+                downstream_error = np.sum(self.output_weights * output_error)
+                hidden_errors = o_h * (1 - o_h) * downstream_error
+                output_weight_deltas = o_h * output_error
+                self.output_weights = self.output_weights + \
+                    (output_weight_deltas * ArtificialNeuralNetwork.NU)
+                hidden_weight_deltas = np.array(
+                    [hidden_errors[i] * x for i in xrange(len(hidden_errors))]
+                )
+                self.hidden_weights = self.hidden_weights + \
+                    (hidden_weight_deltas * ArtificialNeuralNetwork.NU)
+
+    def propagate(self, x):
+        hidden_outputs = sigmoid_ufunc(np.dot(self.hidden_weights, x))
+        output_output = sigmoid(np.dot(self.output_weights, hidden_outputs))
+        return (hidden_outputs, output_output)
+
+    def stop_fitting(self, num_iters, old_hw, old_ow):
+        if self._max_iters is not None:
+            return num_iters >= self._max_iters
+        return np.all(old_hw == self.hidden_weights) and \
+            np.all(old_ow == self.output_weights)
 
     def predict(self, X):
         """ Predict -1/1 output """
-        pass
+        final_activation = 1  # TODO
+        return 1 if final_activation >= 0.5 else -1
 
     def predict_proba(self, X):
         """ Predict probabilistic output """
         pass
+
+    def _build_normalization_table(self):
+        self.normalization_table = {}
+        for i, values in enumerate(self._schema.nominal_values):
+            if not values:
+                continue
+            sorted_values = sorted([int(s) for s in values])
+            self.normalization_table[i] = \
+                dict((str(orig), norm)
+                     for norm, orig in enumerate(sorted_values, start=1))
+
+    def normalize(self, X):
+        return np.array([self._normalize_input(X, i) for i in xrange(len(X))])
+
+    def _normalize_input(self, X, i):
+        return self.normalization_table.get(i, {}).get(X[i], X[i])
+
+    # TODO if needed
+    """
+    def standardize(self, X):
+        return np.array([self.
+    """
