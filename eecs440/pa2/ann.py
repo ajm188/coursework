@@ -113,8 +113,10 @@ class ArtificialNeuralNetwork(object):
 
     def predict(self, X):
         """ Predict -1/1 output """
-        final_activation = 1  # TODO
-        return 1 if final_activation >= 0.5 else -1
+        activations = np.array([self.propagate(x)[1] for x in X])
+        activations[np.where(activations >= 0.5)] = 1
+        activations[np.where(activations < 0.5)] = -1
+        return activations
 
     def predict_proba(self, X):
         """ Predict probabilistic output """
