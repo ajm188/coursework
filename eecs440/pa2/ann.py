@@ -53,13 +53,16 @@ class ArtificialNeuralNetwork(object):
 
         self._max_iters = max_iters
         self._schema = kwargs['schema']
+        self.num_hidden = num_hidden
         self.gamma = gamma
         self.weight_decay_term = 2 * self.gamma * ArtificialNeuralNetwork.NU
 
+        num_attrs = len(self._schema.feature_names)
         self.hidden_weights = random_weights(
-            [num_hidden, len(self._schema.feature_names)],
+            [num_hidden, num_attrs],
             ArtificialNeuralNetwork.STARTING_WEIGHT_RANGE,
         )
+        num_hidden = num_attrs if num_hidden == 0 else num_hidden
         self.output_weights = random_weights(
             [num_hidden],
             ArtificialNeuralNetwork.STARTING_WEIGHT_RANGE,
@@ -97,20 +100,27 @@ class ArtificialNeuralNetwork(object):
                 o_h, o_o = self.propagate(x)
                 # compute deltas
                 output_delta = o_o * (1 - o_o) * (o_o - y[i])
-                hidden_deltas = \
-                    o_h * (1 - o_h) * (self.output_weights * output_delta)
+                if self.num_hidden > 0:
+                    hidden_deltas = \
+                        (1 - o_h) * (self.output_weights * output_delta)
+                else:
+                    o_h = x
                 # update weights
                 self.output_weights = self.output_weights - \
                     (ArtificialNeuralNetwork.NU * output_delta * o_h) - \
                     self.output_weights * self.weight_decay_term
-                self.hidden_weights = self.hidden_weights - \
-                    (ArtificialNeuralNetwork.NU *
-                     np.array([hidden_deltas[i] * x
-                               for i in xrange(len(hidden_deltas))])) - \
-                    self.hidden_weights * self.weight_decay_term
+                if self.num_hidden > 0:
+                    self.hidden_weights = self.hidden_weights - \
+                        (ArtificialNeuralNetwork.NU *
+                         np.array([hidden_deltas[i] * x
+                                   for i in xrange(len(hidden_deltas))])) - \
+                        self.hidden_weights * self.weight_decay_term
 
     def propagate(self, x):
-        hidden_outputs = sigmoid_ufunc(np.dot(self.hidden_weights, x))
+        if self.num_hidden > 0:
+            hidden_outputs = sigmoid_ufunc(np.dot(self.hidden_weights, x))
+        else:
+            hidden_outputs = x
         output_output = sigmoid(np.dot(self.output_weights, hidden_outputs))
         return (hidden_outputs, output_output)
 
@@ -122,16 +132,16 @@ class ArtificialNeuralNetwork(object):
 
     def predict(self, X):
         """ Predict -1/1 output """
-        X = np.apply_along_axis(self.normalize, 1, X.astype('float64'))
-        X = np.apply_along_axis(self.standardize, 1, X)
-        activations = np.array([self.propagate(x)[1] for x in X])
+        activations = self.predict_proba(X)
         activations[np.where(activations >= 0.5)] = 1
         activations[np.where(activations < 0.5)] = -1
         return activations
 
     def predict_proba(self, X):
         """ Predict probabilistic output """
-        pass
+        X = np.apply_along_axis(self.normalize, 1, X.astype('float64'))
+        X = np.apply_along_axis(self.standardize, 1, X)
+        return np.array([self.propagate(x)[1] for x in X])
 
     def _build_normalization_table(self):
         self.normalization_table = {}
