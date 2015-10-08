@@ -3,6 +3,7 @@
 The main script for running experiments
 """
 from __future__ import print_function
+xrange = range
 
 import time
 import numpy as np

@@ -3,6 +3,7 @@ The Artificial Neural Network
 """
 from __future__ import division
 from __future__ import print_function
+xrange = range
 
 import sys
 
