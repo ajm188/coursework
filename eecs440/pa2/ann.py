@@ -3,9 +3,9 @@ The Artificial Neural Network
 """
 from __future__ import division
 from __future__ import print_function
-xrange = range
-
 import sys
+if sys.version_info[0] == 3:
+    xrange = range
 
 import numpy as np
 import numpy.random
