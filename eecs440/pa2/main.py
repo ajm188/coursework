@@ -122,6 +122,28 @@ def get_folds(X, y, k):
 
 
 def train_and_evaluate(arg):
+    """
+    Originally the body of the for loop in main(), placed here so I can use a
+    multiprocessing Pool to train and evaluate on each fold in parallel.
+
+    Takes a single argument, :arg:, which is a tuple of the form
+    (fold, options). Note: there was a cleaner solution to this, but it would
+    only work in Python 3, so I have opted for the slightly uglier solution.
+
+    :fold: is also a tuple, of the form (train_X, train_y, test_X, test_y).
+
+    Note: I did not feel like passing along the fs_alg stuff via the process
+    pool, and since it appears to not actually be used, I have simply left
+    those sections commented out.
+
+    Returns a 4-tuple of (test_y, predictions, probabilities, training time).
+    This can then be put into a StatsManager in the parent process, to be
+    aggregated later, once all folds have finished processing.
+
+    This model is slightly more confusing to understand, but the performance
+    gains are astronomical. I would not have finished data collection
+    otherwise.
+    """
     fold, options = arg
     train_X, train_y, test_X, test_y = fold
     # Construct classifier instance
@@ -176,6 +198,7 @@ def main(**options):
     stats_manager = StatisticsManager()
 
     pool = mp.Pool(k)  # one process per fold
+    # CPU gogogo
     results = pool.map(train_and_evaluate, [(fold, options) for fold in folds])
 
     for test_y, predictions, scores, train_time in results:
