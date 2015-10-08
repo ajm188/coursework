@@ -118,6 +118,34 @@ def get_folds(X, y, k):
     return zip(train_X, train_y, test_X, test_y)
 
 
+def train_and_evaluate(fold, options):
+    train_X, train_y, test_X, test_y = fold
+    # Construct classifier instance
+    print(options)
+    classifier = get_classifier(**options)
+
+    # Train classifier
+    train_start = time.time()
+    """ Commented out b/c not used and I'm running out of time.
+    if fs_alg:
+        selector = FS_ALGORITHMS[fs_alg](n=fs_n)
+        selector.fit(train_X)
+        train_X = selector.transform(train_X)
+    """
+    classifier.fit(train_X, train_y)
+    train_time = (train_start - time.time())
+
+    """
+    if fs_alg:
+        test_X = selector.transform(test_X)
+    """
+    predictions = classifier.predict(test_X)
+    scores = classifier.predict_proba(test_X)
+    if len(np.shape(scores)) > 1 and np.shape(scores)[1] > 1:
+        scores = scores[:, 1]    # Get the column for label 1
+    return (test_y, predictions, scores, train_time)
+
+
 def main(**options):
     dataset_directory = options.pop('dataset_directory', '.')
     dataset = options.pop('dataset')
@@ -143,30 +171,8 @@ def main(**options):
     folds = get_folds(X, y, k)
     stats_manager = StatisticsManager()
 
-    def train_and_evaluate():
-        # Construct classifier instance
-        print(options)
-        classifier = get_classifier(**options)
-
-        # Train classifier
-        train_start = time.time()
-        if fs_alg:
-            selector = FS_ALGORITHMS[fs_alg](n=fs_n)
-            selector.fit(train_X)
-            train_X = selector.transform(train_X)
-        classifier.fit(train_X, train_y)
-        train_time = (train_start - time.time())
-
-        if fs_alg:
-            test_X = selector.transform(test_X)
-        predictions = classifier.predict(test_X)
-        scores = classifier.predict_proba(test_X)
-        if len(np.shape(scores)) > 1 and np.shape(scores)[1] > 1:
-            scores = scores[:, 1]    # Get the column for label 1
-        return (test_y, predictions, scores, train_time)
-
     pool = mp.Pool(k)  # one process per fold
-    results = pool.map(train_and_evaluate, folds)
+    results = pool.starmap(train_and_evaluate, [(fold, options) for fold in folds])
 
     for test_y, predictions, scores, train_time in results:
         stats_manager.add_fold(test_y, predictions, scores, train_time)
