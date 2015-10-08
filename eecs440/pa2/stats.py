@@ -59,7 +59,35 @@ class StatisticsManager(object):
 
 
 def accuracy(labels, predictions):
-    pass
+    """
+    Returns the accuracy of a set of predictions given a set of true labels.
+
+    Computes the true positive count by taking the intersection of the indices
+    where the true label was positive, and the indices where the prediction was
+    positive. This intersection contains all the indices where the label and
+    prediction were both positive, so its length gives the number of true
+    positives. The true negative count is then obtained similarly.
+
+    Raises an assertion error if there are ever a different number of labels
+    and predictions.
+    """
+    assert len(labels) == len(predictions)
+
+    true_positives = len(
+        np.intersect1d(
+            np.where(labels > 0)[0],
+            np.where(predictions > 0)[0],
+            assume_unique=True,
+        )
+    )
+    true_negatives = len(
+        np.intersect1d(
+            np.where(labels < 0)[0],
+            np.where(predictions < 0)[0],
+            assume_unique=True,
+        )
+    )
+    return (true_positives + true_negatives) / float(len(labels))
 
 
 def precision(labels, predictions):
