@@ -118,7 +118,8 @@ def get_folds(X, y, k):
     return zip(train_X, train_y, test_X, test_y)
 
 
-def train_and_evaluate(fold, options):
+def train_and_evaluate(arg):
+    fold, options = arg
     train_X, train_y, test_X, test_y = fold
     # Construct classifier instance
     print(options)
@@ -172,7 +173,7 @@ def main(**options):
     stats_manager = StatisticsManager()
 
     pool = mp.Pool(k)  # one process per fold
-    results = pool.starmap(train_and_evaluate, [(fold, options) for fold in folds])
+    results = pool.map(train_and_evaluate, [(fold, options) for fold in folds])
 
     for test_y, predictions, scores, train_time in results:
         stats_manager.add_fold(test_y, predictions, scores, train_time)
