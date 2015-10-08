@@ -4,6 +4,8 @@ The Artificial Neural Network
 from __future__ import division
 from __future__ import print_function
 
+import sys
+
 import numpy as np
 import numpy.random
 import scipy
@@ -50,8 +52,10 @@ class ArtificialNeuralNetwork(object):
                             (need at least one of [epsilon, max_iters])
         """
         assert layer_sizes == 1
+        assert epsilon is not None or max_iters is not None
 
         self._max_iters = max_iters
+        self.epsilon = epsilon
         self._schema = kwargs['schema']
         self.num_hidden = num_hidden
         self.gamma = gamma
@@ -84,16 +88,18 @@ class ArtificialNeuralNetwork(object):
         self.std_devs[nominal_indices] = 1
         X = np.apply_along_axis(self.standardize, 1, X)
         iterations = 0
-        # Adding 1 is a hack to ensure that we don't "converge" on the first
-        # iteration.
-        old_hidden_weights = self.hidden_weights + 1
-        old_output_weights = self.output_weights + 1
+        output_delta = np.inf
+        hidden_deltas = np.array([np.inf for i in xrange(self.num_hidden)])
         while not self.stop_fitting(iterations,
-                                    old_hidden_weights,
-                                    old_output_weights):
-            old_hidden_weights = self.hidden_weights
-            old_output_weights = self.output_weights
-            print(iterations)
+                                    output_delta,
+                                    hidden_deltas):
+            # begin printing fanciness
+            if iterations == 0:
+                print("iters: {}".format(iterations), end='')
+            else:
+                print("\b" * len(str(iterations - 1)), end='')
+                print(iterations, end='')
+            sys.stdout.flush()
             iterations += 1
             for i, x in enumerate(X):
                 # compute outputs of all nodes
@@ -115,6 +121,7 @@ class ArtificialNeuralNetwork(object):
                          np.array([hidden_deltas[i] * x
                                    for i in xrange(len(hidden_deltas))])) - \
                         self.hidden_weights * self.weight_decay_term
+        print()  # clear the newline we left over
 
     def propagate(self, x):
         if self.num_hidden > 0:
@@ -124,11 +131,11 @@ class ArtificialNeuralNetwork(object):
         output_output = sigmoid(np.dot(self.output_weights, hidden_outputs))
         return (hidden_outputs, output_output)
 
-    def stop_fitting(self, num_iters, old_hw, old_ow):
+    def stop_fitting(self, num_iters, output_delta, hidden_deltas):
         if self._max_iters is not None:
             return num_iters >= self._max_iters
-        return np.all(old_hw == self.hidden_weights) and \
-            np.all(old_ow == self.output_weights)
+        return output_delta < self.epsilon and \
+            np.all(hidden_deltas < self.epsilon)
 
     def predict(self, X):
         """ Predict -1/1 output """
