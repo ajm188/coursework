@@ -12,12 +12,10 @@ import numpy.random
 import scipy
 
 
-def range_size_and_offset(lower, upper):
-    return (upper - lower, lower)
-
-
 def random_weights(dimensions, range):
-    size, offset = range_size_and_offset(*range)
+    lower, upper = *range
+    size = upper - lower
+    offset = lower
     return np.random.rand(*dimensions) * size + offset
 
 
