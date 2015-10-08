@@ -5,6 +5,7 @@ The main script for running experiments
 from __future__ import print_function
 xrange = range
 
+import multiprocessing as mp
 import time
 import numpy as np
 import scipy
@@ -141,8 +142,8 @@ def main(**options):
     options['schema'] = schema
     folds = get_folds(X, y, k)
     stats_manager = StatisticsManager()
-    for train_X, train_y, test_X, test_y in folds:
 
+    def train_and_evaluate():
         # Construct classifier instance
         print(options)
         classifier = get_classifier(**options)
@@ -162,6 +163,12 @@ def main(**options):
         scores = classifier.predict_proba(test_X)
         if len(np.shape(scores)) > 1 and np.shape(scores)[1] > 1:
             scores = scores[:, 1]    # Get the column for label 1
+        return (test_y, predictions, scores, train_time)
+
+    pool = mp.Pool(k)  # one process per fold
+    results = pool.map(train_and_evaluate, folds)
+
+    for test_y, predictions, scores, train_time in results:
         stats_manager.add_fold(test_y, predictions, scores, train_time)
 
     accuracy, std_dev = stats_manager.get_statistic(
