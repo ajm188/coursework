@@ -2,8 +2,11 @@
 """
 The main script for running experiments
 """
+# Python 2/3 compatibility hacks
 from __future__ import print_function
-xrange = range
+import sys
+if sys.version_info[0] == 3:
+    xrange = range
 
 import multiprocessing as mp
 import time
