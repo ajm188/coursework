@@ -107,9 +107,7 @@ def specificity(labels, predictions):
 
 def auc(labels, predictions):
     ordering = np.argsort(predictions)
-    print(ordering)
     ordering = np.array([i for i in reversed(ordering)])
-    print(ordering)
     labels = labels[ordering]
     predictions = predictions[ordering]
     roc_points = []
