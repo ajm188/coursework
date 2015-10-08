@@ -2,12 +2,14 @@
 """
 The main script for running experiments
 """
+from __future__ import print_function
+
 import time
 import numpy as np
+import scipy
 
 from stats import StatisticsManager
 from data import get_dataset
-import scipy
 # from dtree import DecisionTree
 from ann import ArtificialNeuralNetwork
 '''
@@ -141,7 +143,7 @@ def main(**options):
     for train_X, train_y, test_X, test_y in folds:
 
         # Construct classifier instance
-        print options
+        print(options)
         classifier = get_classifier(**options)
 
         # Train classifier
@@ -165,19 +167,19 @@ def main(**options):
         'accuracy',
         pooled=False,
     )
-    print ('      Accuracy: %.03f %.03f' % (accuracy, std_dev))
+    print(('      Accuracy: %.03f %.03f' % (accuracy, std_dev)))
     precision, std_dev = stats_manager.get_statistic(
         'precision',
         pooled=False,
     )
-    print ('     Precision: %.03f %.03f' % (precision, std_dev))
+    print(('     Precision: %.03f %.03f' % (precision, std_dev)))
     recall, std_dev = stats_manager.get_statistic(
         'recall',
         pooled=False,
     )
-    print ('        Recall: %.03f %.03f' % (recall, std_dev))
+    print(('        Recall: %.03f %.03f' % (recall, std_dev)))
     area = stats_manager.get_statistic('auc', pooled=True)
-    print ('Area under ROC: %.03f' % area)
+    print(('Area under ROC: %.03f' % area))
 
 
 if __name__ == "__main__":
