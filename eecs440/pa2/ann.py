@@ -135,7 +135,7 @@ class ArtificialNeuralNetwork(object):
                 continue
             sorted_values = sorted([int(s) for s in values])
             self.normalization_table[i] = \
-                dict((str(orig), norm)
+                dict((float(orig), norm)
                      for norm, orig in enumerate(sorted_values, start=1))
 
     def normalize(self, X):
