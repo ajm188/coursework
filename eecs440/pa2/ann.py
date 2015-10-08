@@ -133,8 +133,8 @@ class ArtificialNeuralNetwork(object):
     def predict(self, X):
         """ Predict -1/1 output """
         activations = self.predict_proba(X)
-        activations[np.where(activations >= 0.5)] = 1
-        activations[np.where(activations < 0.5)] = -1
+        activations[activations >= 0.5] = 1
+        activations[activations < 0.5] = -1
         return activations
 
     def predict_proba(self, X):
