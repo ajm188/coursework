@@ -1,6 +1,9 @@
 """
 Statistics Computations
 """
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 import scipy
 
@@ -62,41 +65,86 @@ def accuracy(labels, predictions):
     """
     Returns the accuracy of a set of predictions given a set of true labels.
 
-    Computes the true positive count by taking the intersection of the indices
-    where the true label was positive, and the indices where the prediction was
-    positive. This intersection contains all the indices where the label and
-    prediction were both positive, so its length gives the number of true
-    positives. The true negative count is then obtained similarly.
-
     Raises an assertion error if there are ever a different number of labels
     and predictions.
     """
     assert len(labels) == len(predictions)
 
-    true_positives = len(
-        np.intersect1d(
-            np.where(labels > 0)[0],
-            np.where(predictions > 0)[0],
-            assume_unique=True,
-        )
-    )
-    true_negatives = len(
-        np.intersect1d(
-            np.where(labels < 0)[0],
-            np.where(predictions < 0)[0],
-            assume_unique=True,
-        )
-    )
+    true_positives = TP(labels, predictions)
+    true_negatives = TN(labels, predictions)
     return (true_positives + true_negatives) / float(len(labels))
 
 
 def precision(labels, predictions):
-    pass
+    assert len(labels) == len(predictions)
+
+    true_positives = TP(labels, predictions)
+    false_positives = FP(labels, predictions)
+    if true_positives + false_positives == 0:
+        return 1
+    return true_positives / (true_positives + false_positives)
 
 
 def recall(labels, predictions):
-    pass
+    assert len(labels) == len(predictions)
+
+    true_positives = TP(labels, predictions)
+    false_negatives = FN(labels, predictions)
+    if true_positives + false_negatives == 0:
+        return 1
+    return true_positives / (true_positives + false_negatives)
+
+
+def specificity(labels, predictions):
+    assert len(labels) == len(predictions)
+
+    true_negatives = TN(labels, predictions)
+    false_positives = FP(labels, predictions)
+    if true_negatives + false_positives == 0:
+        return 1
+    return true_negatives / (true_negatives + false_positives)
 
 
 def auc(labels, predictions):
-    pass
+    ordering = np.argsort(predictions)
+    print(ordering)
+    ordering = np.array([i for i in reversed(ordering)])
+    print(ordering)
+    labels = labels[ordering]
+    predictions = predictions[ordering]
+    roc_points = []
+    for i in xrange(len(predictions) + 1):
+        preds = np.zeros(predictions.shape) - 1
+        preds[np.arange(i)] = 1
+        roc_points.append(
+            (recall(labels, preds), 1 - specificity(labels, preds)),
+        )
+
+    area = 0
+    for i in xrange(len(roc_points) - 1):
+        j = i + 1
+
+        trap_lower_height = roc_points[i][0]
+        trap_upper_height = roc_points[j][0]
+        base_lower = roc_points[i][1]
+        base_upper = roc_points[j][1]
+        h = (trap_lower_height + trap_upper_height) / 2
+        area += h * (base_upper - base_lower)
+
+    return area
+
+
+def TP(labels, predictions):
+    return ((labels > 0) & (predictions > 0)).sum()
+
+
+def TN(labels, predictions):
+    return ((labels < 0) & (predictions < 0)).sum()
+
+
+def FP(labels, predictions):
+    return ((labels < 0) & (predictions > 0)).sum()
+
+
+def FN(labels, predictions):
+    return ((labels > 0) & (predictions < 0)).sum()
