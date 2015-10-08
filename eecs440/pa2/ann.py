@@ -73,7 +73,12 @@ class ArtificialNeuralNetwork(object):
         """
         X = np.apply_along_axis(self.normalize, 1, X.astype('float64'))
         self.means = np.mean(X, 0)
+        nominal_indices = np.array(
+            [i for i, v in enumerate(self._schema.nominal_values) if len(v)]
+        )
+        self.means[nominal_indices] = 0
         self.std_devs = np.std(X, 0)
+        self.std_devs[nominal_indices] = 1
         X = np.apply_along_axis(self.standardize, 1, X)
         iterations = 0
         # Adding 1 is a hack to ensure that we don't "converge" on the first
