@@ -168,7 +168,7 @@ def main(**options):
     pool = mp.Pool(k)  # one process per fold
     results = pool.map(train_and_evaluate, folds)
 
-    for test_y, predictions, scores, train_time:
+    for test_y, predictions, scores, train_time in results:
         stats_manager.add_fold(test_y, predictions, scores, train_time)
 
     accuracy, std_dev = stats_manager.get_statistic(
