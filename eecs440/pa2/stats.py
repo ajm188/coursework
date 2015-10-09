@@ -80,6 +80,12 @@ def accuracy(labels, predictions):
 
 
 def precision(labels, predictions):
+    """
+    Returns the precision of a set of predictions given a set of true labels.
+
+    Raises an assertion error if there are ever a different number of labels
+    and predictions.
+    """
     assert len(labels) == len(predictions)
 
     true_positives = TP(labels, predictions)
@@ -90,6 +96,12 @@ def precision(labels, predictions):
 
 
 def recall(labels, predictions):
+    """
+    Returns the recall of a set of predictions given a set of true labels.
+
+    Raises an assertion error if there are ever a different number of labels
+    and predictions.
+    """
     assert len(labels) == len(predictions)
 
     true_positives = TP(labels, predictions)
@@ -100,6 +112,12 @@ def recall(labels, predictions):
 
 
 def specificity(labels, predictions):
+    """
+    Returns the specificity of a set of predictions given a set of true labels.
+
+    Raises an assertion error if there are ever a different number of labels
+    and predictions.
+    """
     assert len(labels) == len(predictions)
 
     true_negatives = TN(labels, predictions)
@@ -110,11 +128,17 @@ def specificity(labels, predictions):
 
 
 def auc(labels, predictions):
+    """
+    Returns the area under ROC curve of a set of predictions given a set of
+    true labels.
+    """
     ordering = np.argsort(predictions)
     ordering = np.array([i for i in reversed(ordering)])
     labels = labels[ordering]
     predictions = predictions[ordering]
     roc_points = []
+    # Compute recall and 1 - specificity for each confidence threshold,
+    # including 0 and 1.
     for i in xrange(len(predictions) + 1):
         preds = np.zeros(predictions.shape) - 1
         preds[np.arange(i)] = 1
@@ -122,6 +146,8 @@ def auc(labels, predictions):
             (recall(labels, preds), 1 - specificity(labels, preds)),
         )
 
+    # Compute the area by going pairwise along the x-axis, adding the value
+    # of the small trapezoid captured by this segment of the ROC curve.
     area = 0
     for i in xrange(len(roc_points) - 1):
         j = i + 1
