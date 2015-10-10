@@ -4,6 +4,8 @@
 \usepackage{amsthm}
 \usepackage[margin=1in]{geometry}
 \usepackage{mathtools}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
 
 \title{EECS 477 HW3}
 \author{Andrew Mason}
@@ -77,8 +79,47 @@
   % #5
   \item
   % #6
-  \item Postponed.\\
+  \item Postponed.
   % #7
   \item
+    Beginning with the linear program:\\
+    \begin{equation}
+      \begin{split}
+        \text{min}\ &x_1+x_2+3x_3+2x_4+4x_5\\
+        \text{s.t.}\ &x_1+x_3+x_5=2\\
+        &x_4-x_3=1\\
+        &x_2-x_1=-1\\
+        &-x_2-x_4-x_5=-2\\
+        &0\leq x_1\leq1\\
+        &0\leq x_2\leq2\\
+        &0\leq x_3\leq1\\
+        &0\leq x_4\leq3\\
+        &0\leq x_5\leq2\\
+      \end{split}
+    \end{equation}
+    (I inverted the last equality constraint, but this is the same problem).\\
+    The four equality constraints correspond to the four nodes (and their supplies/demands)
+    in the network, and the inequality constraints correspond to the lower and upper bounds
+    of the arcs in the network.\\
+    So we have the following equivalent network (each arc is $(c,l,u)$:\\
+    \begin{center}
+      \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3.8cm,semithick]
+        \node[state] (A) {2};
+        \node[state] (B) [above right of=A] {1};
+        \node[state] (C) [below right of=A] {-1};
+        \node[state] (D) [below right of=B] {-2};
+
+        \path (A) edge node {3,0,1} (B) % x_3
+                  edge node {1,0,1} (C) % x_1
+                  edge node {4,0,2} (D) % x_5
+              (B) edge node {2,0,3} (D) % x_4
+              (C) edge node {1,0,2} (D) % x_2
+              ;
+      \end{tikzpicture}
+    \end{center}
+
+    Now, we have a MCNF problem with all lower and upper bounds integer, and supplies
+    and demands integer. So without loss of generality, this problem has an integer
+    solution which is optimal.\\
 \end{enumerate}
 \end{document}
