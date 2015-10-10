@@ -1,9 +1,10 @@
 \documentclass[12pt]{article}
 
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{amsthm}
-\usepackage[margin=1in]{geometry}
-\usepackage{mathtools}
 \usepackage{tikz}
 \usetikzlibrary{arrows,automata}
 
@@ -16,6 +17,92 @@
 \begin{enumerate}
   % #1
   \item
+    \begin{enumerate}
+      \item
+        \begin{itemize}
+          \item First, put all lower bounds to 0.\\
+            \begin{tabular}{|r|c|c|}
+              \hline
+              Node & $b_i$ \\\hline
+              a & 15 \\ \hline
+              b & 10 \\ \hline
+              c & -20 \\ \hline
+              d & -5 \\ \hline
+              e & 0 \\ \hline
+            \end{tabular}
+            \begin{tabular}{|r|c|c|c|}
+              \hline
+              Arc & $c$ & $u$ \\ \hline
+              (a, b) & 4 & $\infty$ \\ \hline
+              (a, c) & 6 & $\infty$ \\ \hline
+              (b, c) & -2 & 25 \\ \hline
+              (b, e) & 5 & 10 \\ \hline
+              (c, d) & -3 & 5 \\ \hline
+              (e, d) & 2 & $\infty$ \\ \hline
+            \end{tabular}
+          \item Next, reverse arcs with negative costs.\\
+            \begin{tabular}{|r|c|c|}
+              \hline
+              Node & $b_i$ \\\hline
+              a & 15 \\ \hline
+              b & -15 \\ \hline
+              c & 0 \\ \hline
+              d & 0 \\ \hline
+              e & 0 \\ \hline
+            \end{tabular}
+            \begin{tabular}{|r|c|c|c|}
+              \hline
+              Arc & $c$ & $u$ \\ \hline
+              (a, b) & 4 & $\infty$ \\ \hline
+              (a, c) & 6 & $\infty$ \\ \hline
+              (c, b) & 2 & 25 \\ \hline
+              (b, e) & 5 & 10 \\ \hline
+              (d, c) & 3 & 5 \\ \hline
+              (e, d) & 2 & $\infty$ \\ \hline
+            \end{tabular}
+          \item Finally, put all upper bounds to $\infty$.\\
+            \begin{tabular}{|r|c|c|}
+              \hline
+              Node & $b_i$ \\\hline
+              a & 15 \\ \hline
+              b & 10 \\ \hline
+              c & 5 \\ \hline
+              d & 0 \\ \hline
+              e & 10 \\ \hline
+              i & -10 \\ \hline
+              j & -5 \\ \hline
+              k & -25 \\ \hline
+            \end{tabular}
+            \begin{tabular}{|r|c|c|}
+              \hline
+              Arc & $c$ \\ \hline
+              (a, b) & 4 \\ \hline
+              (a, c) & 6 \\ \hline
+              (c, k) & 2 \\ \hline
+              (b, k) & 0 \\ \hline
+              (b, i) & 5 \\ \hline
+              (e, i) & 0 \\ \hline
+              (d, j) & 3 \\ \hline
+              (c, j) & 0 \\ \hline
+              (e, d) & 2 \\ \hline
+            \end{tabular}
+        \end{itemize}
+      \item
+        Sending 20 units of flow along $(a,b)$ satisfies the supply constraint
+        of $a$, and the lower bound constraint of $(a, b)$. Now, sending 25
+        units of flow along $(b,c)$ yields a net outgoing flow for $b$ of 5,
+        satisfying the supply constraint of $b$. Additionally, 25 is within the
+        upper bound for $(b,c)$, so we have not yet violated any constraints.
+        Finally, sending 10 units of flow along $(c,d)$ results in a net
+        outgoing flow of -15 for $c$, and a net outgoing flow of -10 for $d$,
+        so both nodes have their supplies satisfied. Additionally, 10 is within
+        the upper bound for $(c,d)$, so this does not violate the upper bound
+        of the arc. $e$ sees no flow, but its supply constraint is 0, so this
+        is fine. Also, all of the arcs that had no flow move across them have
+        lower bounds of 0, so the flow is feasible.\\
+
+        The residual network is:\\
+    \end{enumerate}
   % #2
   \item
   % #3
@@ -78,6 +165,52 @@
   \item
   % #5
   \item
+    \begin{enumerate}
+      \item Consider: 0 0 2 1.\\
+      If Alice goes first, she loses. She will pick the 1, allowing Bob to pick
+      the 2. Then her and Bob will split the remaining 0`s. If Bob goes first,
+      he can pick the 0, and then this is no different from Alice going first.
+      \item
+        Assume that Alice will move first.\\
+        Define $V(c,i,j,t)=\begin{cases}
+          0 &\mbox{if}\ i\geq j\\
+          \max(c_i + V(c,i+1,j,!t), c_{j-1}+V(c,i,j-1,!t)) &\mbox{if}\ t\\
+          \min(-c_i + V(c,i+1,j,!t), -c_{j-1}+V(c,i,j-1,!t)) &\mbox{otherwise}\end{cases}$
+        \begin{algorithm}
+          \caption{Gambling Strategy for Alice, DP approach}
+          \begin{algorithmic}[1]
+            \State \textbf{Input} $C\gets$ array of chips; length $n$
+            \State $V\gets$ $n\times n+1$ matrix
+            \State Initialize $V_{ij}\gets0$, for $i\geq j$
+            \State $turn\gets n\mod2=0$ //{true if Alice's turn (maximization), false otherwise (minimization)}\\
+            \For{$diag\gets1\ldots n$}
+              \For{$j\gets diag\ldots n+1$}
+                \For{$i\gets0\ldots n-diag$}
+                  \If{$turn$}
+                    \State $V_{ij}=\max(C_i + V_{i+1,j},C_{j-1} + V_{i,j-1})$
+                  \Else
+                    \State $V_{ij}=\min(-C_i + V_{i+1,j},-C_{j-1} + V_{i,j-1})$
+                  \EndIf
+                  \State // Note: Also record backpointer to the argmax/argmin
+                \EndFor
+              \EndFor
+            \EndFor
+            \State
+            \Return Path from following backpointers starting from $V_{0,n+1}$
+          \end{algorithmic}
+        \end{algorithm}
+
+        So, to use shortest paths, when constructing the $V$ matrix, simply reverse
+        the pointers that are being constructed, then compute the shortest path from
+        each point along the $i=j$ diagonal, and choose the maximum.
+
+      \item
+        The running time of the DP approach is $O(n^2)$. The running time of the
+        shortest path approach is also $O(n^2\log n)$ ($n^2$ to build the matrix,
+        as in the DP approach but then $n\log n$ for each node along the diagonal).\\
+        This can be improved upon by computing intermediate shortest paths while
+        constructing the graph, which is what the dynamic programming approach does.\\
+    \end{enumerate}
   % #6
   \item Postponed.
   % #7
