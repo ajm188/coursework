@@ -75,6 +75,54 @@
     \end{equation}
   % 4
   \item
+    First, we will assume that Band Wagon over hears the percentages for the
+    confidence interval and the lower and upper bounds of the confidence
+    interval. For example, Bob says ``My C\% CI was (l, u)''.
+
+    Now, define $C_B,l_B,u_B$ to be the confidence percentage, lower and upper
+    bounds for Bob, and $C_N,l_N,u_N$ defined similarly for Nan. Then, let us
+    consider how to derive $\mu_B,\sigma_B,\mu_N,\sigma_N$, which will be the
+    mean and standard deviation of Bob's and Nan's tests, respectively.
+
+    \begin{equation}
+      \begin{split}
+        (l_B,u_B)&=(\mu_B\pm C_B\sigma_B)\\
+        u_B-l_B&=2C_B\sigma_B\\
+        \sigma_B&=\frac{u_B-l_B}{2C_B}\\
+      \end{split}
+    \end{equation}
+
+    Then,
+    \begin{equation}
+      \begin{split}
+        \mu_B&=l_B+C_B\sigma_B\\
+        \mu_B&=l_B+C_B\frac{u_B-l_B}{2C_B}\\
+        \mu_B&=l_B+\frac{u_B-l_B}{C_B}\\
+        \mu_B&=\frac{C_Bl_B+u_B-l_B}{C_B}\\
+        \mu_B&=\frac{\left(C_B-1\right)l_B+u_B}{C_B}\\
+      \end{split}
+    \end{equation}
+
+    So $\mu_N=\frac{\left(C_N-1\right)l_N+u_N}{C_N}$ and
+    $\sigma_N=\frac{u_N-l_N}{2C_N}$ similarly.
+
+    Now, Band Wagon can compute his $\mu_W,\sigma_W$ as follows:
+    \begin{equation}
+      \begin{split}
+        \mu_W&=\mu_B-\mu_N
+      \end{split}
+    \end{equation}
+    \begin{equation}
+      \begin{split}
+        \sigma_W^2&=\text{Var}\left(W\right)\\
+        &=\frac{\mu_B\left(1-\mu_B\right)}{n}+
+          \frac{\mu_N\left(1-\mu_N\right)}{n}\\
+        &=\frac{\mu_B\left(1-\mu_B\right)+\mu_N\left(1-\mu_N\right)}{n}\\
+      \end{split}
+    \end{equation}
+    and he can report a confidence interval of
+    $\left(\mu_W\pm z_W\sigma_W\right)$, where $z_W$ is the value
+    corresponding to the confidence percentage of his choosing.\\
   % 5
   \item
 \end{enumerate}
