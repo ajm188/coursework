@@ -1,0 +1,52 @@
+\documentclass[12pt]{article}
+
+\usepackage{mathtools}
+
+\title{EECS 440 HW7}
+\author{Andrew Mason}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+  % 1
+  \item
+  % 2
+  \item
+    To establish the difference between A and B at 95\% confidence, we need
+    that $0\notin\left(0.1\pm1.96\sigma\right)$.
+
+    In other words,
+    \begin{equation}
+      \begin{split}
+        0&<0.1-1.96\sigma\\
+        \sigma&<0.05\\
+      \end{split}
+    \end{equation}
+
+    So, looking at the variance, we need:
+    \begin{equation}
+      \begin{split}
+        0.05&>\left[\frac{e_A\left(1-e_A\right)}{n}+\frac{e_B\left(1-e_B\right)}{n}\right]^2\\
+        0.05n^2&>e_A\left(1-e_A\right)+e_B\left(1-e_B\right)\\
+      \end{split}
+    \end{equation}
+
+    Also, since $e_A=e_B+0.1$, we have $e_A^2=e_B^2+0.2e_B+0.01$. Now:
+    \begin{equation}
+      \begin{split}
+        0.05n^2&>e_A\left(1-e_A\right)+e_B\left(1-e_B\right)\\
+        0.05n^2&>e_B+0.1-e_B^2-0.2e_B-0.01+e_B-e_B^2\\
+        0.05n^2&>-2e_B^2+1.98e_B+0.09\\
+        n^2&>\frac{-2e_B^2+1.98e_B+0.09}{0.05}\\
+        n&>\sqrt{\frac{-2e_B^2+1.98e_B+0.09}{0.05}}\\
+      \end{split}
+    \end{equation}
+  % 3
+  \item
+  % 4
+  \item
+  % 5
+  \item
+\end{enumerate}
+\end{document}
