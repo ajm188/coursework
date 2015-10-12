@@ -11,7 +11,13 @@
 \begin{enumerate}
   % 1
   \item
-    $$\frac{\sum_{i=0}^{N}r_i}{\sum_{i=0}^{N}n_i}$$
+    We can view this as if we had done a single test with all $N$ sets of
+    examples. Then, the classifier has made $\sum_{i=0}^{N}r_i$ errors out of
+    $\sum_{i=0}^Nn_i$ total examples, so the MLE estimate of the true error
+    rate is
+    \begin{equation}
+      \frac{\sum_{i=0}^Nr_i}{\sum_{i=0}^Nn_i}
+    \end{equation}
   % 2
   \item
     To establish the difference between A and B at 95\% confidence, we need
