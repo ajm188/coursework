@@ -11,6 +11,7 @@
 \begin{enumerate}
   % 1
   \item
+    $$\frac{\sum_{i=0}^{N}r_i}{\sum_{i=0}^{N}n_i}$$
   % 2
   \item
     To establish the difference between A and B at 95\% confidence, we need
@@ -44,6 +45,28 @@
     \end{equation}
   % 3
   \item
+    Let $r$ be the number of errors made by Professor X's classifier
+    ($\mu_X, \sigma_X$ are the mean and standard deviation, respectively). Then
+    the C\% confidence interval of Professor X's classifier is:
+    \begin{equation}
+      \begin{split}
+        CI&=\left(\mu_X\pm z_C\sigma_X\right)\\
+        &=\left(\frac{r}{n}\pm z_C\sqrt{\frac{r\left(1-r\right)}{n}}\right)\\
+        &=\left(\frac{r\pm z_C\sqrt{n\left(1-r\right)}}{n}\right)\\
+      \end{split}
+    \end{equation}
+
+    Then, with $E_Y$ as the error rate:
+    \begin{equation}
+      \begin{split}
+        Pr\left(E_Y\in CI\right)&
+          =Pr\left(E_Y<\frac{r+z_C\sqrt{n\left(1-r\right)}}{n}\right)-
+          Pr\left(E_Y<\frac{r-z_C\sqrt{n\left(1-r\right)}}{n}\right)\\
+        &=\frac{r+z_C\sqrt{n\left(1-r\right)}}{n}-\frac{r-z_C\sqrt{n\left(1-r\right)}}{n}\\
+        &=r+z_C\sqrt{n\left(1-r\right)}-r-z_C\sqrt{n\left(1-r\right)}\\
+        &=2z_C\sqrt{n\left(1-r\right)}\\
+      \end{split}
+    \end{equation}
   % 4
   \item
   % 5
