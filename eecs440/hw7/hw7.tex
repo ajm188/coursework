@@ -125,5 +125,14 @@
     corresponding to the confidence percentage of his choosing.\\
   % 5
   \item
+    $b$, along with $\mathbf{w}$ and $\mathbf{x}$ define two boundaries, one
+    being the ``plus'' boundary and the other being the ``minus'' boundary.
+    These boundaries (hyperplanes) are related and are defined by
+    $$\mathbf{w}\cdot\mathbf{x}-b=1$$
+    $$\mathbf{w}\cdot\mathbf{x}-b=-1$$
+    So, intuitively, $b$ determines the midpoint of the space between these
+    boundaries (the margin), but a midpoint does not really determine the size
+    of a range in any way. Since the goal is to maximize the size of margin, it
+    makes sense that $b$ does not appear in the objective function.
 \end{enumerate}
 \end{document}
