@@ -45,15 +45,29 @@ class NaiveBayes(object):
                     len(neg_matches) / len(negative_examples)
 
     def predict(self, X):
-        predictions = []
-        for x in X:
-            running_probs = np.ones(2)
-            for i in xrange(len(x)):
-                running_probs = running_probs * [self.neg_probs[i][x[i]],
-                                                 self.pos_probs[i][x[i]]]
-            probs = running_probs / [1 - self.y_prob, self.y_prob]
-            predictions.append((np.argmax(running_probs) * 2 - 1))
-        return np.array(predictions)
+        predictions = np.apply_along_axis(
+            lambda x: np.argmax(
+                self.compute_running_probs(
+                    x,
+                    [self.neg_probs, self.pos_probs],
+                ) / [1 - self.y_prob, self.y_prob]
+            ) * 2 - 1,
+            1,
+            X,
+        )
+        return predictions
 
     def predict_proba(self, X):
-        pass  # add code here
+        probs = np.apply_along_axis(
+            self.compute_running_probs,
+            1,
+            X,
+            [self.pos_probs],
+        ) / self.y_prob
+        return probs.reshape(len(X),)
+
+    def compute_running_probs(self, x, probs):
+        running_probs = np.ones(len(probs))
+        for i in xrange(len(x)):
+            running_probs = running_probs * [p[i][x[i]] for p in probs]
+        return running_probs
