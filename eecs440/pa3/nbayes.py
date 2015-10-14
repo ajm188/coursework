@@ -40,37 +40,61 @@ class NaiveBayes(object):
 
             if self._schema.is_nominal(i):
                 # handle nominal attributes
-                pos_probs, neg_probs = defaultdict(int), defaultdict(int)
-                for v in self._schema.nominal_values[i]:
-                    v = int(v)  # why do you do this to me, template code?
-                    pos_matches = np.where(pos_feature == v)[0]
-                    neg_matches = np.where(neg_feature == v)[0]
-
-                    pos_probs[v] = len(pos_matches) / len(pos_x)
-                    neg_probs[v] = len(neg_matches) / len(neg_x)
+                pos_probs, neg_probs = self.find_nominal_probs(
+                    [pos_feature, neg_feature],
+                    self._schema.nominal_values[i],
+                    [pos_x, neg_x],
+                )
             else:
                 # discretize continuous attributes
-                lb = np.min(X_T[i])
-                ub = np.max(X_T[i])
-                bin_size = (ub - lb) / self.NUM_BINS
-
-                pos_probs, neg_probs = RangeDict(), RangeDict()
-                prev_boundary = -np.inf
-                for i in xrange(1, NUM_BINS + 1):
-                    boundary = lb + (bin_size * i)
-
-                    pos_matches = np.where(pos_x_feature > prev_boundary & pos_x_feature <= boundary)[0]
-                    neg_matches = np.where(neg_x_feature > prev_boundary & neg_x_feature <= boundary)[0]
-
-                    pos_probs[(prev_boundary, boundary)] = len(pos_matches) / len(pos_x)
-                    neg_probs[(prev_boundary, boundary)] = len(neg_matches) / len(neg_x)
-
-                    prev_boundary = boundary
+                pos_probs, neg_probs = self.find_continuous_probs(
+                    [pos_feature, neg_feature],
+                    [np.min(X_T[i]), np.max(X_T[i])],
+                    [pos_x, neg_x],
+                )
 
             self.pos_probs[i] = pos_probs
             self.neg_probs[i] = neg_probs
 
         self.y_prob = len(pos_i) / len(y)
+        print()
+
+    def find_nominal_probs(self, feature, nominal_values, x):
+        pos_feature, neg_feature = feature
+        pos_x, neg_x = x
+
+        pos_probs, neg_probs = defaultdict(int), defaultdict(int)
+        for v in nominal_values:
+            v = int(v)  # why do you do this to me, template code?
+            pos_matches = np.where(pos_feature == v)[0]
+            neg_matches = np.where(neg_feature == v)[0]
+
+            pos_probs[v] = len(pos_matches) / len(pos_x)
+            neg_probs[v] = len(neg_matches) / len(neg_x)
+
+        return pos_probs, neg_probs
+
+    def find_continuous_probs(self, feature, feature_range, x):
+        pos_feature, neg_feature = feature
+        pos_x, neg_x = x
+
+        lb, ub = feature_range
+        bin_size = (ub - lb) / self.NUM_BINS
+
+        pos_probs, neg_probs = RangeDict(), RangeDict()
+        prev_boundary = -np.inf
+        for i in xrange(1, self.NUM_BINS + 1):
+            boundary = lb + (bin_size * i)
+
+            pos_matches = np.sum((prev_boundary < pos_feature) & (pos_feature <= boundary))
+            neg_matches = np.sum((prev_boundary < neg_feature) & (neg_feature <= boundary))
+
+            pos_probs[(prev_boundary, boundary)] = pos_matches / len(pos_x)
+            neg_probs[(prev_boundary, boundary)] = neg_matches / len(neg_x)
+
+            prev_boundary = boundary
+
+        return pos_probs, neg_probs
 
     def predict(self, X):
         predictions = np.apply_along_axis(
@@ -97,5 +121,5 @@ class NaiveBayes(object):
     def compute_running_probs(self, x, probs):
         running_probs = np.ones(len(probs))
         for i in xrange(len(x)):
-            running_probs = running_probs * [p[i][x[i]] for p in probs]
+            running_probs = running_probs * [p[i].get(x[i], 0) for p in probs]
         return running_probs
