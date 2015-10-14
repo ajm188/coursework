@@ -141,64 +141,176 @@
     \end{enumerate}
   % #2
   \item
+    One such network is:\\
+    \begin{center}
+      \begin{tikzpicture}[scale=0.2]
+        \tikzstyle{every node}+=[inner sep=0pt]
+        \draw [black] (19.6,-27.1) circle (3);
+        \draw (19.6,-27.1) node {$b\mbox{ }=\mbox{ }1$};
+        \draw [black] (37.7,-18.7) circle (3);
+        \draw (37.7,-18.7) node {$b\mbox{ }=\mbox{ }0$};
+        \draw [black] (37.7,-32.9) circle (3);
+        \draw (37.7,-32.9) node {$b\mbox{ }=\mbox{ }0$};
+        \draw [black] (53.2,-27.1) circle (3);
+        \draw (53.2,-27.1) node {$b\mbox{ }=\mbox{ }-1$};
+        \draw [black] (22.32,-25.84) -- (34.98,-19.96);
+        \fill [black] (34.98,-19.96) -- (34.04,-19.85) -- (34.46,-20.75);
+        \draw [black] (40.34,-20.13) -- (50.56,-25.67);
+        \fill [black] (50.56,-25.67) -- (50.1,-24.85) -- (49.62,-25.73);
+        \draw [black] (22.46,-28.02) -- (34.84,-31.98);
+        \fill [black] (34.84,-31.98) -- (34.23,-31.26) -- (33.93,-32.22);
+        \draw [black] (40.51,-31.85) -- (50.39,-28.15);
+        \fill [black] (50.39,-28.15) -- (49.47,-27.96) -- (49.82,-28.9);
+      \end{tikzpicture}
+    \end{center}
+
+    All costs are 1, lower bounds 0 and upper bounds $\infty$. An
+    optimal fractional solution is to send $\frac{1}{2}$ of a unit
+    of flow along the upper path, and $\frac{1}{2}$ of a unit of flaw
+    along the lower path.\\
   % #3
   \item
-  The MCNF problem in number 1 can be formulated as the following linear program:\\
-  \begin{equation}
-    \begin{split}
-      \text{min}\ &4x_{ab}+6x_{ac}-2x_{bc}+5x_{be}-3x_{cd}+2x_{ed}\\
-      \text{s.t.}\ &x_{ab}+x_{ac}=20\\
-      &-x_{ab}+x_{bc}+x_{be}=5\\
-      &-x_{ac}-x_{bc}+x_{cd}=-15\\
-      &-x_{cd}-x_{ed}=-10\\
-      &-x_{be}+x_{ed}=0\\
-      &x_{ab}\geq5\\
-      &-x_{bc}\geq-25\\
-      &-x_{be}\geq-10\\
-      &x_{cd}\geq5\\
-      &-x_{cd}\geq-10\\
-      &x_{ac},x_{bc},x_{be},x_{ed}\geq0\\
-    \end{split}
-  \end{equation}
+    The MCNF problem in number 1 can be formulated as the following linear program:\\
+    \begin{equation}
+      \begin{split}
+        \text{min}\ &4x_{ab}+6x_{ac}-2x_{bc}+5x_{be}-3x_{cd}+2x_{ed}\\
+        \text{s.t.}\ &x_{ab}+x_{ac}=20\\
+        &-x_{ab}+x_{bc}+x_{be}=5\\
+        &-x_{ac}-x_{bc}+x_{cd}=-15\\
+        &-x_{cd}-x_{ed}=-10\\
+        &-x_{be}+x_{ed}=0\\
+        &x_{ab}\geq5\\
+        &-x_{bc}\geq-25\\
+        &-x_{be}\geq-10\\
+        &x_{cd}\geq5\\
+        &-x_{cd}\geq-10\\
+        &x_{ac},x_{bc},x_{be},x_{ed}\geq0\\
+      \end{split}
+    \end{equation}
 
-  The dual is then:\\
-  \begin{equation}
-    \begin{split}
-      \text{max}\ &20\pi_1+5\pi_2-15\pi_3-10\pi_4+0\pi_5+5\alpha_1-20\alpha_2-10\alpha_3+5\alpha_4-10\alpha_5\\
-      \text{s.t.}\ &\pi_1-\pi_2+\alpha_1\leq4\\
-      &\pi_1-\pi_3\leq6\\
-      &\pi_2-\pi_3-\alpha_2\leq-2\\
-      &\pi_2-\pi_5-\alpha_3\leq5\\
-      &\pi_3-\pi_4+\alpha_4-\alpha_5\leq-3\\
-      &-\pi_4+\pi_5\leq2\\
-      &\alpha_i\geq0,i=1\ldots5\\
-      &\pi_i\ \text{unrestricted},i=1\ldots5\\
-    \end{split}
-  \end{equation}
+    The dual is then:\\
+    \begin{equation}
+      \begin{split}
+        \text{max}\ &20\pi_1+5\pi_2-15\pi_3-10\pi_4+0\pi_5+5\alpha_1-20\alpha_2-10\alpha_3+5\alpha_4-10\alpha_5\\
+        \text{s.t.}\ &\pi_1-\pi_2+\alpha_1\leq4\\
+        &\pi_1-\pi_3\leq6\\
+        &\pi_2-\pi_3-\alpha_2\leq-2\\
+        &\pi_2-\pi_5-\alpha_3\leq5\\
+        &\pi_3-\pi_4+\alpha_4-\alpha_5\leq-3\\
+        &-\pi_4+\pi_5\leq2\\
+        &\alpha_i\geq0,i=1\ldots5\\
+        &\pi_i\ \text{unrestricted},i=1\ldots5\\
+      \end{split}
+    \end{equation}
 
-  So the complementary slackness conditions are:\\
-  \begin{equation}
-    \begin{split}
-      x_{ab}=0\ &\text{or}\ \pi_1-\pi_2+\alpha_1=4\\
-      x_{ac}=0\ &\text{or}\ \pi_1-\pi_3=6\\
-      x_{bc}=0\ &\text{or}\ \pi_2-\pi_3-\alpha_2=-2\\
-      x_{be}=0\ &\text{or}\ \pi_2-\pi_5-\alpha_3=5\\
-      x_{cd}=0\ &\text{or}\ \pi_3-\pi_4+\alpha_4-\alpha_5=-3\\
-      x_{ed}=0\ &\text{or}\ -\pi_4+\pi_5=2\\
-      \pi_1=0\ &\text{or}\ x_{ab}+x_{ac}=20\\
-      \pi_2=0\ &\text{or}\ -x_{ab}+x_{bc}+x_{be}=5\\
-      \pi_3=0\ &\text{or}\ -x_{ac}-x_{bc}+x_{cd}=-15\\
-      \pi_4=0\ &\text{or}\ -x_{cd}-x_{ed}=-10\\
-      \pi_5=0\ &\text{or}\ -x_{be}+x_{ed}=0\\
-      \alpha_1=0\ &\text{or}\ x_{ab}=5\\
-      \alpha_2=0\ &\text{or}\ -x_{bc}=-25\\
-      \alpha_3=0\ &\text{or}\ -x_{be}=-10\\
-      \alpha_4=0\ &\text{or}\ x_{cd}=5\\
-      \alpha_5=0\ &\text{or}\ -x_{cd}=-10\\
-    \end{split}
-  \end{equation}
+    So the complementary slackness conditions are:\\
+    \begin{equation}
+      \begin{split}
+        x_{ab}=0\ &\text{or}\ \pi_1-\pi_2+\alpha_1=4\\
+        x_{ac}=0\ &\text{or}\ \pi_1-\pi_3=6\\
+        x_{bc}=0\ &\text{or}\ \pi_2-\pi_3-\alpha_2=-2\\
+        x_{be}=0\ &\text{or}\ \pi_2-\pi_5-\alpha_3=5\\
+        x_{cd}=0\ &\text{or}\ \pi_3-\pi_4+\alpha_4-\alpha_5=-3\\
+        x_{ed}=0\ &\text{or}\ -\pi_4+\pi_5=2\\
+        \pi_1=0\ &\text{or}\ x_{ab}+x_{ac}=20\\
+        \pi_2=0\ &\text{or}\ -x_{ab}+x_{bc}+x_{be}=5\\
+        \pi_3=0\ &\text{or}\ -x_{ac}-x_{bc}+x_{cd}=-15\\
+        \pi_4=0\ &\text{or}\ -x_{cd}-x_{ed}=-10\\
+        \pi_5=0\ &\text{or}\ -x_{be}+x_{ed}=0\\
+        \alpha_1=0\ &\text{or}\ x_{ab}=5\\
+        \alpha_2=0\ &\text{or}\ -x_{bc}=-25\\
+        \alpha_3=0\ &\text{or}\ -x_{be}=-10\\
+        \alpha_4=0\ &\text{or}\ x_{cd}=5\\
+        \alpha_5=0\ &\text{or}\ -x_{cd}=-10\\
+      \end{split}
+    \end{equation}
   % #4
   \item
+    \begin{enumerate}
+      \item The residual network of $G(x^*)$ is:\\
+        \begin{center}
+          \begin{tikzpicture}[scale=0.2]
+            \tikzstyle{every node}+=[inner sep=0pt]
+            \draw [black] (7.5,-23.2) circle (3);
+            \draw (7.5,-23.2) node {$1$};
+            \draw [black] (18.1,-11.7) circle (3);
+            \draw (18.1,-11.7) node {$2$};
+            \draw [black] (28.5,-23.2) circle (3);
+            \draw (28.5,-23.2) node {$3$};
+            \draw [black] (18.9,-34) circle (3);
+            \draw (18.9,-34) node {$4$};
+            \draw [black] (48.7,-23.8) circle (3);
+            \draw (48.7,-23.8) node {$5$};
+            \draw [black] (57.9,-11.7) circle (3);
+            \draw (57.9,-11.7) node {$6$};
+            \draw [black] (59.8,-34) circle (3);
+            \draw (59.8,-34) node {$7$};
+            \draw [black] (70.1,-24.4) circle (3);
+            \draw (70.1,-24.4) node {$8$};
+            \draw [black] (16.07,-13.91) -- (9.53,-20.99);
+            \fill [black] (9.53,-20.99) -- (10.44,-20.74) -- (9.71,-20.07);
+            \draw (12.27,-15.99) node [left] {$(1,\mbox{ }10)$};
+            \draw [black] (26.49,-20.97) -- (20.11,-13.93);
+            \fill [black] (20.11,-13.93) -- (20.28,-14.85) -- (21.02,-14.18);
+            \draw (23.84,-15.99) node [right] {$(0,\mbox{ }10)$};
+            \draw [black] (15.914,-34.105) arc (-96.88988:-170.01381:9.662);
+            \fill [black] (15.91,-34.1) -- (15.18,-33.51) -- (15.06,-34.5);
+            \draw (7.74,-32.01) node [below] {$(2,\mbox{ }5)$};
+            \draw [black] (10.467,-23.582) arc (75.10435:17.99197:11.37);
+            \fill [black] (10.47,-23.58) -- (11.11,-24.27) -- (11.37,-23.3);
+            \draw (18.88,-25.83) node [above] {$(-2,\mbox{ }10)$};
+            \draw [black] (20.89,-31.76) -- (26.51,-25.44);
+            \fill [black] (26.51,-25.44) -- (25.6,-25.71) -- (26.35,-26.37);
+            \draw (24.24,-30.05) node [right] {$(-1,\mbox{ }5)$};
+            \draw [black] (31.123,-21.751) arc (113.97014:62.62715:17.372);
+            \fill [black] (46.17,-22.2) -- (45.69,-21.39) -- (45.23,-22.27);
+            \draw (38.75,-19.68) node [above] {$(4,\mbox{ }5)$};
+            \draw [black] (46.034,-25.169) arc (-67.52021:-115.8825:18.262);
+            \fill [black] (31.08,-24.72) -- (31.58,-25.52) -- (32.02,-24.62);
+            \draw (38.45,-27.14) node [below] {$(-4,\mbox{ }5)$};
+            \draw [black] (56.8,-34) -- (21.9,-34);
+            \fill [black] (21.9,-34) -- (22.7,-34.5) -- (22.7,-33.5);
+            \draw (39.35,-33.5) node [above] {$(-5,\mbox{ }10)$};
+            \draw [black] (54.9,-11.7) -- (21.1,-11.7);
+            \fill [black] (21.1,-11.7) -- (21.9,-12.2) -- (21.9,-11.2);
+            \draw (38,-11.2) node [above] {$(-6,\mbox{ }10)$};
+            \draw [black] (50.52,-21.41) -- (56.08,-14.09);
+            \fill [black] (56.08,-14.09) -- (55.2,-14.42) -- (56,-15.03);
+            \draw (53.87,-19.15) node [right] {$(2,\mbox{ }20)$};
+            \draw [black] (68.02,-22.24) -- (59.98,-13.86);
+            \fill [black] (59.98,-13.86) -- (60.17,-14.79) -- (60.89,-14.09);
+            \draw (64.53,-16.58) node [right] {$(-8,\mbox{ }10)$};
+            \draw [black] (61.99,-31.95) -- (67.91,-26.45);
+            \fill [black] (67.91,-26.45) -- (66.98,-26.63) -- (67.66,-27.36);
+            \draw (68.13,-29.68) node [below] {$(9,\mbox{ }15)$};
+            \draw [black] (51.684,-23.985) arc (78.06152:16.7775:10.233);
+            \fill [black] (59.36,-31.04) -- (59.61,-30.13) -- (58.65,-30.42);
+            \draw (59.67,-25.98) node [above] {$(7,\mbox{ }10)$};
+            \draw [black] (57.085,-32.731) arc (-119.27953:-145.88145:20.339);
+            \fill [black] (50.19,-26.4) -- (50.23,-27.34) -- (51.06,-26.78);
+            \draw (49.76,-30.45) node [below] {$(-7,\mbox{ }15)$};
+          \end{tikzpicture}
+        \end{center}
+      \item
+        The node potentials must satisfy the following set of equations:\\
+        \begin{equation}
+          \begin{split}
+            1-\pi_2+\pi_1&\geq0\\
+            -\pi_2+\pi_3&=0\\
+            1-\pi_3+\pi_4&=0\\
+            2-\pi_1+\pi_4&=0\\
+            6-\pi_2+\pi_6&=0\\
+            4-\pi_3+\pi_5&=0\\
+            5-\pi_4+\pi_7&=0\\
+            2-\pi_5+\pi_6&\geq0\\
+            7-\pi_5+\pi_7&=0\\
+            9-\pi_7+\pi_8&\geq0\\
+            8-\pi_6+\pi_8&=0\\
+          \end{split}
+        \end{equation}
+        Did not finish. Octave is telling me this set of equations is unsatisfiable.
+      \item Did not finish.
+    \end{enumerate}
   % #5
   \item
     \begin{enumerate}
