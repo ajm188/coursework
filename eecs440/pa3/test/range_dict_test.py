@@ -1,3 +1,5 @@
+import numpy as np
+
 from ..range_dict import AlreadySpannedRangeException
 from ..range_dict import RangeDict
 
@@ -31,6 +33,15 @@ def test_bad_insert():
         assert False, 'Did not raise AlreadySpannedRangeException'
     except AlreadySpannedRangeException:
         pass
+
+
+def test_lb_neg_inf_insert_does_not_raise_TypeError():
+    rd = RangeDict()
+    try:
+        rd[(-np.inf, 54.3)] = 4
+        assert True
+    except TypeError:
+        assert False, 'Should not have raised TypeError'
 
 
 def test_item_retrieval():
