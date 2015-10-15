@@ -120,30 +120,35 @@ class NaiveBayes(object):
         return pos_probs, neg_probs
 
     def predict(self, X):
-        predictions = []
-        for x in X:
-            rv = np.arange(len(x))
-            probs = np.array(
-                [
-                    self.neg_probs[rv, x],
-                    self.pos_probs[rv, x],
-                ],
-            )
-            joint_probs = np.prod(probs, axis=1) / [self.y_prob, 1 - self.y_prob]
-            predictions.append(np.argmax(probs) * 2 - 1)
-        return np.array(predictions)
+        joint_probs = np.apply_along_axis(
+            self.joint_probs,
+            1,
+            X,
+            np.arange(len(self._schema.feature_names)),
+            [self.neg_probs, self.pos_probs],
+            [self.y_prob, 1 - self.y_prob],
+        )
+        return np.apply_along_axis(
+            lambda probs: np.argmax(probs) * 2 - 1,
+            1,
+            joint_probs,
+        )
 
     def predict_proba(self, X):
-        pred_probs = []
-        for x in X:
-            rv = np.arange(len(x))
-            prob = np.array([self.pos_probs[rv, x]])
-            joint_prob = np.prod(prob, axis=1) / [self.y_prob]
-            pred_probs.append(joint_prob[0])
-        return np.array(pred_probs)
+        joint_probs = np.apply_along_axis(
+            self.joint_probs,
+            1,
+            X,
+            np.arange(len(self._schema.feature_names)),
+            [self.pos_probs],
+            [self.y_prob],
+        )
+        return np.apply_along_axis(
+            lambda x: x[0],
+            1,
+            joint_probs,
+        )
 
-    def compute_running_probs(self, x, probs):
-        running_probs = np.ones(len(probs))
-        for i in xrange(len(x)):
-            running_probs = running_probs * [p[i].get(x[i], 0) for p in probs]
-        return running_probs
+    def joint_probs(self, x, rv, probs, divisors):
+        p = np.array([prob[rv, x] for prob in probs])
+        return np.prod(p, axis=1) / divisors
