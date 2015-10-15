@@ -30,7 +30,7 @@ class NaiveBayes(object):
         @param m : Smoothing parameter (0 for no smoothing)
         """
         self._schema = schema
-        self.m = m
+        self.m = 0
         self.y_prob = None
         self.pos_probs = defaultdict(lambda *args: defaultdict(int))
         self.neg_probs = defaultdict(lambda *args: defaultdict(int))
@@ -43,6 +43,7 @@ class NaiveBayes(object):
 
         pos_x_cols, neg_x_cols = pos_x.T, neg_x.T
 
+        all_pos_probs, all_neg_probs = [], []
         print('Feature: 0', end='')
         for i in xrange(len(self._schema.feature_names)):
             fancy_print(i)
@@ -55,6 +56,12 @@ class NaiveBayes(object):
                     self._schema.nominal_values[i],
                     [pos_x, neg_x],
                 )
+                pos, neg = [], []
+                for j in xrange(int(self._schema.nominal_values[i][-1]) + 1):
+                    for probs_dict, probs_list in [(pos_probs, pos), (neg_probs, neg)]:
+                        probs_list.append(probs_dict[j])
+                pos_probs = np.array(pos)
+                neg_probs = np.array(neg)
             else:
                 # discretize continuous attributes
                 pos_probs, neg_probs = self.find_continuous_probs(
@@ -63,8 +70,10 @@ class NaiveBayes(object):
                     [pos_x, neg_x],
                 )
 
-            self.pos_probs[i] = pos_probs
-            self.neg_probs[i] = neg_probs
+            all_pos_probs.append(pos_probs)
+            all_neg_probs.append(neg_probs)
+        self.pos_probs = np.array(all_pos_probs)
+        self.neg_probs = np.array(all_neg_probs)
 
         self.y_prob = len(pos_i) / len(y)
         print()
@@ -112,25 +121,25 @@ class NaiveBayes(object):
 
     def predict(self, X):
         predictions = []
-        print('Predicting example: 0', end='')
-        for i, x in enumerate(X):
-            fancy_print(i)
-            probs = self.compute_running_probs(
-                x,
-                [self.neg_probs, self.pos_probs],
+        for x in X:
+            rv = np.arange(len(x))
+            probs = np.array(
+                [
+                    self.neg_probs[rv, x],
+                    self.pos_probs[rv, x],
+                ],
             )
+            joint_probs = np.prod(probs, axis=1) / [self.y_prob, 1 - self.y_prob]
             predictions.append(np.argmax(probs) * 2 - 1)
-        print()
         return np.array(predictions)
 
     def predict_proba(self, X):
         pred_probs = []
-        print('Predicting prob for example: 0', end='')
-        for i, x in enumerate(X):
-            fancy_print(i)
-            prob = self.compute_running_probs(x, [self.pos_probs])[0]
-            pred_probs.append(prob / self.y_prob)
-        print()
+        for x in X:
+            rv = np.arange(len(x))
+            prob = np.array([self.pos_probs[rv, x]])
+            joint_prob = np.prod(prob, axis=1) / [self.y_prob]
+            pred_probs.append(joint_prob[0])
         return np.array(pred_probs)
 
     def compute_running_probs(self, x, probs):
