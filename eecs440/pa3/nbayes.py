@@ -4,12 +4,19 @@ The Naive Bayes Classifier
 from __future__ import division
 from __future__ import print_function
 
+import sys
 from collections import defaultdict
 
 import numpy as np
 import scipy
 
 from range_dict import RangeDict
+
+
+def fancy_print(i):
+    print('\b' * len(str(abs(i - 1))), end='')
+    print(i, end='')
+    sys.stdout.flush()
 
 
 class NaiveBayes(object):
@@ -35,7 +42,9 @@ class NaiveBayes(object):
 
         pos_x_cols, neg_x_cols = pos_x.T, neg_x.T
 
+        print('Feature: 0', end='')
         for i in xrange(len(self._schema.feature_names)):
+            fancy_print(i)
             pos_feature, neg_feature = pos_x_cols[i], neg_x_cols[i]
 
             if self._schema.is_nominal(i):
@@ -97,26 +106,27 @@ class NaiveBayes(object):
         return pos_probs, neg_probs
 
     def predict(self, X):
-        predictions = np.apply_along_axis(
-            lambda x: np.argmax(
-                self.compute_running_probs(
-                    x,
-                    [self.neg_probs, self.pos_probs],
-                ) / [1 - self.y_prob, self.y_prob]
-            ) * 2 - 1,
-            1,
-            X,
-        )
-        return predictions
+        predictions = []
+        print('Predicting example: 0', end='')
+        for i, x in enumerate(X):
+            fancy_print(i)
+            probs = self.compute_running_probs(
+                x,
+                [self.neg_probs, self.pos_probs],
+            )
+            predictions.append(np.argmax(probs) * 2 - 1)
+        print()
+        return np.array(predictions)
 
     def predict_proba(self, X):
-        probs = np.apply_along_axis(
-            self.compute_running_probs,
-            1,
-            X,
-            [self.pos_probs],
-        ) / self.y_prob
-        return probs.reshape(len(X),)
+        pred_probs = []
+        print('Predicting prob for example: 0', end='')
+        for i, x in enumerate(X):
+            fancy_print(i)
+            prob = self.compute_running_probs(x, [self.pos_probs])[0]
+            pred_probs.append(prob / self.y_prob)
+        print()
+        return np.array(pred_probs)
 
     def compute_running_probs(self, x, probs):
         running_probs = np.ones(len(probs))
