@@ -23,13 +23,14 @@ class NaiveBayes(object):
 
     NUM_BINS = 10
 
-    def __init__(self, alpha=0, schema=None, m=None):
+    def __init__(self, alpha=0, schema=None, m=0):
         """
         Constructs a Naive Bayes classifier
 
         @param m : Smoothing parameter (0 for no smoothing)
         """
         self._schema = schema
+        self.m = m
         self.y_prob = None
         self.pos_probs = defaultdict(lambda *args: defaultdict(int))
         self.neg_probs = defaultdict(lambda *args: defaultdict(int))
@@ -78,8 +79,9 @@ class NaiveBayes(object):
             pos_matches = np.where(pos_feature == v)[0]
             neg_matches = np.where(neg_feature == v)[0]
 
-            pos_probs[v] = len(pos_matches) / len(pos_x)
-            neg_probs[v] = len(neg_matches) / len(neg_x)
+            laplace = self.m * len(nominal_values)
+            pos_probs[v] = (len(pos_matches) + laplace) / (len(pos_x) + self.m)
+            neg_probs[v] = (len(neg_matches) + laplace) / (len(neg_x) + self.m)
 
         return pos_probs, neg_probs
 
@@ -98,8 +100,11 @@ class NaiveBayes(object):
             pos_matches = np.sum((prev_boundary < pos_feature) & (pos_feature <= boundary))
             neg_matches = np.sum((prev_boundary < neg_feature) & (neg_feature <= boundary))
 
-            pos_probs[(prev_boundary, boundary)] = pos_matches / len(pos_x)
-            neg_probs[(prev_boundary, boundary)] = neg_matches / len(neg_x)
+            laplace = self.m + self.NUM_BINS
+            pos_probs[(prev_boundary, boundary)] = \
+                (pos_matches + laplace) / (len(pos_x) + self.m)
+            neg_probs[(prev_boundary, boundary)] = \
+                (neg_matches + self.NUM_BINS) / (len(neg_x) + self.m)
 
             prev_boundary = boundary
 
