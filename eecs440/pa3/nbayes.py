@@ -62,13 +62,6 @@ class NaiveBayes(object):
                     self._schema.nominal_values[i],
                     [pos_x, neg_x],
                 )
-                pos, neg = [], []
-                for j in xrange(largest_feature_value + 1):
-                    for probs_dict, probs_list in [(pos_probs, pos),
-                                                   (neg_probs, neg)]:
-                        probs_list.append(probs_dict[j])
-                pos_probs = np.array(pos)
-                neg_probs = np.array(neg)
             else:
                 # discretize continuous attributes
                 pos_probs, neg_probs, lb, bs = self.find_continuous_probs(
@@ -78,13 +71,13 @@ class NaiveBayes(object):
                 )
                 self.discrete_mappings[i] = (lb, bs)
 
-                pos, neg = [], []
-                for j in xrange(largest_feature_value + 1):
-                    for probs_dict, probs_list in [(pos_probs, pos),
-                                                   (neg_probs, neg)]:
-                        probs_list.append(probs_dict[j])
-                pos_probs = np.array(pos)
-                neg_probs = np.array(neg)
+            pos, neg = [], []
+            for j in xrange(largest_feature_value + 1):
+                for probs_dict, probs_list in [(pos_probs, pos),
+                                               (neg_probs, neg)]:
+                    probs_list.append(probs_dict[j])
+            pos_probs = np.array(pos)
+            neg_probs = np.array(neg)
 
             all_pos_probs.append(pos_probs)
             all_neg_probs.append(neg_probs)
