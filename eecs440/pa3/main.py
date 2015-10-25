@@ -135,6 +135,14 @@ def main(**options):
         if fs_alg:
             test_X = selector.transform(test_X)
         predictions = classifier.predict(test_X)
+        print(
+            len(np.where(predictions == test_y)[0]),
+            len(np.where(predictions != test_y)[0]),
+        )
+        print(
+            len(np.where(test_y == 1)[0]),
+            len(np.where(test_y == -1)[0]),
+        )
         scores = classifier.predict_proba(test_X)
         if len(np.shape(scores)) > 1 and np.shape(scores)[1] > 1:
             scores = scores[:, 1]  # Get the column for label 1
