@@ -9,6 +9,9 @@ import sys
 import numpy as np
 import scipy
 
+import stats
+from folds import get_folds
+
 
 def fancy_print(i):
     print('\b' * len(str(abs(i - 1))), end='')
@@ -21,30 +24,34 @@ class NaiveBayes(object):
     NUM_BINS = 10
 
     def __init__(self, m=None, schema=None):
+        self.m = m
         self.schema = schema
         self.discretizations = {}
 
     def fit(self, X, y):
         self._enable_discretization(X)
         X = self.discretize(X).astype('int')
+        m = self.tune(X, y, [0, 0.001, 0.01, 0.1, 1, 10, 100])
+        print('Selected {} for m'.format(m))
+        self.m = m
+        self._fit(X, y)
+
+    def _fit(self, X, y):
         pos_y, neg_y = np.where(y == 1)[0], np.where(y == -1)[0]
         pos_X, neg_X = X[pos_y], X[neg_y]
 
         pos_probs, neg_probs = [], []
         max_feat_vec_len = 0
 
-        print('Training feature: 1', end='')
         for i, _ in enumerate(self.schema.feature_names):
-            fancy_print(i + 1)
             feat_vec_len = max(pos_X[:, i]) + 1
-            p = 1 / (feat_vec_len - 1)
             m = self.m
+            p = 1 / (feat_vec_len - 1)
             max_feat_vec_len = max(feat_vec_len, max_feat_vec_len)
             pos_probs.append((np.bincount(pos_X[:, i]) + (m * p)) /
                              (len(pos_y) + m))
             neg_probs.append((np.bincount(neg_X[:, i]) + (m * p)) /
                              (len(neg_y) + m))
-        print()
 
         # Normalize the arrays so we can safely put them in a 2darray
         self.pos_probs = np.array(
@@ -58,8 +65,28 @@ class NaiveBayes(object):
 
         self.y_prob = len(pos_y) / len(y)
 
+    def tune(self, X, y, m_range):
+        folds = get_folds(X, y, 5)
+        best, best_m = -np.inf, None
+        for m in m_range:
+            sm = stats.StatisticsManager()
+            for train_X, train_y, test_X, test_y in folds:
+                m_classifier = NaiveBayes(m=m, schema=self.schema)
+                m_classifier._fit(train_X, train_y)
+                preds = m_classifier._predict(test_X)
+                probs = m_classifier._predict_proba(test_X)
+                sm.add_fold(test_y, preds, probs, 0)
+            A = sm.get_statistic('auc', pooled=True)
+            if A > best:
+                best = A
+                best_m = m
+        return best_m
+
     def predict(self, X):
         X = self.discretize(X).astype('int')
+        return self._predict(X)
+
+    def _predict(self, X):
         pos, neg = [self.predict_p(X, p)
                     for p in [self.pos_probs, self.neg_probs]]
         pos_probs = pos * self.y_prob
@@ -69,6 +96,9 @@ class NaiveBayes(object):
 
     def predict_proba(self, X):
         X = self.discretize(X).astype('int')
+        return self._predict_proba(X)
+
+    def _predict_proba(self, X):
         return self.predict_p(X, self.pos_probs) * self.y_prob
 
     def predict_p(self, X, probs):
