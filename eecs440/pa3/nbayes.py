@@ -67,7 +67,7 @@ class NaiveBayes(object):
 
     def tune(self, X, y, m_range):
         folds = get_folds(X, y, 5)
-        best, best_m = -np.inf, None
+        AUCs = []
         for m in m_range:
             sm = stats.StatisticsManager()
             for train_X, train_y, test_X, test_y in folds:
@@ -77,10 +77,8 @@ class NaiveBayes(object):
                 probs = m_classifier._predict_proba(test_X)
                 sm.add_fold(test_y, preds, probs, 0)
             A = sm.get_statistic('auc', pooled=True)
-            if A > best:
-                best = A
-                best_m = m
-        return best_m
+            AUCs.append(A)
+        return m_range[np.argmax(AUCs)]
 
     def predict(self, X):
         X = self.discretize(X).astype('int')

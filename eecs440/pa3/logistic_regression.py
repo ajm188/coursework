@@ -11,6 +11,9 @@ import numpy.random
 import scipy
 import scipy.optimize
 
+import stats
+from folds import get_folds
+
 
 def sigmoid(x):
     return (np.exp(-x) + 1) ** (-1)
@@ -51,6 +54,11 @@ class LogisticRegression(object):
         self._lambda = kwargs.pop('lambda')
 
     def fit(self, X, y):
+        self._lambda = self.tune(X, y, [0, 0.001, 0.01, 0.1, 1, 10, 100])
+        print('Chose {} for λ'.format(self._lambda))
+        self._fit(X, y)
+
+    def _fit(self, X, y):
         self._enable_unnominalization(X)
         X = self.unnominalize(X)
 
@@ -66,6 +74,26 @@ class LogisticRegression(object):
             # disp=False,
         )
         self.w, self.b = res[0:-1], res[-1]
+
+    def tune(self, X, y, lambda_range):
+        folds = get_folds(X, y, 5)
+        AUCs = []
+        for _lambda in lambda_range:
+            print(_lambda)
+            sm = stats.StatisticsManager()
+            i = 0
+            for train_X, train_y, test_X, test_y in folds:
+                print(i)
+                i += 1
+                kwargs = {'schema': self.schema, 'lambda': _lambda}
+                classifier = LogisticRegression(**kwargs)
+                classifier._fit(train_X, train_y)
+                preds = classifier.predict(test_X)
+                probs = classifier.predict_proba(test_X)
+                sm.add_fold(test_y, preds, probs, 0)
+            A = sm.get_statistic('auc', pooled=True)
+            AUCs.append(A)
+        return lambda_range[np.argmax(AUCs)]
 
     def normalize(self, X):
         return (X - self.means) / self.stddevs
