@@ -128,34 +128,19 @@ def auc(labels, predictions):
     Returns the area under ROC curve of a set of predictions given a set of
     true labels.
     """
-    ordering = np.argsort(predictions)
-    ordering = np.array([i for i in reversed(ordering)])
+    rev_ord = np.argsort(predictions)
+    ordering = np.fliplr(np.vstack((rev_ord, rev_ord)))[0]
     labels = labels[ordering]
-    predictions = predictions[ordering]
-    roc_points = []
+    x, y = [], []
     # Compute recall and 1 - specificity for each confidence threshold,
     # including 0 and 1.
     for i in xrange(len(predictions) + 1):
         preds = np.zeros(predictions.shape) - 1
         preds[np.arange(i)] = 1
-        roc_points.append(
-            (recall(labels, preds), 1 - specificity(labels, preds)),
-        )
+        x.append(1 - specificity(labels, preds))
+        y.append(recall(labels, preds))
 
-    # Compute the area by going pairwise along the x-axis, adding the value
-    # of the small trapezoid captured by this segment of the ROC curve.
-    area = 0
-    for i in xrange(len(roc_points) - 1):
-        j = i + 1
-
-        trap_lower_height = roc_points[i][0]
-        trap_upper_height = roc_points[j][0]
-        base_lower = roc_points[i][1]
-        base_upper = roc_points[j][1]
-        h = (trap_lower_height + trap_upper_height) / 2
-        area += h * (base_upper - base_lower)
-
-    return area
+    return np.trapz(np.array(y), np.array(x))
 
 
 def TP(labels, predictions):
