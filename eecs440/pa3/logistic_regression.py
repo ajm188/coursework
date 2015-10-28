@@ -66,14 +66,19 @@ class LogisticRegression(object):
         self.stddevs = np.std(X, axis=0)
         X = self.normalize(X)
 
-        res = scipy.optimize.fmin_ncg(
+        res = scipy.optimize.minimize(
             objective_func,
             np.zeros(len(X[0]) + 1),
-            gradient,
+            method='BFGS',
+            jac=gradient,
             args=(X, y, self._lambda),
-            # disp=False,
+            options={
+                'disp': True,
+                'maxiters': 2000,
+            },
         )
-        self.w, self.b = res[0:-1], res[-1]
+
+        self.w, self.b = res.x[0:-1], res.x[-1]
 
     def tune(self, X, y, lambda_range):
         folds = get_folds(X, y, 5)
@@ -81,10 +86,7 @@ class LogisticRegression(object):
         for _lambda in lambda_range:
             print(_lambda)
             sm = stats.StatisticsManager()
-            i = 0
             for train_X, train_y, test_X, test_y in folds:
-                print(i)
-                i += 1
                 kwargs = {'schema': self.schema, 'lambda': _lambda}
                 classifier = LogisticRegression(**kwargs)
                 classifier._fit(train_X, train_y)
