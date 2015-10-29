@@ -104,9 +104,7 @@ class NaiveBayes(object):
         return np.array([np.product(probs[row_vec, x]) for x in X])
 
     def _enable_discretization(self, X):
-        print('Enabling discretization: 1', end='')
         for i, _ in enumerate(self.schema.feature_names):
-            fancy_print(i + 1)
             if not self.schema.is_nominal(i):
                 self.discretizations[i] = []
                 lb, ub = np.min(X[:, i]), np.max(X[:, i])
@@ -116,13 +114,10 @@ class NaiveBayes(object):
                 for j in range(self.NUM_BINS + 1):
                     self.discretizations[i].append(ub)
                     ub += bin_size
-        print()
 
     def discretize(self, X):
         D = np.empty_like(X)
-        print('Discretizing feature: 1', end='')
         for i, _ in enumerate(self.schema.feature_names):
-            fancy_print(i + 1)
             X_C = X[:, i]
             if not self.schema.is_nominal(i):
                 d = self.discretizations[i]
@@ -132,5 +127,4 @@ class NaiveBayes(object):
                     D[:, i][matches] = j
             else:
                 D[:, i] = X_C
-        print()
         return D
