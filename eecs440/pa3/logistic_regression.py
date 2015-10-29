@@ -59,6 +59,7 @@ class LogisticRegression(object):
         self._fit(X, y)
 
     def _fit(self, X, y):
+        np.seterr(over='ignore', divide='ignore')
         self._enable_unnominalization(X)
         X = self.unnominalize(X)
 
@@ -73,8 +74,7 @@ class LogisticRegression(object):
             jac=gradient,
             args=(X, y, self._lambda),
             options={
-                'disp': True,
-                'maxiters': 2000,
+                'maxiter': 2000,
             },
         )
 
@@ -84,7 +84,6 @@ class LogisticRegression(object):
         folds = get_folds(X, y, 5)
         AUCs = []
         for _lambda in lambda_range:
-            print(_lambda)
             sm = stats.StatisticsManager()
             for train_X, train_y, test_X, test_y in folds:
                 kwargs = {'schema': self.schema, 'lambda': _lambda}
@@ -120,6 +119,7 @@ class LogisticRegression(object):
         return D
 
     def predict(self, X):
+        np.seterr(over='ignore')
         X = self.normalize(self.unnominalize(X))
         predictions = np.dot(X, self.w) + self.b
         predictions[np.where(predictions > 0)[0]] = 1
@@ -127,6 +127,7 @@ class LogisticRegression(object):
         return predictions
 
     def predict_proba(self, X):
+        np.seterr(over='ignore', divide='ignore')
         X = self.normalize(self.unnominalize(X))
         dot_prods = -(np.dot(X, self.w[:, np.newaxis]) + self.b)
         frac = ((np.exp(dot_prods) + 1) ** (-1)).reshape(dot_prods.shape[0],)
