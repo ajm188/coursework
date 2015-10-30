@@ -284,10 +284,50 @@
     \item Omitted.\\
     % #5
     \item
+        I have included my traces of the SSP algorithm. I hope they are
+        readable.
+
+        \includegraphics[angle=-90,width=\linewidth]{Aug1Aug2.jpeg}
+
+        \includegraphics[angle=-90,width=\linewidth]{Aug3.jpeg}
+
+        \includegraphics[angle=-90,width=\linewidth]{Aug4.jpeg}
+
+        \includegraphics[angle=-90,width=\linewidth]{Aug5.jpeg}
+
+        \includegraphics[angle=-90,width=\linewidth]{Aug6.jpeg}
+
+        \includegraphics[angle=-90,width=\linewidth]{Aug7.jpeg}
     % #6
     \item Postponed.\\
     % #7
     \item
+        If $u$ is permanently-labeled, then $u$ is in the shortest path from
+        $k$ to $v$. In this case, $d(u)$ is the actual minimal distance from
+        $k$ to $u$. This is no different from the way $\pi_u$ is updated in the
+        original SSP algorithm. Since this holds for every node in the shortest
+        path, every arc in the shortest path still has reduced cost of 0, just
+        is in the original SSP.
+
+        If $u$ is temporarily-labeled, then $d(u)>d(v)$, otherwise, Dijkstra`s
+        algorithm would have permanently-labeled $u$ before permanently-labeling
+        $v$. So, if we update $\pi'_u=\pi_u-d(v)$ then we should consider what
+        this does to the $c^\pi{'}_{uj}$, both when $j$ is permanently-labeled
+        and when $j$ is temporarily-labeled.
+
+        If $j$ is also temporarily-labeled, then we update its
+        $\pi'_j=\pi_j-d(v)$, so $\pi'_u-\pi'_j=\pi_u-\pi_j$, and
+        $c^\pi{'}_{uj}\geq0$ since $c^\pi_{uj}\geq0$. If $j$ is
+        permanently-labeled, then $d(j)\leq d(v)<d(u)$, so we have
+        \begin{equation}
+            \begin{split}
+                c^\pi{'}_{uj}&=c^\pi_{uj}-\pi'_u+\pi'_j\\
+                &=c^\pi_{uj}-\left(\pi_u-d(v)\right)+\left(\pi_j-d(j)\right)\\
+                &=c^\pi_{uj}-\pi_u+\pi_j+d(v)+d(j)\\
+                &\geq0\\
+            \end{split}
+        \end{equation}
+        Since we are adding a strictly positive quantity to the original $c^\pi{'}_uj$, the new $c^\pi{'}_uj$ will be nonnegative.
     % #8
     \item Postponed.\\
 \end{enumerate}
