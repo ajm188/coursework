@@ -140,6 +140,130 @@
         And this can now be solved by max flow.\\
     % #2
     \item
+        For each region $x_j$, create an intermediate node. Put an arc from
+        each skilled contractor $c_i$ to this node, with cost $c_{ij}$, lower
+        bound 0, and upper bound $\infty$. Then put a single arc going from
+        this intermediate node to $x_j$, with cost 0, lower bound 1 and upper
+        bound $\infty$. This ensures that all regions get at least one skilled
+        contractor. Then, for each unskilled contractor, put an arc directly
+        from the contractor to the region, with cost $c_{ij}$, lower bound 0
+        and upper bound $\infty$. Next, assign a supply of $u_i$ to each
+        contractor $c_i$, and a demand of $r_j$ to each region $x_j$. Finally,
+        create a sink with a demand $\sum_{i}u_i - \sum_jr_j$ and place an arc
+        going from each contractor to the sink. Each of these arcs should have
+        cost 0, lower bound 0, upper bound $\infty$. This will capture any
+        extra teams that did not need to be assigned to a region. I should also
+        add that the intermediate nodes discussed above are transhipment nodes,
+        so their supplies should each be 0.
+
+        So, for a contractor problem with 3 contractors (2 skilled), and 2
+        regions, we would have (note that since all upper bounds are $\infty$,
+        they have been ignored):
+
+        \begin{center}
+            \begin{tikzpicture}[scale=0.2]
+                \tikzstyle{every node}+=[inner sep=0pt]
+                \draw [black] (56.5,-4) circle (3);
+                \draw (56.5,-4) node {$b_i$};
+                \draw [black] (70.9,-4) circle (3);
+                \draw (70.9,-4) node {$b_j$};
+                \draw [black] (15.6,-11.4) circle (3);
+                \draw (15.6,-11.4) node {$u_1$};
+                \draw [black] (15.6,-21.9) circle (3);
+                \draw (15.6,-21.9) node {$u_2$};
+                \draw [black] (15.6,-32.4) circle (3);
+                \draw (15.6,-32.4) node {$u_3$};
+                \draw [black] (55,-12.2) circle (3);
+                \draw (55,-12.2) node {$-r_1$};
+                \draw [black] (54.4,-21.9) circle (3);
+                \draw (54.4,-21.9) node {$-r_2$};
+                \draw [black] (38.2,-12.2) circle (3);
+                \draw (38.2,-12.2) node {$0$};
+                \draw [black] (38.2,-21.9) circle (3);
+                \draw (38.2,-21.9) node {$0$};
+                \draw [black] (21.1,-44.3) circle (3);
+                \draw (21.1,-44.3) node {$-(U-R)$};
+                \draw [black] (59.5,-4) -- (67.9,-4);
+                \fill [black] (67.9,-4) -- (67.1,-3.5) -- (67.1,-4.5);
+                \draw (63.7,-4.5) node [below] {$c_{ij},\mbox{ }l_{ij}$};
+                \draw [black] (17.776,-9.343) arc (127.45108:48.49428:14.478);
+                \fill [black] (36.17,-9.99) -- (35.91,-9.09) -- (35.24,-9.84);
+                \draw (27.2,-5.73) node [above] {$c_{11},0$};
+                \draw [black] (18.36,-20.72) -- (35.44,-13.38);
+                \fill [black] (35.44,-13.38) -- (34.51,-13.24) -- (34.91,-14.16);
+                \draw (22.87,-16.5) node [above] {$c_{21},0$};
+                \draw [black] (41.2,-12.2) -- (52,-12.2);
+                \fill [black] (52,-12.2) -- (51.2,-11.7) -- (51.2,-12.7);
+                \draw (46.6,-12.7) node [below] {$0,1$};
+                \draw [black] (18.475,-12.256) arc (72.28468:57.87599:75.688);
+                \fill [black] (35.69,-20.25) -- (35.28,-19.41) -- (34.75,-20.25);
+                \draw (31.42,-15.18) node [above] {$c_{12},0$};
+                \draw [black] (18.6,-21.9) -- (35.2,-21.9);
+                \fill [black] (35.2,-21.9) -- (34.4,-21.4) -- (34.4,-22.4);
+                \draw (26.9,-22.4) node [below] {$c_{22},0$};
+                \draw [black] (41.2,-21.9) -- (51.4,-21.9);
+                \fill [black] (51.4,-21.9) -- (50.6,-21.4) -- (50.6,-22.4);
+                \draw (46.3,-22.4) node [below] {$0,1$};
+                \draw [black] (16.86,-35.12) -- (19.84,-41.58);
+                \fill [black] (19.84,-41.58) -- (19.96,-40.64) -- (19.05,-41.06);
+                \draw (17.63,-39.38) node [left] {$0,0$};
+                \draw [black] (17.378,-24.314) arc (33.12213:-5.53163:26.481);
+                \fill [black] (21.56,-41.34) -- (22.13,-40.59) -- (21.14,-40.49);
+                \draw (21.68,-32.03) node [right] {$0,0$};
+                \draw [black] (18.492,-42.823) arc (-123.74905:-217.26983:20.305);
+                \fill [black] (18.49,-42.82) -- (18.1,-41.96) -- (17.55,-42.79);
+                \draw (9.03,-29.52) node [left] {$0,0$};
+                \draw [black] (53.848,-14.969) arc (-25.22653:-100.48591:32.512);
+                \fill [black] (53.85,-14.97) -- (53.06,-15.48) -- (53.96,-15.91);
+                \draw (43.39,-30.56) node [below] {$c_{31},0$};
+                \draw [black] (53.511,-24.763) arc (-20.99749:-128.7173:22.898);
+                \fill [black] (53.51,-24.76) -- (52.76,-25.33) -- (53.69,-25.69);
+                \draw (41.33,-39.42) node [below] {$c_{32},0$};
+            \end{tikzpicture}
+        \end{center}
+        where $U=\sum_iu_i$ and $R=\sum_jr_j$.
+
+        The standard form for MCNF duality is:
+        \begin{equation}
+            \begin{split}
+                \text{max}\ &\sum_{i\in V}b_i\pi_i - \sum_{\left(i,j\right)\in E}u_{ij}\alpha_{ij}\\
+                \text{s.t.}\ &\pi_i-\pi_j-\alpha_{ij}\leq0\text{ for all i,j}\\
+                &\alpha_{ij}\geq0\\
+                &\pi_i\ \text{unrestricted}\\
+            \end{split}
+        \end{equation}
+
+        Now, since each $u_{ij}=\infty$, all $\alpha_{ij}=0$, or the dual is
+        infeasible (objective value goes to $-\infty$). So, I will simply
+        ignore second summation in the objective function. The dual for the
+        contractors problem is then:
+        \begin{equation}
+            \begin{split}
+                \text{max}\ &\sum_{i\in V_C}u_i\pi_i - \sum_{j\in V_R}r_j\pi_j - (U-R)\pi_s\\
+                \text{s.t.}\ &\pi_i-\pi_j-\alpha_{ij}\leq0\text{ for all i,j}\\
+                &\alpha_{ij}\geq0\\
+                &\pi_i\ \text{unrestricted}\\
+            \end{split}
+        \end{equation}
+        where $V_C$ is the set of nodes that are contractors, $V_R$ is the set
+        of nodes that are regions, $\pi_s$ is the node potential corresponding
+        to the sink node, and $U,R$ defined as above. All of the other nodes
+        have supplies and demands of 0, so they do not appear in the objective
+        function.\\
+
+        The complimentary slackness conditions are:
+        \begin{itemize}
+            \item $\alpha_{ij}\left(u_{ij}-x_{ij}\right)=0$
+            \item $x_{ij}\left(c^\pi_{ij}+\alpha_{ij}\right)=0$
+        \end{itemize}
+
+        Since we know that all $\alpha_{ij}=0$, this actually leaves us with
+        just:
+        $$x_{ij}c^\pi_{ij}=0$$
+
+        So, this tells us that for an optimal solution to the contractor
+        problem, either an arc in the original network gets no flow, or the
+        reduced cost for that arc is 0.\\
     % #3
     \item
     % #4
