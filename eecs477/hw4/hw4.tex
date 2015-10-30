@@ -271,6 +271,15 @@
         is integer.
     % #3
     \item
+        Proof (by contradiction):
+
+        Let $d(v)>d(u)+w(u,v)$. If this is true, then there is another path
+        from a vertex $x\in S$ to $v$, going through some other node
+        $y\in(V-S)$.  But, since Dijkstra's algorithm always takes the arc with
+        the least weight at each iteration, it would have chosen $(u,v)$,
+        updating the tentative distance of $v$ to $d(u)+w(u,v)$. The only way
+        this could not happen is if there were no edge $(u,v)$, which is a
+        contradiction.\\
     % #4
     \item Omitted.\\
     % #5
