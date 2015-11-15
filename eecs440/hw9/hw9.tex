@@ -1,0 +1,240 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{verbatim}
+
+\title{EECS 440 HW9}
+\author{Andrew Mason}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\parens}[1]{\left(#1\right)}
+\newcommand{\sbrack}[1]{\left[#1\right]}
+\newcommand{\chev}[1]{\left<#1\right>}
+\newtheorem{claim}{Claim}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+    % 1
+    \item
+        \begin{enumerate}
+            \item
+                \begin{proof} $K'=aK_1+bK_2$ is a valid kernel\\
+                    Since $K_1,K_2$ are valid kernels, we know
+                    \begin{equation}
+                        \begin{split}
+                            \forall v&,v^*K_1v\geq0\\
+                            \forall v&,v^*K_2v\geq0\\
+                        \end{split}
+                    \end{equation}
+
+                    Since $a,b>0$, we also know that
+                    \begin{equation}
+                        \begin{split}
+                            \forall v&,v^*aK_1v=a\left(v^*K_1v\right)\geq0\\
+                            \forall v&,v^*bK_2v=b\left(v^*K_2v\right)\geq0\\
+                        \end{split}
+                    \end{equation}
+
+                    Now consider $aK_1+bK_2$.
+                    \begin{equation}
+                        \begin{split}
+                            v^*\left(aK_1+bK_2\right)v&=\left(v^*aK_1+v^*bK_2\right)v\\
+                            &=v^*aK_1v+v^*bK_2v\\
+                            &\geq0\\
+                        \end{split}
+                    \end{equation}
+                    We now have $K'$ positive semi-definite. Further, we also
+                    have $K'$ symmetric, since both $K_1,K_2$ valid kernels,
+                    \begin{equation}
+                        \begin{split}
+                            K'(x,y)&=aK_1(x,y)+bK_2(x,y)\\
+                            K'(y,x)&=aK_1(y,x)+bK_2(y,x)\\
+                        \end{split}
+                    \end{equation}
+
+                    So $K'$ is a valid kernel.
+                \end{proof}
+            \item
+                \begin{proof} $K'=aK_1K_2$ is a valid kernel\\
+
+                    \begin{equation}
+                        \begin{split}
+                            K'(x,y)&=aK_1K_2\\
+                            &=a\parens{\phi_1\parens{x}\cdot\phi_1\parens{y}}
+                                \parens{\phi_2\parens{x}\cdot\phi_2\parens{y}}\\
+                            &=a\parens{\sum_i\phi_1\parens{x}_i\phi_1\parens{y}_i}
+                                \parens{\sum_i\phi_2\parens{x}_i\phi_2\parens{y}_i}\\
+                            &=a\sum_{i,j}\phi_1\parens{x}_i\phi_2\parens{x}_j
+                                \phi_1\parens{y}_i\phi_2\parens{y}_j\\
+                            &=\sum_{i,j}a\phi_1\parens{x}_i\phi_2\parens{x}_j
+                                \phi_1\parens{y}_i\phi_2\parens{y}_j\\
+                            &=\phi'\parens{x}\phi'\parens{y}\\
+                            \text{where}\ \phi'\parens{x}&=\sqrt{a}[\\
+                                &\phi_1\parens{x}_1\phi_2\parens{x}_1,\\
+                                &a^{-\frac{1}{4}}\sqrt{2}\phi_1\parens{x}_1\phi_2\parens{x}_2,
+                                    \ldots,\\
+                                &a^{-\frac{1}{4}}\sqrt{2}\phi_1\parens{x}_i\phi_2\parens{x}_j,
+                                    \ldots,\\
+                                &\phi_1\parens{x}_n\phi_2\parens{x}_n\\
+                            ]
+                        \end{split}
+                    \end{equation}
+                \end{proof}
+        \end{enumerate}
+    % 2
+    \item $K\parens{x,y}=\parens{x\cdot y + c}^3$
+        \begin{enumerate}
+            \item
+                \begin{equation}
+                    \begin{split}
+                        \parens{x\cdot y+c}^3&=\parens{x\cdot y}^3+3c\parens{x\cdot y}^2+
+                            3c^2x\cdot y+c^3\\
+                        &=\sum_{i,j,k}x_ix_jx_ky_iy_jy_k+3c\sum_{i,j}x_ix_jy_iy_j+
+                            3c^2\sum_ix_iy_i+c^3\\
+                        &=\sum_{i,j,k}x_ix_jx_ky_iy_jy_k+\sum_{i,j}3cx_ix_jy_iy_j+
+                            \sum_i3c^2x_iy_i+c^3\\
+                        &=\phi\parens{x}\cdot\phi\parens{y}
+                    \end{split}
+                \end{equation}
+                where $\phi\parens{x}=[x_1x_1x_1,x_1x_1x_2,\ldots,x_ix_jx_k,\ldots,x_nx_nx_n,\\
+                    \sqrt{3c}x_1x_1,\sqrt{3c}x_1x_2,\ldots,\sqrt{3c}x_ix_j,\ldots,\sqrt{3c}x_nx_n,\\
+                    c\sqrt{3}x_1,\ldots,c\sqrt{3}x_i,\ldots,c\sqrt{3}x_n,\\
+                    \sqrt{c^3}]$
+            \item
+                \begin{proof}$K$ is symmetric positive semi-definite.\\
+                    $K$ is symmetric because the dot product is commutative
+                    ($a\cdot b=b\cdot a$), so $\parens{x\cdot y+c}^3=\parens{y\cdot x+c}^3$\\
+
+                    $K$ is positive semi-definite because
+                    \begin{equation}
+                        \begin{split}
+                            K\parens{x,y}&=\parens{x\cdot y+c}^3\\
+                            &=\parens{x\cdot y}^3+3c\parens{x\cdot y}^2+3c^2x\cdot y+c^3\\
+                            &=K_3+3cK_2+3c^2K_1+c^3\\
+                        \end{split}
+                    \end{equation}
+                    where $K_1,K_2,K_3$ are all valid kernels (from lecture). So, we
+                    also know that $K_1,K_2,K_3$ are all symmetric positive semi-definite. So,
+                    \begin{equation}
+                        \begin{split}
+                            v^*Kv&=v^*\parens{K_3+3cK_2+3c^2K_1+c^3}v\\
+                            &=v^*K_3v+v^*3cK_2v+v^*3c^2K_1v+v^*c^3v\\
+                            &\geq0\\
+                        \end{split}
+                    \end{equation}
+                    whenever $c\geq0$.
+                \end{proof}
+        \end{enumerate}
+    % 3
+    \item $K(x,y)=\phi(x)\cdot\phi(y)$
+        \begin{enumerate}
+            \item $K$ is symmetric because the inner product is commutative.
+            That is, $\mathbf{a}\cdot\mathbf{b}=\mathbf{b}\cdot\mathbf{a}$. So,
+            $K(x,y)=\phi(x)\cdot\phi(y)=\phi(y)\cdot\phi(x)$.
+            \item $K$ is positive semi-definite, because
+                \begin{equation}
+                    \begin{split}
+                        v^*Kv&=\sum_{i,j}v_iv_jK(x_i,x_j)\\
+                        &=\sum_{i,j}v_iv_j\chev{\phi\parens{x_i},\phi\parens{x_j}}\\
+                        &=\chev{\sum_{i}v_i\phi\parens{x_i},\sum_{j}v_j\phi\parens{x_j}}\\
+                        &=\norm{\sum_{i}v_i\phi\parens{x_i}}^2\\
+                        &\geq0\\
+                    \end{split}
+                \end{equation}
+        \end{enumerate}
+    % 4 TODO
+    \item
+        \begin{enumerate}
+            \item
+                We want to find $q_x$ such that $\chev{p, q_x}=p(x)$ for any polynomial $p$.
+                Define $\chev{p,q}=\int_0^1p(t)q(t)dt$.
+
+                Then $p(t)=p_0+p_1t+p_2t^2$ and $q(t)=q_0+q_1t+q_2t^2$.
+                \begin{equation}
+                    \begin{split}
+                        \chev{p,q}&=\int_0^1p(t)q(t)dt\\
+                        &=\int_0^1\parens{p_0+p_1t+p_2t^2}\parens{q_0+q_1t+q_2t^2}\\
+                        &=\int_0^1p_0q_0+\parens{p_0q_1+p_1q_0}t
+                            +\parens{p_0q_2+p_1q_1+p_2q_0}t^2+\parens{p_1q_2+p_2q_1}t^3
+                            +p_2q_2t^4dt\\
+                        &=p_0q_0+\frac{1}{2}\parens{p_0q_1+p_1q_0}+
+                            \frac{1}{3}\parens{p_0q_2+p_1q_1+p_2q_0}+
+                            \frac{1}{4}\parens{p_1q_2+p_2q_1}+\frac{1}{5}p_2q_2\\
+                    \end{split}
+                \end{equation}
+                Setting $\chev{p,q}=p(x)$ for the $x$ of interest will yield the
+                following system of equations:
+                \begin{equation}
+                    \begin{split}
+                        1&=q_0+\frac{1}{2}q_1+\frac{1}{3}q_2\\
+                        x&=\frac{1}{2}q_0+\frac{1}{3}q_1+\frac{1}{4}q_2\\
+                        x^2&=\frac{1}{3}q_0+\frac{1}{4}q_1+\frac{1}{5}q_2\\
+                    \end{split}
+                \end{equation}
+
+                So, (see attached ``eq\_solver.py'' for the code)
+                \begin{equation}
+                    \begin{split}
+                        \phi\parens{0}=q_0\parens{t}&=9-36t+30t^2\\
+                        \phi\parens{\frac{1}{2}}=
+                            q_{\frac{1}{2}}\parens{t}&=-\frac{3}{2}+15t-15t^2\\
+                        \phi\parens{1}=q_1\parens{t}&=3-24t+30t^2\\
+                    \end{split}
+                \end{equation}
+            \item
+                If $w=\sum\alpha_i\phi\parens{x_i}$, then (I'm fudging the indices
+                on the $\alpha's$ a bit so I don't have to write $\alpha_{\frac{1}{2}}$)
+                \begin{equation}
+                    \begin{split}
+                        w&=f\parens{t}\\
+                        &=\alpha_1\phi\parens{x_0}+\alpha_2\phi\parens{x_\frac{1}{2}}
+                            +\alpha_3\phi\parens{x_1}\\
+                        &=\alpha_1\parens{9-36t+30t^2}
+                            +\alpha_2\parens{-\frac{3}{2}+15t-15t^2}
+                            +\alpha_3\parens{3-24t+30t^2}\\
+                        \text{and}\\
+                        \chev{w, \phi\parens{x_0}}&=f\parens{0}\\
+                        \chev{w, \phi\parens{x_\frac{1}{2}}}&=f\parens{\frac{1}{2}}\\
+                        \chev{w, \phi\parens{x_1}}&=f\parens{1}\\
+                    \end{split}
+                \end{equation}
+
+                So, we now have
+                \begin{equation}
+                    \begin{split}
+                        \begin{bmatrix*}
+                            9 & -\frac{3}{2} & 3 \\
+                            -\frac{3}{2} & \frac{9}{4} & -\frac{3}{2} \\
+                            3 & -\frac{3}{2} & 9 \\
+                        \end{bmatrix*}
+                        \begin{bmatrix*}
+                            \alpha_1 \\ \alpha_2 \\ \alpha_3 \\
+                        \end{bmatrix*}&=
+                        \begin{bmatrix*}
+                            y_0 \\ y_\frac{1}{2} \\ y_1
+                        \end{bmatrix*} \\&=
+                        \begin{bmatrix*}
+                            2 \\ -1 \\ 0
+                        \end{bmatrix*} \\
+                    \end{split}
+                \end{equation}
+            \item
+                Again, see the code in ``eq\_solver.py''.
+                The solution to the above system of equations is
+                $\alpha_1,\alpha_2,\alpha_3=\frac{1}{5},-\frac{2}{5},-\frac{1}{6}$
+
+                So, $w=f\parens{t}=\frac{19}{10}-\frac{46}{5}t+7t^2$\\
+
+                I'm not exactly sure how this relates to the hyperplane, so
+                I'm just going to wing this.
+
+                Basically, $w$ is a function that takes an $x$ in the input
+                space, transforms it to the feature space via the representers
+                $\phi_0,\phi_\frac{1}{2},\phi_1$ and then evaluates the resulting
+                function in feature space.
+        \end{enumerate}
+\end{enumerate}
+\end{document}
