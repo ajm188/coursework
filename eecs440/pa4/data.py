@@ -2,8 +2,10 @@
 Handle reading in the data and representing feature values
 """
 import os
+
 import numpy as np
 from scipy.io import loadmat
+
 
 class Schema(object):
 
@@ -21,6 +23,7 @@ class Schema(object):
 
     def is_nominal(self, feature_index):
         return self._is_nominal[feature_index]
+
 
 def get_dataset(dataset_name, base_directory='.'):
     """

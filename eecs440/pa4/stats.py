@@ -13,14 +13,19 @@ class StatisticsManager(object):
         self.prediction_scores = []
         self.training_times = []
         self.statistics = {
-            'accuracy' : (accuracy,  self.predicted_labels),
+            'accuracy': (accuracy, self.predicted_labels),
             'precision': (precision, self.predicted_labels),
-            'recall'   : (recall,    self.predicted_labels),
-            'auc'      : (auc,       self.prediction_scores),
+            'recall': (recall, self.predicted_labels),
+            'auc': (auc, self.prediction_scores),
         }
 
-    def add_fold(self, true_labels, predicted_labels,
-                 prediction_scores, training_time):
+    def add_fold(
+        self,
+        true_labels,
+        predicted_labels,
+        prediction_scores,
+        training_time,
+    ):
         """
         Add a fold of labels and predictions for later statistics computations
 
@@ -57,14 +62,18 @@ class StatisticsManager(object):
                 stats.append(statistic(l, p))
             return np.average(stats), np.std(stats)
 
+
 def accuracy(labels, predictions):
     pass
+
 
 def precision(labels, predictions):
     pass
 
+
 def recall(labels, predictions):
     pass
+
 
 def auc(labels, predictions):
     pass

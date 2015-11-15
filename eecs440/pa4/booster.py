@@ -4,17 +4,18 @@ An implementation of boosting as a wrapper for a classifier
 import numpy as np
 import scipy
 
-from dtree import DecisionTree
 from ann import ArtificialNeuralNetwork
-from nbayes import NaiveBayes
+from dtree import DecisionTree
 from logistic_regression import LogisticRegression
+from nbayes import NaiveBayes
 
 CLASSIFIERS = {
-    'dtree'                 : DecisionTree,
-    'ann'                   : ArtificialNeuralNetwork,
-    'nbayes'                : NaiveBayes,
-    'logistic_regression'   : LogisticRegression,
+    'ann': ArtificialNeuralNetwork,
+    'dtree': DecisionTree,
+    'logistic_regression': LogisticRegression,
+    'nbayes': NaiveBayes,
 }
+
 
 class Booster(object):
 
