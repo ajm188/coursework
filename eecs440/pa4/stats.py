@@ -1,6 +1,9 @@
 """
 Statistics Computations
 """
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 import scipy
 
@@ -64,16 +67,98 @@ class StatisticsManager(object):
 
 
 def accuracy(labels, predictions):
-    pass
+    """
+    Returns the accuracy of a set of predictions given a set of true labels.
+
+    Raises an assertion error if there are ever a different number of labels
+    and predictions.
+    """
+    assert len(labels) == len(predictions)
+
+    true_positives = TP(labels, predictions)
+    true_negatives = TN(labels, predictions)
+    return (true_positives + true_negatives) / float(len(labels))
 
 
 def precision(labels, predictions):
-    pass
+    """
+    Returns the precision of a set of predictions given a set of true labels.
+
+    Raises an assertion error if there are ever a different number of labels
+    and predictions.
+    """
+    assert len(labels) == len(predictions)
+
+    true_positives = TP(labels, predictions)
+    false_positives = FP(labels, predictions)
+    if true_positives + false_positives == 0:
+        return 1
+    return true_positives / (true_positives + false_positives)
 
 
 def recall(labels, predictions):
-    pass
+    """
+    Returns the recall of a set of predictions given a set of true labels.
+
+    Raises an assertion error if there are ever a different number of labels
+    and predictions.
+    """
+    assert len(labels) == len(predictions)
+
+    true_positives = TP(labels, predictions)
+    false_negatives = FN(labels, predictions)
+    if true_positives + false_negatives == 0:
+        return 1
+    return true_positives / (true_positives + false_negatives)
+
+
+def specificity(labels, predictions):
+    """
+    Returns the specificity of a set of predictions given a set of true labels.
+
+    Raises an assertion error if there are ever a different number of labels
+    and predictions.
+    """
+    assert len(labels) == len(predictions)
+
+    true_negatives = TN(labels, predictions)
+    false_positives = FP(labels, predictions)
+    if true_negatives + false_positives == 0:
+        return 1
+    return true_negatives / (true_negatives + false_positives)
 
 
 def auc(labels, predictions):
-    pass
+    """
+    Returns the area under ROC curve of a set of predictions given a set of
+    true labels.
+    """
+    rev_ord = np.argsort(predictions)
+    ordering = np.fliplr(np.vstack((rev_ord, rev_ord)))[0]
+    labels = labels[ordering]
+    x, y = [], []
+    # Compute recall and 1 - specificity for each confidence threshold,
+    # including 0 and 1.
+    for i in xrange(len(predictions) + 1):
+        preds = np.zeros(predictions.shape) - 1
+        preds[np.arange(i)] = 1
+        x.append(1 - specificity(labels, preds))
+        y.append(recall(labels, preds))
+
+    return np.trapz(np.array(y), np.array(x))
+
+
+def TP(labels, predictions):
+    return ((labels > 0) & (predictions > 0)).sum()
+
+
+def TN(labels, predictions):
+    return ((labels < 0) & (predictions < 0)).sum()
+
+
+def FP(labels, predictions):
+    return ((labels < 0) & (predictions > 0)).sum()
+
+
+def FN(labels, predictions):
+    return ((labels > 0) & (predictions < 0)).sum()
