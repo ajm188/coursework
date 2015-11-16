@@ -15,6 +15,7 @@ from bagger import Bagger
 from booster import Booster
 from data import get_dataset
 from dtree import DecisionTree
+from folds import get_folds
 from logistic_regression import LogisticRegression
 from nbayes import NaiveBayes
 from stats import StatisticsManager
@@ -58,20 +59,6 @@ def get_classifier(**options):
         return CLASSIFIERS[classifier_name](**options)
 
 
-def get_folds(X, y, k):
-    """
-    Return a list of stratified folds for cross validation
-
-    @param X : NumPy array of examples
-    @param y : NumPy array of labels
-    @param k : number of folds
-    @return (train_X, train_y, test_X, test_y) for each fold
-    """
-    pass  # add code here
-
-    return zip(train_X, train_y, test_X, test_y)
-
-
 def main(**options):
     dataset_directory = options.pop('dataset_directory', '.')
     dataset = options.pop('dataset')
@@ -97,8 +84,7 @@ def main(**options):
     schema, X, y = get_dataset(dataset, dataset_directory)
     folds = get_folds(X, y, k)
     stats_manager = StatisticsManager()
-    import pdb
-    pdb.set_trace()
+    options['schema'] = schema
     for train_X, train_y, test_X, test_y in folds:
 
         # Construct classifier instance
