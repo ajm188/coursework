@@ -139,7 +139,7 @@ def auc(labels, predictions):
     x, y = [], []
     # Compute recall and 1 - specificity for each confidence threshold,
     # including 0 and 1.
-    for i in xrange(len(predictions) + 1):
+    for i in range(len(predictions) + 1):
         preds = np.zeros(predictions.shape) - 1
         preds[np.arange(i)] = 1
         x.append(1 - specificity(labels, preds))

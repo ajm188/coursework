@@ -35,17 +35,26 @@ class Bagger(object):
         self.params = params
 
     def fit(self, X, y):
-        classifier = CLASSIFIERS[self.algorithm]
-        self.classifiers = [classifiers(**self.params) for _ in self.bags]
+        cls = CLASSIFIERS[self.algorithm]
+        self.classifiers = [cls(**self.params) for _ in range(self.bags)]
         for classifier in self.classifiers:
-            bag = ((len(X) + 1) * np.random_sample(len(X))).as_type('int')
-            classifier.fit(X[bag], y[bag])
+            bag = (len(X) * np.random.random_sample(len(X))).astype('int')
+            X_bag = np.array([X[i] for i in bag])
+            y_bag = np.array([y[i] for i in bag])
+            classifier.fit(X_bag, y_bag)
 
     def predict(self, X):
         preds = np.array(
             [c.predict(X) for c in self.classifiers],
         )
-        pass
+        preds = np.sum(preds, axis=0)
+        preds[preds >=0] = 1
+        preds[preds < 0] = -1
+        return preds
 
     def predict_proba(self, X):
-        pass
+        probs = np.array(
+            [c.predict_proba(X) for c in self.classifiers],
+        )
+        probs = np.average(probs, axis=0)
+        return probs

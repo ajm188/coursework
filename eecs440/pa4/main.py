@@ -103,6 +103,7 @@ def main(**options):
         if fs_alg:
             test_X = selector.transform(test_X)
         predictions = classifier.predict(test_X)
+        print(len(np.where(predictions == test_y)[0]), len(test_y))
         scores = classifier.predict_proba(test_X)
         if len(np.shape(scores)) > 1 and np.shape(scores)[1] > 1:
             scores = scores[:, 1]   # Get the column for label 1
@@ -141,7 +142,7 @@ if __name__ == "__main__":
         '--dataset_directory',
         dest='dataset_directory',
         metavar='DIR',
-        default='.',
+        default='data/',
     )
     parser.add_argument('--k', metavar='FOLDS', type=int, default=5)
     parser.add_argument('--dataset', metavar='DATASET', default='voting')
@@ -184,7 +185,7 @@ if __name__ == "__main__":
         '--depth',
         type=int,
         help='Maximum depth for decision tree, 0 for None',
-        default=2,
+        default=1,
     )
 
     ann_parser = subparsers.add_parser('ann', help='Artificial Neural Network')
@@ -204,7 +205,7 @@ if __name__ == "__main__":
         '--num_hidden',
         type=int,
         help='Number of hidden units in the hidden layers',
-        default=40,
+        default=0,
     )
     ann_parser.add_argument('--epsilon', type=float, required=False)
     ann_parser.add_argument('--max_iters', type=int, required=False)
