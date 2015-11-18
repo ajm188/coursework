@@ -181,7 +181,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--flip_probs',
-        type=int,
+        type=float,
         default=0,
     )
 
