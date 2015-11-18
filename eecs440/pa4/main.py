@@ -8,6 +8,7 @@ from __future__ import print_function
 import time
 
 import numpy as np
+import numpy.random
 import scipy
 
 from ann import ArtificialNeuralNetwork
@@ -97,6 +98,10 @@ def main(**options):
             selector = FS_ALGORITHMS[fs_alg](n=fs_n)
             selector.fit(train_X)
             train_X = selector.transform(train_X)
+
+        randoms = np.random.rand(len(train_y))
+        train_y[randoms < options['flip_probs']] = \
+            -1 * train_y[randoms < options['flip_probs']]
         classifier.fit(train_X, train_y)
         train_time = (train_start - time.time())
 
@@ -173,6 +178,11 @@ if __name__ == "__main__":
         required=False,
         type=int,
         help='Number of feature to select, if applicable',
+    )
+    parser.add_argument(
+        '--flip_probs',
+        type=int,
+        default=0,
     )
 
     subparsers = parser.add_subparsers(
