@@ -10,25 +10,37 @@ import scipy
 import scipy.stats
 
 
-def continuous_counts(X, value):
+def continuous_counts(X, value, sample_weight=None):
     """
     Obtain the counts of a continuous attribute X. That is, the number of rows
     in X that are <= value, and the number of rows that are > value.
     """
-    lhs = len(np.where(X <= value)[0])
-    return np.array([lhs, len(X) - lhs])
+    lhs = np.where(X <= value)[0]
+    rhs = np.where(X > value)[0]
+    if sample_weight is None:
+        sample_weight = np.ones_like(X)
+    return np.array([sum(sample_weight[lhs]), sum(sample_weight[rhs])])
 
 
-def discrete_counts(X):
+def discrete_counts(X, sample_weight=None):
     """
     Returns the counts of values of a discrete attribute.
     """
+    if sample_weight is None:
+        sample_weight = np.ones_like(X)
+
     # Have to cast X to an int array because of the single discrete attribute
     # that has int-y float values, i.e. 1., 2., ...
-    return np.bincount(X.astype(int))
+    X = X.astype('int')
+    return np.array(
+        [
+            sum(sample_weight[np.where(X == v)[0]]) if np.any(X == v) else 0
+            for v in range(np.max(X))
+        ],
+    )
 
 
-def H(Y, given=None, continuous_value=None):
+def H(Y, given=None, continuous_value=None, sample_weight=None):
     """
     Returns the Shannon entropy of Y.
 
@@ -38,9 +50,17 @@ def H(Y, given=None, continuous_value=None):
     """
     if given is not None:
         X = given
-        X_counts = discrete_counts(X) if continuous_value is None else \
-            continuous_counts(X, continuous_value)
-        X_probs = X_counts / float(len(X))
+        if sample_weight is None:
+            sample_weight = np.ones_like(X)
+        if continuous_value is None:
+            X_counts = discrete_counts(X, sample_weight=sample_weight)
+        else:
+            X_counts = continuous_counts(
+                X,
+                continuous_value,
+                sample_weight=sample_weight,
+            )
+        X_probs = X_counts / sum(sample_weight)
         if continuous_value is not None:
             cond_entropies = np.array(
                 [
@@ -56,25 +76,36 @@ def H(Y, given=None, continuous_value=None):
 
     if not len(Y):
         return 0
-    counts = discrete_counts(Y) if continuous_value is None else \
-        continuous_counts(Y, continuous_value)
-    probabilities = counts / float(len(Y))
+    if sample_weight is None:
+        sample_weight = np.ones_like(Y)
+    if continuous_value is None:
+        counts = discrete_counts(Y, sample_weight=sample_weight)
+    else:
+        counts = continuous_counts(
+            Y,
+            continuous_value,
+            sample_weight=sample_weight,
+        )
+    probabilities = counts / sum(sample_weight)
     log_probabilities = np.log2(probabilities)
     log_probabilities[log_probabilities == -np.inf] = 0
     return -np.dot(probabilities, log_probabilities)
 
 
-def IG(X, y, continuous_value=None):
+def IG(X, y, continuous_value=None, sample_weight=None):
     """Returns the information gain in y given by X."""
-    return H(y) - H(y, given=X, continuous_value=continuous_value)
+    return H(y, sample_weight=sample_weight) - \
+            H(y, given=X, continuous_value=continuous_value,
+              sample_weight=sample_weight)
 
 
-def gain_ratio(X, y, continuous_value=None):
+def gain_ratio(X, y, continuous_value=None, sample_weight=None):
     """Returns the gain_ratio for the labels y given by the attribute X"""
-    H_X = H(X, continuous_value=continuous_value)
+    H_X = H(X, continuous_value=continuous_value, sample_weight=sample_weight)
     if not H_X:
         return 0
-    return IG(X, y, continuous_value=continuous_value) / H_X
+    return IG(X, y, continuous_value=continuous_value,
+              sample_weight=sample_weight) / H_X
 
 
 class DecisionTree(object):
@@ -220,9 +251,11 @@ class DecisionTree(object):
             set(range(len(self._schema.feature_names))),
             {},
             0,
+            sample_weight=sample_weight,
         )
 
-    def _fit(self, X, y, features, used_splits, depth, parent=None):
+    def _fit(self, X, y, features, used_splits, depth, parent=None,
+             sample_weight=None):
         """
         The actual recursive function that does the fitting.
 
@@ -241,7 +274,8 @@ class DecisionTree(object):
                 self.pure_partition(y):
 
             # convert 1/0 back to 1/-1
-            return self.majority_node((y * 2) - 1, parent)
+            return self.majority_node((y * 2) - 1, parent,
+                                      sample_weight=sample_weight,)
 
         _features = features
         best_feature, best_GR, best_split = None, -np.inf, None
@@ -260,13 +294,14 @@ class DecisionTree(object):
                     # if there are no values left to test, stop checking
                     _features = _features - set([feature])
                 for tv in test_values:
-                    gr = gain_ratio(X_values, y, continuous_value=tv)
+                    gr = gain_ratio(X_values, y, continuous_value=tv,
+                                    sample_weight=sample_weight)
                     if gr > best_GR:
                         best_GR = gr
                         best_feature = feature
                         best_split = tv
             else:
-                gr = gain_ratio(X_values, y)
+                gr = gain_ratio(X_values, y, sample_weight=sample_weight)
                 if gr > best_GR:
                     best_GR = gr
                     best_feature = feature
@@ -282,11 +317,14 @@ class DecisionTree(object):
             split=best_split,
             parent=parent,
         )
-        partition = self.partition(X, y, best_feature, split=best_split)
+        partition = self.partition(X, y, best_feature, split=best_split,
+                                   sample_weight=sample_weight)
         if not best_split:
             # Only remove features from consideration if they are discrete
             _features = _features - set([best_feature])
-        for x_part, y_part in partition:
+        for part in partition:
+            x_part, y_part = part[0], part[1]
+            weight_part = part[2] if len(part) == 3 else None
             value = best_split or x_part[0][best_feature]
             n.add_test(
                 value,
@@ -296,11 +334,12 @@ class DecisionTree(object):
                     _features,
                     dict(used_splits),
                     depth + 1,
+                    sample_weight=weight_part,
                 ),
             )
         return n
 
-    def partition(self, X, y, feature, split=None):
+    def partition(self, X, y, feature, split=None, sample_weight=None):
         """
         Partition examples (X) and labels (y) based on the feature.
         Returns a list of tuples, one tuple for each "bucket" of the
@@ -313,18 +352,25 @@ class DecisionTree(object):
         else:
             counts = np.bincount(X.astype(int)[:, feature])
             rows = [np.where(X[:, feature] == v)[0]
-                    for v in range(len(counts)) 
+                    for v in range(len(counts))
                     if counts[v] != 0]
 
-        return [(X[r], y[r]) for r in rows]
+        if sample_weight is not None:
+            return [(X[r], y[r], sample_weight[r]) for r in rows]
+        else:
+            return [(X[r], y[r]) for r in rows]
 
-    def majority_node(self, y, parent):
+    def majority_node(self, y, parent, sample_weight=None):
         """
         Return a node which assigns the majority class label for an example.
         If the set of labels (y) is empty, pick between 1 and -1 randomly.
         """
         if len(y):
-            label = scipy.stats.mode(y).mode[0]
+            if sample_weight is not None:
+                weighted_output = np.sum(y * sample_weight)
+                label = 1 if weighted_output >= 0 else -1
+            else:
+                label = scipy.stats.mode(y).mode[0]
         else:
             # Choose between 1 and -1 randomly if the set of labels is empty
             label = (-1) ** np.random.random_integers(0, 1)
