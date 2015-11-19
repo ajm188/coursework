@@ -66,7 +66,7 @@ class Booster(object):
             [c.predict(X) * w / denom
              for w, c in zip(self.classifier_weights, self.classifiers)],
         )
-        preds = np.sum(weighted_preds, axis=0)
+        preds = (np.sum(weighted_preds, axis=0) * 2).astype('int')
         preds[preds < 0] = -1
         preds[preds >= 0] = 1
         return preds
