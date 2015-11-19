@@ -46,10 +46,12 @@ class Booster(object):
             preds = classifier.predict(X)
             indicators = (preds != y).astype('int')
             error = np.sum(indicators * sample_weight)
+            if error == 1:
+                self.classifier_weights[i] = 0
+            else:
+                self.classifier_weights[i] = 0.5 * np.log2((1 - error) / error)
             if error == 0 or error >= 0.5:
                 break
-
-            self.classifier_weights[i] = 0.5 * np.log2((1 - error) / error)
 
             correct = np.where(preds == y)[0]
             incorrect = np.where(preds != y)[0]
@@ -66,9 +68,12 @@ class Booster(object):
             [c.predict(X) * w / denom
              for w, c in zip(self.classifier_weights, self.classifiers)],
         )
-        preds = (np.sum(weighted_preds, axis=0) * 2).astype('int')
-        preds[preds < 0] = -1
-        preds[preds >= 0] = 1
+        try:
+            preds = (np.sum(weighted_preds, axis=0) * 2).astype('int')
+            preds[preds < 0] = -1
+            preds[preds >= 0] = 1
+        except:
+            import pdb; pdb.set_trace()
         return preds
 
     def predict_proba(self, X):
