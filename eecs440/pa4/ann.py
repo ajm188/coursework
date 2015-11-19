@@ -116,6 +116,8 @@ class ArtificialNeuralNetwork(object):
                 o_h, o_o = self.propagate(x)
                 # compute deltas
                 output_delta = o_o * (1 - o_o) * (o_o - y[i])
+                if sample_weight is not None:
+                    output_delta = output_delta * sample_weight[i]
                 # Ignore the hidden layer if there isn't one
                 if self.num_hidden > 0:
                     hidden_deltas = \

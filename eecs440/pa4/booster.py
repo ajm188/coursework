@@ -1,6 +1,8 @@
 """
 An implementation of boosting as a wrapper for a classifier
 """
+from __future__ import division
+
 import numpy as np
 import scipy
 
@@ -29,13 +31,50 @@ class Booster(object):
         @param iters : How many iterations of boosting to do
         @param params : Parameters for the classification algorithm
         """
-        pass
+        self.algorithm = algorithm
+        self.iters = iters
+        self.params = params
 
     def fit(self, X, y):
-        pass
+        cls = CLASSIFIERS[self.algorithm]
+        self.classifiers = [cls(**self.params) for _ in range(self.iters)]
+        sample_weight = np.ones_like(y) / len(y)
+
+        self.classifier_weights = {}
+        for i, classifier in enumerate(self.classifiers):
+            classifier.fit(X, y, sample_weight=sample_weight)
+            preds = classifier.predict(X)
+            indicators = (preds != y).astype('int')
+            error = np.sum(indicators * sample_weight)
+            if error == 0 or error >= 0.5:
+                break
+
+            self.classifier_weights[i] = 0.5 * np.log2((1 - error) / error)
+
+            correct = np.where(preds == y)[0]
+            incorrect = np.where(preds != y)[0]
+            sample_weight[correct] = sample_weight[correct] * error
+            sample_weight[incorrect] = sample_weight[incorrect] / error
+
+        self.classifier_weights = \
+            [self.classifier_weights[i]
+             for i in sorted(self.classifier_weights.keys())]
 
     def predict(self, X):
-        pass
+        denom = sum(self.classifier_weights)
+        weighted_preds = np.array(
+            [c.predict(X) * w / denom
+             for w, c in zip(self.classifier_weights, self.classifiers)],
+        )
+        preds = np.sum(weighted_preds, axis=0)
+        preds[preds < 0] = -1
+        preds[preds >= 0] = 1
+        return preds
 
     def predict_proba(self, X):
-        pass
+        denom = sum(self.classifier_weights)
+        weighted_probs = np.array(
+            [c.predict_proba(X) * w / denom
+             for w, c in zip(self.classifier_weights, self.classifiers)],
+        )
+        return np.sum(weighted_probs, axis=0)
